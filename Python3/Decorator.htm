@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Python</title>
+		<link rel="stylesheet" href="../css/atelier-sulphurpool-light.css" type="text/css">
+		<script src="../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+		<style>
+			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+			div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+		</style>
+	</head>
+	<body>
+		<div class = "title">
+			Decorator
+		</div>
+
+		<div class = "block">
+			<ul>
+				A decorator in Python is a callable Python object that is used to modify a function, method or class definition. The original object, the one which is going to be modified, is passed to a decorator as an argument. The decorator returns a modified object, e.g. a modified function, which is bound to the name used in the definition.
+			</ul>
+		</div>
+
+		<div class = "subtitle">Function Decorator</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+def func_decorator(func):
+    def wrapper(x):
+        if x == 0:
+            raise Exception('Denominator is zero ...');
+        return func(x);
+    return wrapper;
+
+# before decoration
+def inverse(x):
+    return 1.0/x
+
+# after decoration
+inverse = func_decorator(inverse)
+
+try:
+    print(inverse(0.5))
+    print(inverse(0))
+except Exception as e:
+    print(e)
+        </pre>
+        </div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+def func_decorator(func):
+    def wrapper(x):
+        if x == 0:
+            raise Exception('Denominator is zero ...');
+        return func(x);
+    return wrapper;
+ 
+@func_decorator
+def inverse(x):
+    return 1.0/x;
+ 
+try:
+    print(inverse(10))
+    print(inverse(0))
+except Exception as e:
+    print(e)
+		</pre>
+		</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+def argument(func):
+    def wrapper(x):
+        if type(x) == int and x > 0:
+            return func(x)
+        else:
+            raise Exception("Argument is not an integer")
+    return wrapper
+
+@argument
+def factorial(n):
+    if n == 1:
+        return 1
+    else:
+        return n * factorial(n-1)
+
+try:
+    print(factorial(10))
+    print(factorial(-1))
+except Exception as e:
+    print(e)
+        </pre>
+        </div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+# count the number of times a function has been called
+def call_counter(func):
+    def helper(x):
+        helper.calls += 1 # set up a function attribute
+        return func(x)
+    helper.calls = 0
+    return helper
+
+@call_counter
+def succ(x):
+    return x + 1
+
+print(succ.calls) # 0
+for i in range(10):
+    print(succ(i))
+
+print(succ.calls) # 10
+        </pre>
+        </div>
+		<div class = "subtitle">Third-party Function Decoration</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+from math import sin, cos
+
+def func_decorator(func):
+    def function_wrapper(x):
+        print('Decorating ...')
+        return func(x)
+    return function_wrapper
+
+sin = func_decorator(sin)
+
+print(sin(0))
+        </pre>
+        </div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+from random import randint
+
+def func_decorator(func):
+    def function_wrapper(*args, **kwargs):
+        return func(*args, **kwargs)
+    return function_wrapper
+
+randint = func_decorator(randint)
+
+print(randint(1, 10))
+        </pre>
+        </div>
+		<div class = "subtitle">Decorators with Parameters</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+def dec_para(n):
+    def decorator(f):
+        def wrapper(a=10, b=100):
+            return f(a, b=b)*n
+        return wrapper
+    return decorator
+
+@dec_para(10)
+def f(a, b):
+    return a+b
+
+print(f(1, 2)) # 30
+        </pre>
+        </div>
+		<div class = "subtitle">Memoization</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+def memoize(f):
+    memo = {}
+    def helper(x):
+        if x not in memo:            
+            memo[x] = f(x)
+        return memo[x]
+    return helper
+    
+ 
+@memoize
+def fib(n):
+    if n == 0:
+        return 0
+    elif n == 1:
+        return 1
+    else:
+        return fib(n-1) + fib(n-2)
+ 
+#fib = memoize(fib)
+ 
+print(fib(40))
+		</pre>
+		</div>
+
+		<div class = "subtitle">Callable Class</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+# callable class
+class A:
+    def __init__(self):
+        print('Create an object ...')
+    def __call__(self, *args, **kwargs):
+        print('Arguments: ', args, kwargs)
+
+a = A() # Create an object ...
+
+print(callable(a)) # True
+a(1, 2, b = 10, c = 20) # Arguments:  (1, 2) {'b': 10, 'c': 20}
+        </pre>
+        </div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+class Fibonacci:
+    def __init__(self):
+        self.cache = {}
+    def __call__(self, n):
+        if n not in self.cache:
+            if n == 0:
+                self.cache[0] = 0
+            elif n == 1:
+                self.cache[1] = 1
+            else:
+                self.cache[n] = self.__call__(n-1) + self.__call__(n-2)
+        return self.cache[n]
+
+fib = Fibonacci()
+
+for i in range(15):
+    print(fib(i), end=" ")
+		</pre>
+		</div>
+
+		<div class = "subtitle">Class Decorator</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+class Decorator:
+    def __init__(self, func):
+        self.func = func
+    def __call__(self, x):
+        if x == 0:
+            raise Exception('Denominator is zero ...')
+        return self.func(x)
+
+@Decorator
+def inverse(x):
+    return 1.0/x;
+
+try:
+    print(inverse(10))
+    print(inverse(0))
+except Exception as e:
+    print(e)
+        </pre>
+        </div>
+
+		<div class = "subtitle">Class Decorator with Parameters</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+class Decorator:
+    def __init__(self, func, n):
+        self.func = func
+        self.n = n
+    def __call__(self, x):
+        if x == 0:
+            raise Exception('Denominator is zero ...');
+        return self.n*self.func(x);
+
+def inverse(x):
+    return 1.0/x;
+
+inverse = Decorator(inverse, 10)
+
+try:
+    print(inverse(10))
+    print(inverse(0))
+except Exception as e:
+    print(e)
+        </pre>
+        </div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+class Decorator:
+    def __init__(self, n):
+        self.n = n
+    def __call__(self, func):
+        def wrapper(x):
+            if x == 0:
+                raise Exception('Denominator is zero ...')
+            return self.n*func(x)
+        return wrapper
+
+@Decorator(10)
+def inverse(x):
+    return 1.0/x;
+
+try:
+    print(inverse(10))
+    print(inverse(0))
+except Exception as e:
+    print(e)
+        </pre>
+        </div>
+
+		<div class = "subtitle">Reference</div>
+		<div class = "block">
+			<ul>
+                <li><a href = "https://www.codementor.io/@dobristoilov/python-class-decorator-part-ii-with-configuration-arguments-rv73o8pjn">Python class decorator - part II - with configuration arguments</a></li>
+                <li><a href = "https://realpython.com/primer-on-python-decorators/">Primer on Python Decorators</a></li>
+				<li><a href = "http://www.python-course.eu/python3_decorators.php">Decorator</a> at Python Course</li>
+				<li><a href = "http://www.python-course.eu/python3_memoization.php">Memoization</a> at Python Course</li>
+			</ul>
+		</div>
+	</body>
+</html>

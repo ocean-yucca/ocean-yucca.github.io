@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Docker</title>
+		<link rel="stylesheet" href="../css/atelier-sulphurpool-light.css" type="text/css">
+		<script src="../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+		<style>
+			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+			div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+			span {color: red; font-weight: bold;}
+		</style>
+	</head>
+	<body>
+		<div class = "title">
+			Compose
+		</div>
+        <div class = "block">
+            <li>Deploy multiple containers on a <span>single</span> host</li>
+            <li>A YAML file defining <span>version</span> (DEPRECATED), <span>services</span> (REQUIRED), <span>networks</span>, <span>volumes</span>, <span>configs</span> and <span>secrets</span></li>
+            <li>Default path is <span>compose.yaml</span> (or compose.yml, docker-compose.yaml, docker-compose.yml) in working directory</li>
+        </div>
+        <div class = "subtitle">Build and Compose</div>
+        <div class = "block">
+            <li>1. Build an image from local</li>
+            <li>2. Compose containers</li>
+		<pre class = "prettyprint linenums">
+version: "3.9" # version of Docker Compose
+services:
+  webapp: # container
+    image: lchenlangley/count # image name [domain/image:tag]
+    build: . # search local, if image does not exist, build image from local
+    ports:
+      - 8000:5000 # host port : container port
+    environment:
+      - MYREDIS_HOST=redisserver # environment variable
+  redisserver: # container
+    image: redis:alpine # if image exist in local, use the local image
+# a bridge network is created by default
+        </pre>
+        </div>
+        <div class = "subtitle">Fetch and Compose</div>
+        <div class = "block">
+            <li>1. Fetch images from repositories</li>
+            <li>2. Compose containers</li>
+		<pre class = "prettyprint linenums">
+version: "3.9"
+services:
+  webapp:
+    image: lchenlangley/count # fetch image from Docker Hub
+    ports:
+      - 8000:5000
+    environment:
+      - MYREDIS_HOST=redisserver
+  redisserver:
+    image: "redis:alpine" # fetch image from Docker Hub
+        </pre>
+        </div>
+        <div class = "subtitle">Multiple Compose Files</div>
+        <div class = "block">
+		<pre class = "prettyprint linenums">
+# compose_1.yaml
+version: "3.9"
+services:
+  webapp: # container
+    image: lchenlangley/count
+    #build: .
+    volumes:
+      - type: volume
+        source: voltemp
+        target: /code
+volumes:
+  voltemp:
+        </pre>
+		<pre class = "prettyprint linenums">
+# compose_2.yaml
+version: "3.9"
+services:
+  webapp: # container
+    ports:
+      - target: 5000
+        published: 8000
+        protocol: tcp
+        mode: host
+    environment:
+      MYREDIS_HOST: redisserver
+  redisserver: # container
+    image: redis:alpine
+        </pre>
+		<pre class = "prettyprint linenums">
+docker-compose -f compose_1.yaml -f compose_2.yaml up
+docker-compose -f compose_1.yaml -f compose_2.yaml down
+        </pre>
+        </div>
+        <div class = "subtitle">Configuration Extension</div>
+        <div class = "block">
+            <li>re-use a common configuration</li>
+		<pre class = "prettyprint linenums">
+# compose.yaml
+version: "3.9"
+services:
+  webapp: # container
+    extends:
+      file: common.yaml
+      service: template
+    image: lchenlangley/count
+    #build: .
+    volumes:
+      - type: volume
+        source: voltemp
+        target: /code
+  redisserver: # container
+    image: redis:alpine
+volumes:
+  voltemp:
+        </pre>
+		<pre class = "prettyprint linenums">
+# common.yaml, contains a common configuration
+version: "3.9"
+services:
+  template: # container
+    ports:
+      - target: 5000
+        published: 8000
+        protocol: tcp
+        mode: host
+    environment:
+      MYREDIS_HOST: redisserver
+        </pre>
+		<pre class = "prettyprint linenums">
+docker-compose up
+docker-compose down
+        </pre>
+        </div>
+        <div class = "subtitle">Services</div>
+        <div class = "block">
+            <li>Abstract concept implementing <span>docker run</span></li>
+        <li><span>image</span>
+            <ul>
+                <li>Specifies the image to start the container from</li>
+            </ul>
+        </li>
+		<pre class = "prettyprint linenums">
+image: redis # [domainName/imageName:tag]
+        </pre>
+        <li><span>ports</span>
+            <ul>
+                <li>Expose ports from container to host</li>
+            </ul>
+        </li>
+		<pre class = "prettyprint linenums">
+ports:
+      - 8000:5000 # host_port:container_port
+        </pre>
+        <li><span>build</span>
+            <ul>
+                <li>Build image from local source code, allow to miss the image attribute</li>
+            </ul>
+        </li>
+		<pre class = "prettyprint linenums">
+services:
+  webapp:
+    image: awesome/webapp # image name
+    build: . # path for source code and Dockerfile
+        </pre>
+		<pre class = "prettyprint linenums">
+services:
+  webapp:
+    image: awesome/database # image name
+    build:
+        context: . # source code path
+        dockerfile: ../Dockerfile # Dockerfile path
+        </pre>
+		<pre class = "prettyprint linenums">
+services:
+  webapp:
+    build: . # source code path
+        </pre>
+        <li><span>environment</span>
+            <ul>
+                <li>Add environment variables</li>
+            </ul>
+        </li>
+		<pre class = "prettyprint linenums">
+services:
+  webapp:
+    ...
+    environment:
+       MYREDIS_HOST: redisserver
+        </pre>
+		<pre class = "prettyprint linenums">
+services:
+  webapp:
+    ...
+    environment:
+       - MYREDIS_HOST=redisserver
+        </pre>
+        <li><span>networks</span>
+            <ul>
+                <li>Specify the networks to join</li>
+            </ul>
+        </li>
+		<pre class = "prettyprint linenums">
+services:
+  webapp:
+    ...
+    networks:
+     - frontend-network
+     - backend-network
+        </pre>
+        <li><span>restart</span>
+            <ul>
+                <li>restart containers when restarting the docker daemon, rebooting your server, using a CMD inside a container and running an exit, etc.</li>
+                <li>restart policy is <span>ignored</span> when containers are stopped manually, such as stop and kill by docker-compose</li>
+            </ul>
+        </li>
+		<pre class = "prettyprint linenums">
+restart: always
+        </pre>
+        <li><span>env_file</span>
+            <ul>
+                <li>Add environment variables from a file, <span>not</span> really work in the test</li>
+            </ul>
+        </li>
+		<pre class = "prettyprint linenums">
+# .env, default environment file
+MYREDIS_HOST=redisserver
+
+# compose.yml
+services:
+  webapp:
+    ...
+    environment:
+       - MYREDIS_HOST=${MYREDIS_HOST}
+        </pre>
+		<pre class = "prettyprint linenums">
+# env/webapp.env
+MYREDIS_HOST=redisserver
+
+# compose.yml
+services:
+  webapp:
+    ...
+    environment:
+       - MYREDIS_HOST=${MYREDIS_HOST}
+
+# compose
+docker-compose --env-file env/webapp.env up
+
+# turn off compose
+docker-compose --env-file env/webapp.env down
+        </pre>
+            <li><span>profiles and depends_on</span>
+                <ul>
+                    <li>Selectively enable services</li>
+                    <li>If unassigned, the service is always started</li>
+                    <li>If assigned, the service is only started if the profile is activated</li>
+                </ul>
+            </li>
+		<pre class = "prettyprint linenums">
+services:
+  foo:
+    image: foo
+  bar:
+    image: bar
+    profiles:
+      - test
+  baz:
+    image: baz
+    depends_on:
+      - bar
+    profiles:
+      - test
+  zot:
+    image: zot
+    depends_on:
+      - bar
+    profiles:
+      - debug
+        </pre>
+		<pre class = "prettyprint linenums">
+# enable test (bar, baz) and foo
+docker-compose --profile test up
+
+# invalid, profile debug (zot) is enabled, but zot depends on bar which is in the profile test
+docker-compose --profile debug up
+
+# enable test(bar, baz), debug(zot) and foo
+docker-compose --profile debug --profile test up
+
+# enable bar, profile test is active, but baz is not enabled
+docker-compose up bar
+
+# enable baz, profile test is active, bar is enabled by depends_on constraint
+docker-compose up baz
+
+# enable zot and test, bar is enabled by depends_on constraint
+docker-compose --profile test up zot
+		</pre>
+        <li><span>command</span>
+            <ul>
+                <li>Override the default command of a container</li>
+            </ul>
+        </li>
+		<pre class = "prettyprint linenums">
+command: python app.py
+        </pre>
+        <li><span>expose</span>
+            <ul>
+                <li>Specify the port number exposed from container</li>
+                <li>Same as expose in Dockerfile, it functions as a type of documentation</li>
+                <li>By default, make the access port number in app, the expose number in dockerfile, and the expose port number in compose file match</li>
+            </ul>
+        </li>
+		<pre class = "prettyprint linenums">
+expose:
+  - "5000"
+        </pre>
+        <li><span>container_name</span>
+            <ul>
+                <li>Specify container name instead of using default name</li>
+            </ul>
+        </li>
+		<pre class = "prettyprint linenums">
+container_name: redis-container
+        </pre>
+        <li><span>hostname</span>
+            <ul>
+                <li>Specify host name inside a container</li>
+            </ul>
+        </li>
+		<pre class = "prettyprint linenums">
+hostname: redis-host
+        </pre>
+        </div>
+        <div class = "subtitle">Networks</div>
+		<div class = "block">
+            <li>Capability abstraction to establish an IP route between containers, analogous to <span>docker network create</span></li>
+            <li>By default, docker-compose sets up a <span>single</span> network, containers join the network for communication
+                <ul>
+                    <li><span>[directory]_default</span>, network name</li>
+                </ul>
+            </li>
+		<pre class = "prettyprint linenums">
+version: "3.9"
+services:
+  webapp: # container
+    image: lchenlangley/count
+    #build: .
+    volumes:
+      - type: volume
+        source: voltemp
+        target: /code
+    ports:
+      - target: 5000
+        published: 8000
+        protocol: tcp
+        mode: host
+    environment:
+      MYREDIS_HOST: ${MYREDIS_HOST}
+    networks:
+      - app-net
+  redisserver: # container
+    image: redis:alpine
+    networks:
+      - app-net
+volumes:
+  voltemp:
+networks:
+  app-net: # create a network named [directory]_app-net
+		</pre>
+		</div>
+        <div class = "subtitle">Volumes</div>
+		<div class = "block">
+            <li>Analogous to <span>docker volume create</span></li>
+            <li>Volume</li>
+		<pre class = "prettyprint linenums">
+# Short Syntax
+services:
+  app:
+    # ...
+    volumes: # volumes for a particular service
+      - [source]:[target]:[mode]
+        # source, named volume, defined in the top level "volumes"
+        # target, an absolute path in container
+        # mode, read-only or read-write
+
+volumes: # define volumes
+		</pre>
+		<pre class = "prettyprint linenums">
+version: "3.9"
+services:
+  webapp:
+    image: lchenlangley/count
+    build: .
+    ports:
+      - 8000:5000
+    volumes:
+      - voltemp:/code
+    environment:
+      - MYREDIS_HOST=redisserver
+      - FLASK_ENV=development
+    depends_on:
+      - redisserver
+  redisserver:
+    image: "redis:alpine"
+volumes:
+  voltemp: # volume name length should greater than five
+        </pre>
+		<pre class = "prettyprint linenums">
+# Syntax
+services:
+  app:
+    # ...
+    volumes: # volumes for a particular service
+      - type: volume
+        source: [volume_name]
+        target: [path]
+
+volumes: # define volumes
+        </pre>
+		<pre class = "prettyprint linenums">
+version: "3.9"
+services:
+  webapp:
+    image: lchenlangley/count
+    build: .
+    ports:
+      - 8000:5000
+    volumes:
+      - type: volume
+        source: voltemp
+        target: /code
+    environment:
+      - MYREDIS_HOST=redisserver
+      - FLASK_ENV=development
+    depends_on:
+      - redisserver
+  redisserver:
+    image: "redis:alpine"
+volumes:
+  voltemp:
+        </pre>
+            <li>Bind Mount</li>
+		<pre class = "prettyprint linenums">
+# Short Syntax
+services:
+  app:
+    # ...
+    volumes: # volumes for a particular service
+      - [source]:[target]:[mode]
+        # source, a path (absolute or relate)
+        # target, an absolute path in container
+        # mode, read-only or read-write
+        </pre>
+		<pre class = "prettyprint linenums">
+version: "3.9"
+services:
+  webapp:
+    image: lchenlangley/count
+    build: .
+    ports:
+      - 8000:5000
+    volumes:
+      - .:/code
+    environment:
+      - MYREDIS_HOST=redisserver
+      - FLASK_ENV=development
+    depends_on:
+      - redisserver
+  redisserver:
+    image: "redis:alpine"
+        </pre>
+		<pre class = "prettyprint linenums">
+# Syntax
+services:
+  app:
+    # ...
+    volumes: # volumes for a particular service
+      - type: bind
+        source: [path]
+        target: [path]
+        </pre>
+		<pre class = "prettyprint linenums">
+version: "3.9"
+services:
+  webapp:
+    image: lchenlangley/count
+    build: .
+    ports:
+      - 8000:5000
+    volumes:
+      - type: bind
+        source: .
+        target: /code
+    environment:
+      - MYREDIS_HOST=redisserver
+      - FLASK_ENV=development
+    depends_on:
+      - redisserver
+  redisserver:
+    image: "redis:alpine"
+        </pre>
+		</div>
+        <div class = "subtitle">Configs</div>
+		<div class = "block">
+            <li>Grant access to configs on a per-service basis</li>
+		<pre class = "prettyprint linenums">
+		</pre>
+		</div>
+        <div class = "subtitle">Secret</div>
+		<div class = "block">
+            <li>Grant access to secrets on a per-service basis</li>
+		<pre class = "prettyprint linenums">
+		</pre>
+		</div>
+        <div class = "subtitle">Example</div>
+        <div class = "block">
+            <p style = "text-align:center;"><img src = "img/Docker_11.png" width = "50%"></p>
+		</div>
+		<div class = "block">
+            <li>2 services, backed by Docker images: webapp and database</li>
+            <li>1 secret (HTTPS certificate), injected into the frontend</li>
+            <li>1 configuration (HTTP), injected into the frontend</li>
+            <li>1 persistent volume, attached to the backend</li>
+            <li>2 networks: front-tier and back-tier</li>
+		<pre class = "prettyprint linenums">
+services:
+  frontend:
+    image: awesome/webapp
+    ports:
+      - "443:8043"
+    networks:
+      - front-tier
+      - back-tier
+    configs:
+      - httpd-config
+    secrets:
+      - server-certificate
+
+  backend:
+    image: awesome/database
+    volumes:
+      - db-data:/etc/data
+    networks:
+      - back-tier
+
+volumes:
+  db-data:
+    driver: flocker
+    driver_opts:
+      size: "10GiB"
+
+configs:
+  httpd-config:
+    external: true
+
+secrets:
+  server-certificate:
+    external: true
+
+networks:
+  # The presence of these objects is sufficient to define them
+  front-tier: {}
+  back-tier: {}
+		</pre>
+		</div>
+        <div class = "subtitle">docker-compose</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+# get command help
+docker-compose --help
+
+# start services
+# --build, build images from source code instead of loading built images before starting containers
+# -d, detached
+# docker-compose up [service list]
+
+docker-compose up # start all services
+docker-compose up webapp # start service webapp
+docker-compose -f [composeFileName] up # specify compose file
+
+# turn off and remove services
+docker-compose down
+
+# build images in compose file
+docker-compose build
+
+# list images of the current compose
+docker-compose images
+
+# list service of the current compose
+docker-compose ps
+
+# stop services of the current compose
+docker-compose stop [serviceName] # stop a specific service
+docker-compose stop # stop services in the current compose
+
+# start services
+docker-compose start [serviceName] # start a specific service
+docker-compose start # start services in the current compose
+
+# one-off command
+# docker-compose run [serviceName] [command]
+docker-compose run webapp env
+
+# view the compose file
+docker-compose config
+		</pre>
+		</div>
+        <div class = "subtitle">Reference</div>
+        <div class = "block">
+            <li><a href = "https://www.educative.io/blog/docker-compose-tutorial">Docker Compose Tutorial: advanced Docker made simple</a></li>
+            <li><a href = "https://docs.docker.com/compose/reference/">docker-compose CLI</a></li>
+            <li><a href = "https://docs.docker.com/compose/compose-file/compose-file-v3/">Compose File Reference</a></li>
+            <li><a href = "https://github.com/compose-spec/compose-spec/blob/master/spec.md">The Compose Specification</a></li>
+            <li><a href = "https://docs.docker.com/compose/">User Guide</a></li>
+        </div>
+    </body>
+</html>

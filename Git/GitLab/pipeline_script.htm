@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Python</title>
+		<link rel="stylesheet" href="../../css/atelier-sulphurpool-light.css" type="text/css">
+		<script src="../../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+		<style>
+			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+			div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+			span {color: red;}
+		</style>
+	</head>
+	<body>
+		<div class = "title">
+			Script Pipeline
+		</div>
+		<div class = "subtitle">Script Jobs</div>
+		<div class = "block">
+			<p style = "text-align:center;"><img src = "img/pipeline_1.png" width = "40%"></p>
+		</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+# .gitlab-ci.yml
+image: alpine:latest # define a default image for jobs
+
+stages: # define stages and order
+  - build
+  - test
+  - deploy
+  
+job_1:
+  stage: build
+  tags:
+    - saas-linux-small-amd64 # select runner with specific tag to run the job
+  script:
+    - echo "Hello, $GITLAB_USER_LOGIN!" > output_1.txt # generate output file
+  artifacts:
+    paths:
+      - output_1.txt # define the output file path
+
+job_2:
+  stage: test
+  tags:
+    - gitlab-org-docker
+  script:
+    - mkdir results # create a output folder
+    - echo "Test in job 2" > results/output_2.txt
+  artifacts:
+    paths:
+      - results # define output folder path which is relative to the project directory
+    expire_in: 1 day # setup expiration days
+
+job_3:
+  stage: test
+  script:
+    - echo "Test in job 3"
+    - sleep 20
+  needs:
+    - job_1 # implement job_3 when job_1 finish
+
+job_4:
+  stage: deploy
+  script:
+    - echo "Deploy job"
+		</pre>
+		</div><div class = "subtitle">Workflow</div>
+		<div class = "block">
+			<p style = "text-align:center;"><img src = "img/pipeline_2.png" width = "70%"></p>
+		</div>
+		<div class = "block">
+			<ol>
+				<li>You push code to GitLab (e.g., commit to main branch)</li>
+				<li>GitLab CI/CD
+				<ul>
+					<li>Parses .gitlab-ci.yml</li>
+					<li>Triggers a pipeline</li>
+					<li>Assigns a job to a Docker-based runner
+					</li>
+				</ul>
+			</li>
+			<li>Runner pulls the image specified in image: (e.g., python:3.10)</li>
+			<li>Runner creates a container from that image</li>
+			<li>Runner injects the project source code into the container's working directory
+				<ul>
+					<li>Default is /builds/[username or group_name]/[project_name]</li>
+				</ul>
+			</li>
+			<li>The runner runs the job’s script: commands inside the container in working directory</li>
+			</ol>
+		</div>
+		<div class = "subtitle">CI/CD Pipeline Engine</div>
+		<div class = "block">
+			<li>Parsing .gitlab-ci.yml when you push a commit</li>
+			<li>Building the pipeline graph: which jobs to run, what stages and dependencies exist</li>
+			<li>Scheduling jobs in the correct order</li>
+			<li>Assigning jobs to available runners based on tags, availability, and rules</li>
+			<li>The .gitlab-ci.yml file itself is not "executed" on your runner</li>
+		</div>
+		<div class = "subtitle">Runner</div>
+		<div class = "block">
+			<li>What a runner does?
+				<ul>
+					<li>Executes one job at a time</li>
+					<li>Reports back the results</li>
+				</ul>
+			</li>
+			<li>Executor modes
+				<ul>
+					<li>shell
+						<ul>
+							<li>Runs jobs directly in the local shell</li>
+							<li>Jobs can share files</li>
+						</ul>
+					</li>
+					<li>docker
+						<ul>
+							<li><span>Default</span> executor of shared runners on GitLab.com</li>
+							<li>Launches a container for each job</li>
+							<li>Each job runs in its own isolated Docker container for security, reproducibility, and separation of concerns</li>
+							<li>Nothing is shared between job containers by default</li>
+						</ul>
+					</li>
+					<li>virtualbox</li>
+					<li>ssh</li>
+					<li>kubernetes</li>
+				</ul>
+			</li>
+			<li>Tags
+				<ul>
+					<li>A job with a tag and multiple runners have the tags. Choose one of the available runners</li>
+					<li>A job has multiple tags. A runner match all of these tags will be eligible to run the job</li>
+				</ul>
+			</li>
+		</div>
+		<div class = "subtitle">Share Files between Jobs</div>
+		<div class = "block">
+				<li>artifacts
+					<ul>
+						<li>Share files between jobs in a single pipeline</li>
+					</ul>
+				</li>
+		</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+		</pre>
+	</div>
+		<div class = "block">
+				<li>cache
+					<ul>
+						<li>Share files across pipelines</li>
+						<li>Share files between jobs in the same pipeline</li>
+					</ul>
+				</li>
+		</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+stages:
+  - build
+  - test
+
+create_file:
+  stage: build
+  script:
+    - mkdir -p shared
+    - echo "Hello to a cache!" > shared/message.txt
+  cache:
+    key: shared-cache
+    paths:
+      - shared
+
+use_file:
+  stage: test
+  cache:
+    key: shared-cache
+    paths:
+      - shared
+  script:
+    - echo "Job B in the same pipeline reads file from cache:"
+    - cat shared/message.txt
+		</pre>
+	</div>
+		<div class = "block">
+				<li>external storage</li>
+		</div>
+	</body>
+</html>

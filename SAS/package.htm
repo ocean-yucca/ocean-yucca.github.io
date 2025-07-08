@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>SAS</title>
+		<link rel="stylesheet" href="../css/atelier-sulphurpool-light.css" type="text/css">
+		<script src="../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+		<style>
+			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+			div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+			span {color: red; font-weight: bold;}
+			span.blue {color: blue; font-weight: bold;}
+		</style>
+	</head>
+	<body>
+		<div class = "title">
+			Package
+		</div>
+		
+		<div class = "subtitle">Consolidated Code</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+/* main.sas */
+options nosource;
+
+/* Define global variables */
+%let name = Lin;
+
+/* Define macros */
+%macro m1(name);
+	%put &name. in m1;
+%mend m1;
+
+%macro m2(name);
+	%put &name. in m2;
+%mend m2;
+
+%macro m3(name);
+	%put &name. in m3;
+%mend m3;
+
+/* Define start point */
+%macro main();
+	%m1(name=&name.);
+	%m2(name=&name.);
+	%m3(name=&name.);
+%mend main;
+
+/* Run program */
+%main();
+		</pre>
+		</div>
+		<div class = "subtitle">Layout with %include</div>
+		<div class = "block">
+			<p style = "text-align:center;"><img src = "img/sas_10.png" width = "40%"></p>
+	</div>
+	<div class = "block">
+		<li><span>Compile</span>, include the contents of external SAS scripts into your submitting scripts</li>
+		<li><span>Run</span>, executes code as if the code is in the consolidated script</li>
+	</div>
+		<div class = "block">
+			<span>main.sas</span>
+		<pre class = "prettyprint linenums">
+options nosource;
+
+/* Get project directory */
+%macro get_project_dir();
+	%let fullpath = &_SASPROGRAMFILE;
+	%let folder = %substr(&fullpath, 1, %length(&fullpath) - %length(%scan(&fullpath, -1, '/')) - 1);
+	&folder.
+%mend get_project_dir;
+
+%let project_path = %get_project_dir();
+
+%include "&project_path./config.sas";
+%include "&project_path./package_1/init.sas";
+%include "&project_path./package_2/init.sas";
+
+/* Define start point */
+%macro main();
+	%m1(name=&name.);
+	%m2(name=&name.);
+	%m3(name=&name.);
+%mend main;
+
+/* Run program */
+%main();
+		</pre>
+		</div>
+		<div class = "block">
+			<span>config.sas</span>
+		<pre class = "prettyprint linenums">
+/* Define global variables */
+%let name = Lin;
+		</pre>
+		</div>
+		<div class = "block">
+			<span>package_1</span>
+		<pre class = "prettyprint linenums">
+/* init.sas */
+%include "&project_path./package_1/module_1.sas";
+%include "&project_path./package_1/sub_package/init.sas";
+		</pre>
+		<pre class = "prettyprint linenums">
+/* module_1.sas */
+%macro m1(name);
+	%put &name. in m1;
+%mend m1;
+		</pre>
+		</div>
+		<div class = "block">
+			<span>sub_package</span>
+		<pre class = "prettyprint linenums">
+/* init.sas */
+%include "&project_path./package_1/sub_package/module_2.sas";
+		</pre>
+		<pre class = "prettyprint linenums">
+/* module_2.sas */
+%macro m2(name);
+	%put &name. in m2;
+%mend m2;
+		</pre>
+		</div>
+		<div class = "block">
+			<span>package_2</span>
+		<pre class = "prettyprint linenums">
+/* init.sas */
+%include "&project_path./package_2/module_3.sas";
+		</pre>
+		<pre class = "prettyprint linenums">
+/* module_3.sas */
+%macro m3(name);
+	%put &name. in m3;
+%mend m3;
+		</pre>
+		</div>
+		<div class = "subtitle">Compile Package</div>
+		<div class = "block">
+			<p style = "text-align:center;"><img src = "img/sas_11.png" width = "40%"></p>
+	</div>
+		<div class = "block">
+			<span>compile.sas</span>, create <span class="blue">sasmacr.sas7bat</span>
+		<pre class = "prettyprint linenums">
+options nosource;
+
+/* Get project directory */
+%macro get_project_dir();
+	%let fullpath = &_SASPROGRAMFILE;
+	%let folder = %substr(&fullpath, 1, %length(&fullpath) - %length(%scan(&fullpath, -1, '/')) - 1);
+	&folder.
+%mend get_project_dir;
+
+%let project_path = %get_project_dir();
+
+/* Compile macros with specified package path */
+libname plib "package_path";
+
+options mstored
+		sasMstore = plib;
+
+%include "&project_path./package_1/init.sas";
+%include "&project_path./package_2/init.sas";
+		</pre>
+	</div>
+	<div class = "subtitle">Use Compiled Package</div>
+		<div class = "block">
+			<p style = "text-align:center;"><img src = "img/sas_12.png" width = "30%"></p>
+	</div>
+		<div class = "block">
+			<span>main.sas</span>
+		<pre class = "prettyprint linenums">
+options nosource;
+
+/* Specify the path of sasmacr.sas7bat */
+/* sasmacr.sas7bat should stay in the same path that was used in compiling code*/
+libname uselib "package_path";
+
+options mstored
+		sasMstore = uselib;
+
+/* Use the macros compiled in the package */
+%macro main();
+	%m1(name=Lin);
+	%m1(name=Lin);
+	%m1(name=Lin);
+%mend main;
+
+%main();
+		</pre>
+	</div>
+	<div class = "subtitle">Auto Source Pakcage</div>
+	<div class = "block">
+		<li><span>Run</span>, executes the code in submitting scripts</li>
+		<li><span>Search</span>, search from source paths when calling external macros and run</li>
+		<li>Macros called in other scripts will not be executed</li>
+	</div>
+		<div class = "block">
+			<span>main.sas</span>
+		<pre class = "prettyprint linenums">
+options nosource;
+
+/* Get project directory */
+%macro get_project_dir();
+	%let fullpath = &_SASPROGRAMFILE;
+	%let folder = %substr(&fullpath, 1, %length(&fullpath) - %length(%scan(&fullpath, -1, '/')) - 1);
+	&folder.
+%mend get_project_dir;
+
+%let project_path = %get_project_dir();
+
+%include "&project_path./config.sas";
+options mautosource sasautos=("&project_path./package_1"
+options mautosource sasautos=("&project_path./package_2"););
+
+/* Define start point */
+%macro main();
+	%m1(name=&name.);
+	%m2(name=&name.);
+	%m3(name=&name.);
+%mend main;
+
+/* Run program */
+%main();
+		</pre>
+		</div>
+	</body>
+</html>

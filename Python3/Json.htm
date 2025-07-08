@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Python</title>
+		<link rel="stylesheet" href="../css/atelier-sulphurpool-light.css" type="text/css">
+		<script src="../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+		<style>
+			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+			div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+		</style>
+	</head>
+	<body>
+		<div class = "title">
+			JSON
+		</div>
+
+		<div class = "block">
+            <li>a text serialization format</li>
+            <li>JSON, by default, can only represent a subset of the Python built-in types, and no custom classes</li>
+            <li>Unlike pickle, deserializing untrusted JSON does not in itself create an arbitrary code execution vulnerability</li>
+        </div>
+		<div class = "subtitle">Serialize to File</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+import json
+
+l = list(range(10))
+
+# serialize to file
+f = open('temp.json', 'w')
+json.dump(l, f)
+f.close()
+		</pre>
+		<pre class = "prettyprint linenums">
+# deserialize from file
+f = open('temp.json', 'r')
+print(json.load(f))
+f.close()
+        </pre>
+		</div>
+		<div class = "subtitle">Serialize to String</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+# serialize to string
+s = json.dumps(l)
+
+s = json.dumps([1, 2, 3, {'4': 5, '6': 7}], separators=(',', ':')) # compact
+
+s = json.dumps({'4': 5, '6': 7}, sort_keys=True, indent=4) # pretty
+
+# deserialize from string
+json.loads(s)
+		</pre>
+		</div>
+		<div class = "subtitle">JSON Class</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+# encode
+encoder = json.JSONEncoder()
+s = encoder.encode(l)
+
+# decode
+decoder = json.JSONDecoder()
+decoder.decode(s)
+		</pre>
+		</div>
+		<div class = "subtitle">Reference</div>
+		<div class = "block">
+            <li><a href = "https://docs.python.org/3/library/json.html">Document</a></li>
+		</div>
+	</body>
+</html>

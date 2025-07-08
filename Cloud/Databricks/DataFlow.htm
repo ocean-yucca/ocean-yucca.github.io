@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Python</title>
+		<link rel="stylesheet" href="../../css/atelier-sulphurpool-light.css" type="text/css">
+		<script src="../../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+		<style>
+			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+			div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+			span {color: red;}
+		</style>
+	</head>
+	<body>
+		<div class = "title">
+			Dataflow
+		</div>
+
+		<div class = "subtitle">Storage Space</div>
+		<div class = "block">
+			<li>dbfs:/, a distributed file system mounted into a Databricks workspace and available on Databricks clusters</li>
+			<li>file:/, a virtual directory</li>
+			<li>s3://, S3 directory</li>
+		</div>
+		<div class = "block">
+			<p style = "text-align:center;"><img src = "img/Databricks_3.png" width = "40%"></p>
+		</div>
+		<div class = "block">
+			<p style = "text-align:center;"><img src = "img/Databricks_2.png" width = "50%"></p>
+		</div>
+		
+		<div class = "subtitle">File System</div>
+		<div class = "block">
+			<pre class = "prettyprint linenums">
+# ls
+%fs ls file:/
+			</pre>
+		</div>
+		<div class = "subtitle">S3</div>
+		<div class = "block">
+			<pre class = "prettyprint linenums">
+# ls
+%fs ls s3://path
+display(dbutils.fs.ls('s3://path'))
+
+# load data from S3
+df = spark.read.csv('s3://path', header=True, inferSchema=True) # pyspark.sql.dataframe.DataFrame
+
+# write data to S3
+df.write.csv()
+			</pre>
+		</div>
+		<div class = "subtitle">DBFS</div>
+		<div class = "block">
+			<pre class = "prettyprint linenums">
+# ls
+%fs ls dbfs:/
+			</pre>
+		</div>
+		<div class = "subtitle">Hive</div>
+		<div class = "block">
+			<pre class = "prettyprint linenums">
+# database
+%sql show databases
+spark.sql('show databases').toPandas()
+
+# table
+%sql show tables in database_name
+spark.sql('show tables in database_name').toPandas()
+spark.catalog.listTables('database_name')
+
+# read
+%sql select * from database_name.table_name
+df = spark.sql('select * from database_name.table_name')
+
+# write
+df.write.format('parquet').option('header', 'true').mode('overwrite').saveAsTable('database_name.table_name')
+
+# remove
+%sql drop table if exists database_name.table_name
+spark.sql('drop table if exists database_name.table_name')
+			</pre>
+		</div>
+		<div class = "subtitle">View</div>
+		<div class = "block">
+			<pre class = "prettyprint linenums">
+# create temporary view
+df.createOrReplaceTempView('view_name')
+
+# create global temporary view
+df.createOrReplaceGlobalTempView('view_name')
+
+# read view
+df_view = spark.sql('select * from view_name')
+
+# read global view
+df_view = spark.sql('select * from global_temp.view_name')
+
+# list views
+spark.catalog.listTables()
+
+# list views and global views
+spark.catalog.listTables('global_temp')
+
+# remove view
+spark.catalog.listTables('view_name')
+
+# remove global view
+spark.catalog.listTables('global_temp.view_name')
+			</pre>
+		</div>
+		<div class = "subtitle">dbutils.fs</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+# ls
+%fs ls s3://url
+display(dbutils.fs.ls('s3://url'))
+
+%fs ls dbfs:/ # %fs ls .
+%fs ls file:/
+%fs ls s3://url
+		</pre>
+		</div>
+			<div class = "block">
+		<pre class = "prettyprint linenums">
+# mkdirs
+%fs mkdirs file:/url
+dbutils.fs.mkdirs('file:/url')
+
+%fs mkdirs s3://url
+dbutils.fs.mkdirs('s3://url')
+		</pre>
+		</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+# mv
+dbutils.fs.mv('file:/url_from', 'file:/url_to', recurse=True)
+dbutils.fs.mv('s3://url_from', 's3://url_to', recurse=True)
+		</pre>
+		</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+# put
+dbutils.fs.put('file:/url/hello.txt', 'Hello World!', True)
+		</pre>
+		</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+# head
+%fs head file:/url/hello.txt
+dbutils.fs.head('file:/url/hello.txt')
+		</pre>
+		</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+# rm
+dbutils.fs.rm('file:/url/temp', True)
+		</pre>
+		</div>
+		<div class = "subtitle">Help</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+dbutils.help() # list packages
+dbutils.fs.help() # list commands in fs package
+dbutils.fs.help("ls") # help information of command ls
+		</pre>
+		</div>
+		<div class = "subtitle">Reference</div>
+		<div class = "block">
+			<li><a href = "https://docs.databricks.com/en/dev-tools/databricks-utils.html#">Databricks</a></li>
+		</div>
+	</body>
+</html>

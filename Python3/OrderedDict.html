@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Python</title>
+		<link rel="stylesheet" href="../css/atelier-sulphurpool-light.css" type="text/css">
+		<script src="../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+		<style>
+			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+			div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+		</style>
+	</head>
+	<body>
+		<div class = "title">
+			OrderedDict
+		</div>
+		<div class = "block">
+            <li>an instance of a dict subclass, mutable</li>
+            <li>remembers the order that keys were first inserted</li>
+        </div>
+		<div class = "subtitle">Initialization</div>
+		<div class = "block">
+			<pre class = "prettyprint linenums">
+from collections import OrderedDict
+
+d = {'banana': 3, 'apple': 4, 'pear': 1, 'orange': 2}
+o = OrderedDict(d) # OrderedDict([('banana', 3), ('apple', 4), ('pear', 1), ('orange', 2)])
+
+# insert item
+o['pineapple'] = 10 # OrderedDict([('banana', 3), ('apple', 4), ('pear', 1), ('orange', 2), ('pineapple', 10)])
+            </pre>
+        </div>
+		<div class = "subtitle">Access</div>
+		<div class = "block">
+			<pre class = "prettyprint linenums">
+o['apple'] # 4
+
+list(o.keys()) # ['banana', 'apple', 'pear', 'orange', 'pineapple']
+list(o.values()) # [3, 4, 1, 2, 10]
+list(o.items()) # [('banana', 3), ('apple', 4), ('pear', 1), ('orange', 2), ('pineapple', 10)]
+
+# update
+o['apple'] = 10
+
+# empty
+#o.clear()
+            </pre>
+        </div>
+		<div class = "subtitle">Methods</div>
+		<div class = "block">
+			<pre class = "prettyprint linenums">
+d = {'banana': 3, 'apple': 4, 'pear': 1, 'orange': 2}
+o = OrderedDict(d) # OrderedDict([('banana', 3), ('apple', 4), ('pear', 1), ('orange', 2)])
+
+item = o.popitem(last = True) # default, return the last item in LIFO order
+print(o, item) # OrderedDict([('banana', 3), ('apple', 4), ('pear', 1)]) ('orange', 2)
+# item = o.popitem(last = False) # return the first item in FIFO order
+# print(o, item) # OrderedDict([('OrderedDict([('OrderedDict([('OrderedDict([('apple', 4), ('pear', 1), ('orange', 2)]) ('banana', 3)
+            </pre>
+			<pre class = "prettyprint linenums">
+d = {'banana': 3, 'apple': 4, 'pear': 1, 'orange': 2}
+o = OrderedDict(d) # OrderedDict([('banana', 3), ('apple', 4), ('pear', 1), ('orange', 2)])
+
+o.move_to_end('apple', last = True) # default, the item is moved to the right end 
+print(o) # OrderedDict([('banana', 3), ('pear', 1), ('orange', 2), ('apple', 4)])
+# o.move_to_end('apple', last = False) # default, the item is moved to the left end
+# print(o) # OrderedDict([('apple', 4), ('banana', 3), ('pear', 1), ('orange', 2)])
+            </pre>
+        </div>
+		<div class = "subtitle">Built-in Functions</div>
+		<div class = "block">
+			<pre class = "prettyprint linenums">
+len(o) # 4
+list(o) # ['banana', 'apple', 'pear', 'orange']
+            </pre>
+        </div>
+		<div class = "subtitle">Reference</div>
+		<div class = "block">
+            <li><a href = "https://docs.python.org/3/library/collections.html#collections.OrderedDict">Python 3 Standard Library</a></li>
+            <li><a href = "https://pymotw.com/3/collections/ordereddict.html">Python 3 Module of the Week</a></li>
+        </div>
+    </body>
+</html>

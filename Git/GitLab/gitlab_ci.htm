@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Python</title>
+		<link rel="stylesheet" href="../../css/atelier-sulphurpool-light.css" type="text/css">
+		<script src="../../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+		<style>
+			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+			div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+			span {color: red;}
+		</style>
+	</head>
+	<body>
+		<div class = "title">
+			CI/CD YAML Syntax
+		</div>
+		<div class = "subtitle">Global Keywords</div>
+		<div class = "block">
+			<li><span>stages</span>
+				<ul>
+					<li>The names and order of the pipeline stages</li>
+					<li>Default stages
+						<ul>
+							<li>.pre, build, test, deploye, .post</li>
+						</ul>
+					</li>
+					<li>Jobs in the same stage run in parallel</li>
+					<li>Jobs in the next stage run after the jobs from the previous stage complete successfully</li>
+				</ul>
+			</li>
+			<li><span>image</span>
+				<ul>
+					<li>Defines the default Docker image used by all jobs unless a specific job overrides it</li>
+				</ul>
+			</li>
+		<pre class = "prettyprint linenums">
+		</pre>
+		</div>
+		<div class = "subtitle">Job Keywords</div>
+		<div class = "block">
+			<li><span>stage</span>
+				<ul>
+					<li>Define which stage a job runs in</li>
+					<li>Default stage is test</li>
+				</ul>
+			</li>
+			<li><span>image</span>
+				<ul>
+					<li>Specify the Docker image for a job to run inside</li>
+				</ul>
+			</li>
+			<li><span>tags</span>
+				<ul>
+					<li>List of tags that are used to select a runner</li>
+				</ul>
+			</li>
+			<li><span>script</span>
+				<ul>
+					<li>Shell script that is executed by a runner</li>
+				</ul>
+			</li>
+			<li><span>needs</span>
+				<ul>
+					<li>Defines explicit job dependencies to override stage-based sequencing</li>
+					<li>Start when dependencies finish even it belongs to a later stage</li>
+				</ul>
+			</li>
+			<li><span>dependencies</span>
+				<ul>
+					<li>Define from which jobs to fetch artifacts</li>
+				</ul>
+			</li>
+		</div>
+		<div class = "subtitle">Reference</div>
+		<div class = "block">
+			<li><a href = "https://docs.gitlab.com/ci/yaml/">CI/CD YAML syntax reference</a></li>
+		</div>
+	</body>
+</html>

@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Kubernetes</title>
+		<link rel="stylesheet" href="../css/atelier-sulphurpool-light.css" type="text/css">
+		<script src="../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+		<style>
+			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+			div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+			span {color: red; font-weight: bold;}
+		</style>
+	</head>
+	<body>
+		<div class = "title">
+			kubectl
+		</div>
+        <div class = "subtitle">get</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+# get status of nodes
+kubectl get nodes
+
+# get pods
+kubectl get pods
+kubectl get pod  --watch # continuously monitor pods
+
+# get services
+kubectl get services
+kubectl get svc
+
+# get deployments
+kubectl get deployment
+kubectl get deploy
+kubectl get deployment [deploymentName] -o yaml # get configuration
+
+# get pods, services, deployments, statefulsets, replicasets
+kubectl get all
+
+# get secret
+kubectl get secret
+
+# get configMap
+kubectl get configmap
+
+# get namespace
+kubectl get namespaces
+        </pre>
+        </div>
+        <div class = "subtitle">create</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+# create pod and replicaset
+# kubectl create deployment [Name] --image=image
+# deployment -&gt; replicaset -&gt; pod -&gt; container
+kubectl create deployment redis-deploy --image=redis:alpine # by default, pull images from docker.io
+
+# create component from files
+# kubectl create -f [fileName]
+kubectl create -f k8s/redis-deployment.yaml
+# kubectl create -f [directoryName]
+kubectl create -f k8s
+        </pre>
+        </div>
+        <div class = "subtitle">edit</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+# edit deployment
+# create an automatically generated compose file, edit, and save
+# termiante the old pod and create a new pod using the editted deployment
+kubectl edit deployment redis-deploy
+        </pre>
+        </div>
+        <div class = "subtitle">logs</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+kubectl logs [podName]
+        </pre>
+        </div>
+        <div class = "subtitle">describe</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+# describe pod
+kubectl describe pod [podName]
+
+# describe service
+kubectl describe service [serviceName] # get podIP:podPort connected to the service
+        </pre>
+        </div>
+        <div class = "subtitle">delete</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+# delete deployment
+kubectl delete deployment [deploymentName]
+kubectl delete deploy [deploymentName]
+
+# delete service
+kubectl delete service [serviceName]
+kubectl delete svc [serviceName]
+
+# delete from configuration files
+# kubectl delete -f [fileName]
+kubectl delete -f k8s/redis-deployment.yaml
+#kubectl delete -f [directoryName]
+kubectl delete -f k8s
+        </pre>
+        </div>
+        <div class = "subtitle">exec</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+# access container
+kubectl exec -it [podName] -- sh
+        </pre>
+        </div>
+        <div class = "subtitle">apply</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+# create or update components
+# kubectl apply -f [fileName]
+kubectl apply -f k8s/redis-deployment.yaml
+
+# kubectl apply -f [directoryName]
+kubectl apply -f k8s
+        </pre>
+        </div>
+        <div class = "subtitle">port-forward</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+# kubectl port-forward svc/[serviceName] [accessPort]:[servicePort]
+kubectl port-forward svc/perceptor-service 8080:8082
+        </pre>
+        </div>
+        <div class = "subtitle"></div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+kubectl api-resources --namespaced=true # list namespaced resources
+kubectl api-resources --namespaced=false # list non-namespaced resources
+        </pre>
+        </div>
+        <div class = "subtitle">version</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+kubectl version
+        </pre>
+        </div>
+        <div class = "subtitle">config</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+# get clusters
+kubectl config get-clusters
+
+# get current cluster
+kubectl config current-context
+        </pre>
+        </div>
+        <div class = "subtitle">cluster-info</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+# list clusters
+kubectl ctx
+
+# switch cluster
+kubectl ctx [clusterName]
+
+# display control plane and CoreDNS
+kubectl cluster-info
+
+# get debug and diagnose information
+kubectl cluster-info dump
+        </pre>
+        </div>
+        <div class = "subtitle">Reference</div>
+		<div class = "block">
+            <li><a href = "https://kubernetes.io/docs/reference/kubectl/cheatsheet/">Cheat Sheet</a></li>
+            <li><a href = "https://kubernetes.io/docs/reference/kubectl/">Documentation</a></li>
+            <li><a href = "https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands">Reference</a></li>
+        </div>
+    </body>
+</html>

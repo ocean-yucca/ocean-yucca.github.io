@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Python</title>
+		<link rel="stylesheet" href="../../css/atelier-sulphurpool-light.css" type="text/css">
+		<script src="../../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+		<style>
+			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+			div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+			span {color: red; font-weight: bold;}
+		</style>
+	</head>
+	<body>
+		<div class = "title">
+			Output
+		</div>
+
+		<div class = "subtitle">Capture</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+import ipywidgets as widgets
+
+# define components
+debug_view = widgets.Output(layout={'border': '1px solid black'})
+
+button = widgets.Button(description='Click',layout={'width': '300px'})
+
+# callback
+@debug_view.capture(clear_output=True)
+def bad_callback(event):
+    print('This is about to explode')
+
+# event
+button.on_click(bad_callback)
+
+# layout
+widgets.VBox([button, debug_view])
+		</pre>
+		</div>
+		<div class = "subtitle">Output</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+import ipywidgets as widgets
+
+# define components
+debug_view = widgets.Output(layout={'border': '1px solid black'})
+
+button = widgets.Button(description='Click',layout={'width': '300px'})
+
+# callback
+def bad_callback(event):
+    with debug_view:
+        print('This is about to explode')
+
+# event
+button.on_click(bad_callback)
+
+# layout
+widgets.VBox([button, debug_view])
+        </pre>
+        </div>
+		<div class = "subtitle">Append</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+# append_stdout, append_stderr, or append_display_data
+from IPython.display import YouTubeVideo
+out = widgets.Output(layout={'border': '1px solid black'})
+out.append_stdout('Output appended with append_stdout\n')
+out.append_stderr('Output appended with append_stdout')
+out.append_display_data(YouTubeVideo('eWzY2nGfkXk'))
+
+display(out)
+        </pre>
+        </div>
+		<div class = "subtitle">Threading</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+import threading
+from IPython.display import display, HTML
+import ipywidgets as widgets
+import datetime
+import time
+
+out = widgets.Output()
+#out_html = widgets.HTML(layout={'border':'1px solid red'})
+display(out)
+
+def thread_func():
+    while True:
+        time.sleep(1)
+        with out:
+            out.clear_output()
+            print(datetime.datetime.now().time())
+        
+thread = threading.Thread(target=thread_func,)
+thread.start()
+        </pre>
+        </div>
+    </body>
+</html>

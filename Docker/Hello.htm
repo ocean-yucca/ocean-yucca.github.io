@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Docker</title>
+		<link rel="stylesheet" href="../css/atelier-sulphurpool-light.css" type="text/css">
+		<script src="../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+		<style>
+			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+			div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+			span {color: red; font-weight: bold;}
+		</style>
+	</head>
+	<body>
+		<div class = "title">
+			Hello App
+		</div>
+        <div class = "subtitle">Workflow</div>
+        <div class = "block">
+            <p style = "text-align:center;"><img src = "img/Docker_18.png" width = "60%"></p>
+		</div>
+        <div class = "subtitle">Source Code</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+# hello.py
+print("Hello World!")
+		</pre>
+		</div>
+        <div class = "subtitle">Dockerfile</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+# 885.45M, python3 image have many development tools installed
+FROM python:3
+
+# set a directory for the app
+WORKDIR /usr/src/app
+
+# copy all the files to the container
+COPY . .
+
+# run the command
+CMD ["python", "./hello.py"]
+		</pre>
+		</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+# 140.68M
+FROM ubuntu
+
+RUN apt-get update && apt-get install -y python3.8
+
+# set a directory for the app
+WORKDIR /usr/src/app
+
+# copy all the files to the container
+COPY . .
+
+# run the command
+CMD ["/usr/bin/python3.8", "./hello.py"]
+        </pre>
+        </div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+# 77.5M
+FROM alpine
+
+RUN apk add --update --no-cache python3 && ln -sf python3 /usr/bin/python
+RUN python3 -m ensurepip
+RUN pip3 install --no-cache --upgrade pip setuptools
+
+# set a directory for the app
+WORKDIR /usr/src/app
+
+# copy all the files to the container
+COPY . .
+
+# run the command
+CMD ["python", "./hello.py"]
+        </pre>
+        </div>
+        <div class = "subtitle">Create Image</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+# build image on local
+docker build -t lchenlangley/hello .
+		</pre>
+		</div>
+        <div class = "subtitle">Push Image</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+docker login
+docker push lchenlangley/hello
+        </pre>
+        </div>
+        <div class = "subtitle">Deployment</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+docker run lchenlangley/hello
+		</pre>
+		</div>
+	</body>
+</html>

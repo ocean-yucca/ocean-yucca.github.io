@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Python</title>
+		<link rel="stylesheet" href="../css/atelier-sulphurpool-light.css" type="text/css">
+		<script src="../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+		<style>
+			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+			div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+		</style>
+	</head>
+	<body>
+		<div class = "title">
+			ChainMap
+		</div>
+		<div class = "block">
+            <li>groups multiple dicts or other mappings together to create a single, updateable view</li>
+        </div>
+		<div class = "subtitle">Initialization</div>
+		<div class = "block">
+			<pre class = "prettyprint linenums">
+from collections import ChainMap
+
+a = {'Name': 'Lin', 'Age': 39}
+b = {'maker': 'Honda', 'year': 2016}
+cm = ChainMap(a, b) # ChainMap({'Name': 'Lin', 'Age': 39}, {'maker': 'Honda', 'year': 2016})
+
+# a list of maps
+cm.maps # [{'Name': 'Lin', 'Age': 39}, {'maker': 'Honda', 'year': 2016}]
+
+# add a new map
+cm.maps.append({'ID': 970196897}) # ChainMap({'Name': 'Lin', 'Age': 39}, {'maker': 'Honda', 'year': 2016}, {'ID': 970196897})
+
+# create a copy of chainmap and add a new map in at the front
+cm2 = cm.new_child()
+print(cm2.maps) # [{}, {'Name': 'Lin', 'Age': 39}, {'maker': 'Honda', 'year': 2016}, {'ID': 970196897}]
+
+# fill the new map
+cm2.maps[0] = {'Color': 'Blue'} # ChainMap({'Color': 'Blue'}, {'Name': 'Lin', 'Age': 39}, {'maker': 'Honda', 'year': 2016}, {'ID': 970196897})
+
+# get parent
+p = cm2.parents # ChainMap({'Name': 'Lin', 'Age': 39}, {'maker': 'Honda', 'year': 2016}, {'ID': 970196897})
+
+print(id(cm), id(cm2), id(p)) # 140454428292816 140454428291904 140454428443168
+            </pre>
+        </div>
+		<div class = "subtitle">Access</div>
+		<div class = "block">
+			<pre class = "prettyprint linenums">
+cm['Name'] # Lin
+cm['maker'] # Honda
+
+# keys()
+list(cm.keys()) # ['maker', 'year', 'Name', 'Age']
+
+# values()
+list(cm.values()) # ['Honda', 2016, 'Lin', 39]
+
+# items()
+for k, v in cm.items():
+    print(k, v)
+
+cm['maker'] = 'Subaru'
+            </pre>
+        </div>
+		<div class = "subtitle">Update</div>
+		<div class = "block">
+			<pre class = "prettyprint linenums">
+a = {'Name': 'Lin', 'Age': 39}
+b = {'maker': 'Honda', 'year': 2016}
+cm = ChainMap(a, b)
+
+a['Age'] = 42
+print(cm) # ChainMap({'Name': 'Lin', 'Age': 42}, {'maker': 'Honda', 'year': 2016})
+
+cm.maps[1]['maker'] = 'Subaru'
+print(cm) # ChainMap({'Name': 'Lin', 'Age': 39}, {'maker': 'Subaru', 'year': 2016})
+
+cm['maker'] = 'Subaru'
+print(a) # {'Name': 'Lin', 'Age': 39, 'maker': 'Subaru'}
+print(cm) # ChainMap({'Name': 'Lin', 'Age': 39, 'maker': 'Subaru'}, {'maker': 'Subaru', 'year': 2016})
+            </pre>
+        </div>
+		<div class = "subtitle">Built-in Functions</div>
+		<div class = "block">
+			<pre class = "prettyprint linenums">
+a = {'Name': 'Lin', 'Age': 39}
+b = {'maker': 'Honda', 'year': 2016}
+cm = ChainMap(a, b) # ChainMap({'Name': 'Lin', 'Age': 39}, {'maker': 'Honda', 'year': 2016})
+
+list(cm) # all nested keys, ['maker', 'year', 'Name', 'Age']
+
+print('Name' in cm) # True
+
+len(cm) # 4
+
+dict(cm) # Flatten into a regular dictionary, {'maker': 'Honda', 'year': 2016, 'Name': 'Lin', 'Age': 39}
+            </pre>
+        </div>
+		<div class = "subtitle">Reference</div>
+		<div class = "block">
+            <li><a href = "https://docs.python.org/3/library/collections.html#collections.ChainMap">Python 3 Standard Library</a></li>
+            <li><a href = "https://pymotw.com/3/collections/chainmap.html">Python 3 Module of the Week</a></li>
+        </div>
+    </body>
+</html>

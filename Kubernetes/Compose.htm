@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Kubernetes</title>
+		<link rel="stylesheet" href="../css/atelier-sulphurpool-light.css" type="text/css">
+		<script src="../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+		<style>
+			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+			div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+			span {color: red; font-weight: bold;}
+		</style>
+	</head>
+	<body>
+		<div class = "title">
+			Compose
+		</div>
+		<div class = "block">
+            <li>1. <span>metadata</span></li>
+            <li>2. <span>spec</span>
+                <ul>
+                    <li>desired status</li>
+                </ul>
+            </li>
+            <li>3. <span>status</span>
+                <ul>
+                    <li>actual status</li>
+                    <li>automatically generated and added by kubernetes</li>
+                    <li>Etcd holds the current status of kubernetes components</li>
+                </ul>
+            </li>
+        </div>
+        <div class = "subtitle">Deployment</div>
+        <div class = "block">
+            <li>Pods from the same deployment have the same labels</li>
+            <li>Selector uses the labels to know which pods belong to the deployment</li>
+            <li>Pod label, selector label in deployment, deployment label, and service label should be same</li>
+            <li>Service uses the labels to create connection</li>
+            <li>Names are used as the reference, can be arbitrary names</li>
+            <p style = "text-align:center;"><img src = "img/k8s_12.png" width = 60%"></p>
+		</div>
+        <div class = "block">
+            <p style = "text-align:center;"><img src = "img/k8s_10.png" width = "80%"></p>
+		</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+apiVersion: apps/v1
+kind: Deployment # type
+metadata:
+  name: nginx-deployment # deployment name
+  labels:
+    app: nginx
+spec: # specification for deployment
+  replicas: 1 # number of replicas
+  selector:
+    matchLabels:
+      app: nginx
+  template: # specification for pods
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.16
+        ports:
+        - containerPort: 8080 # container access port
+        </pre>
+        </div>
+        <div class = "subtitle">Service</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-service
+spec:
+  selector:
+    app: nginx
+  ports:
+    - protocol: TCP
+      port: 80 # service port
+      targetPort: 8080 # container port
+        </pre>
+        </div>
+        <div class = "subtitle">Secret</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mongo-secret
+type: Opaque
+data:
+  mongo-user: bW9uZ291c2Vy
+  mongo-password: bW9uZ29wYXNzd29yZA==
+        </pre>
+        </div>
+        <div class = "subtitle">Ingress</div>
+        <div class = "block">
+            <p style = "text-align:center;"><img src = "img/k8s_18.png" width = "60%"></p>
+		</div>
+        <div class = "block">
+		<pre class = "prettyprint linenums">
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: minimal-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  ingressClassName: nginx-example
+  rules:
+  - http:
+      paths:
+      - path: /testpath
+        pathType: Prefix
+        backend:
+          service:
+            name: test
+            port:
+              number: 80
+        </pre>
+        </div>
+        <div class = "subtitle">Reference</div>
+		<div class = "block">
+            <li><a href = "https://developers.redhat.com/blog/2019/05/27/command-line-tools-for-kubernetes-kubectl-stern-kubectx-kubens#">Command-line tools for Kubernetes: kubectl, stern, kubectx, kubens</a></li>
+            <li><a href = "https://cloud.google.com/blog/products/containers-kubernetes/kubernetes-best-practices-organizing-with-namespaces">Kubernetes best practices: Organizing with Namespaces</a></li>
+        </div>
+    </body>
+</html>

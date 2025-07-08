@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Python</title>
+		<link rel="stylesheet" href="../css/atelier-sulphurpool-light.css" type="text/css">
+		<script src="../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+		<style>
+			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+			div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+		</style>
+	</head>
+	<body>
+		<div class = "title">
+			deque
+		</div>
+		<div class = "block">
+            <li>a double-ended queue, or deque, supports adding and removing elements from either end of the queue</li>
+            <li>a mutable, sequential data structure</li>
+        </div>
+		<div class = "subtitle">Initialization</div>
+		<div class = "block">
+			<pre class = "prettyprint linenums">
+from collections import deque
+
+a = deque('abcdefg') #deque(['a', 'b', 'c', 'd', 'e', 'f', 'g'])
+print(a)
+b = deque(['Hello', 2]) # deque(['Hello', 2])
+print(len(b))
+			</pre>
+		</div>
+		<div class = "subtitle">Access</div>
+		<div class = "block">
+			<pre class = "prettyprint linenums">
+print(a[0]) # a
+a[0] = 'h' # deque(['h', 'b', 'c', 'd', 'e', 'f', 'g'])
+            </pre>
+        </div>
+		<div class = "subtitle">Methods</div>
+		<div class = "block">
+			<pre class = "prettyprint linenums">
+d = deque('abcdefg')
+
+# append, add a new entry to the right side
+d.append('j') # deque(['a', 'b', 'c', 'd', 'e', 'f', 'g', 'j'])
+
+# appendleft, add a new entry to the left side
+d.appendleft('f') # deque(['f', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'j'])
+
+# pop
+print(d.pop()) # j, return and remove the rightmost item
+
+# popleft
+print(d.popleft()) # f, return and remove the leftmost item
+
+print(d) # deque(['a', 'b', 'c', 'd', 'e', 'f', 'g'])
+print(d[0]) # a, peek at leftmost item
+print(d[-1]) # g, peek at rightmost item
+
+# extend, add multiple elements at once
+d.extend(['Hello', 'World']) # deque(['a', 'b', 'c', 'd', 'e', 'f', 'g', 'Hello', 'World'])
+
+# rotate
+d.rotate(3) # deque(['g', 'Hello', 'World', 'a', 'b', 'c', 'd', 'e', 'f']), right rotation
+d.rotate(-2) # deque(['World', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'Hello']), left rotation
+
+# clear, empty the deque
+d.clear()
+            </pre>
+        </div>
+		<div class = "subtitle">Built-in Functions</div>
+		<div class = "block">
+			<pre class = "prettyprint linenums">
+b = deque(['Hello', 2]) # deque(['Hello', 2])
+print(len(b)) # 2
+
+l = list(b) # ['Hello', 2]
+print(l)
+
+list(reversed(b)) # [2, 'Hello']
+
+b = deque(reversed(b)) # deque([2, 'Hello']), make a new deque in reverse order
+print(b)
+            </pre>
+        </div>
+		<div class = "subtitle">Reference</div>
+		<div class = "block">
+            <li><a href = "https://docs.python.org/3/library/collections.html#collections.deque">Python 3 Standard Library</a></li>
+            <li><a href = "https://pymotw.com/3/collections/deque.html">Python 3 Module of the Week</a></li>
+        </div>
+    </body>
+</html>

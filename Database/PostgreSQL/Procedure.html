@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+
+<html>
+
+	<head>
+
+		<title>Database</title>
+		<link rel="stylesheet" href="../../css/atelier-sulphurpool-light.css" type="text/css">
+		<script src="../../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+		<style>
+			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+
+			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+
+			div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+
+            span {color: red; font-weight: bold;}
+		</style>
+
+	</head>
+
+	<body>
+
+		<div class = "title">
+            Procedure
+		</div>
+
+		<div class = "subtitle">What is Procedure?</div>
+		<div class = "block">
+			<li>A procedure is a stored block of SQL code that performs actions like INSERT, UPDATE, DELETE, or other operations — but does not return a value</li>
+		</div>
+		<div class = "subtitle">Create Procedure</div>
+		<div class = "block">
+			<pre class = "prettyprint linenums">
+# create a procedure in Query Tool on pgAdmin
+CREATE OR REPLACE PROCEDURE insert_record(
+	IN s_id INT,
+    IN s_name TEXT,
+    IN s_status TEXT
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    INSERT INTO public."Survey" ("surveyID", "surveyName", "surveyStatus")
+    VALUES (s_id, s_name, s_status);
+END;
+$$;
+			</pre>
+		</div>
+		<div class = "subtitle">Use Procedure</div>
+		<div class = "block">
+			<pre class = "prettyprint linenums">
+# call procedure in pgAdmin
+CALL insert_record(10, 'S4', 'In Progress');
+			</pre>
+		</div>
+		<div class = "block">
+			<pre class = "prettyprint linenums">
+# use procedure in Python
+import psycopg2
+import pandas as pd
+import datetime
+
+# Define connection parameters
+conn = psycopg2.connect(
+    host="localhost",        # or your host, e.g., "db" if in Docker
+    port=5432,
+    database="mydatabase",
+    user="admin",
+    password="admin123"
+)
+
+# Create a cursor
+cur = conn.cursor()
+
+try:
+    call_insert_record = "CALL insert_record(%s, %s, %s)"
+    parameters = (20, 'S4', 'In Progress')
+    
+    cur.execute(call_insert_record, parameters)
+    conn.commit()
+except Exception as err:
+    print(err)
+			</pre>
+		</div>
+    </body>
+</html>

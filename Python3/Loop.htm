@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Python</title>
+		<link rel="stylesheet" href="../css/atelier-sulphurpool-light.css" type="text/css">
+		<script src="../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+		<style>
+			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+			div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+		</style>
+	</head>
+	<body>
+		<div class = "title">
+			Loop
+		</div>
+
+		<div class = "subtitle">While</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+#!/usr/bin/python
+ 
+n = 10;
+while n &gt; 0:
+    print(n)
+    n = n-1
+else:
+    print("End of Loop ...")
+		</pre>
+		</div>
+
+		<div class = "subtitle">For</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+l = [1, 2, 3, 4]
+
+for i in l:
+    print(i, id(i)) # print element and id
+</pre>
+<pre class = "prettyprint linenums">
+for i in l:
+    # i is immutable
+    # changing it creates a new object, the object in l does not change
+    i = i*10
+    print(i, id(i))
+
+print(l) # [1, 2, 3, 4]
+</pre>
+<pre class = "prettyprint linenums">
+for index, ele in enumerate(l):
+    # l is mutable
+    # changing an item creates a new object, and replaces the old object
+    l[index] = l[index]*10
+    # l[index] = ele*10
+    print(index, l[index], id(l[index]), ele, id(ele))
+
+print(l) # [10, 20, 30, 40]
+		</pre>
+		</div>
+		<div class = "block">
+			Remove items in for loop
+		<p style = "text-align:center;"><img src = "img/for_1.png" width = "25%"></p>
+		<pre class = "prettyprint linenums">
+# wrong
+l = [1, 2, 3, 4, 5]
+for item in l:
+    l.remove(item)
+
+print(l) # [2, 4]
+		</pre>
+		<p style = "text-align:center;"><img src = "img/for_2.png" width = "45%"></p>
+		<pre class = "prettyprint linenums">
+# correct
+l = [1, 2, 3, 4, 5]
+# l[:] is a shadow copy of l
+for item in l[:]:
+    l.remove(item)
+
+print(l) # []
+		</pre>
+	</div>
+
+		<div class = "subtitle">Break</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+for i in range(10):
+    if i == 5:
+        break
+    print(i)
+		</pre>
+		</div>
+
+		<div class = "subtitle">Continue</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+for i in range(10):
+    if i%2 == 0:
+        continue
+    print(i)
+		</pre>
+		</div>
+
+		<div class = "subtitle">Pass</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+for i in range(10):
+    if i%2 == 0:
+        pass # do nothing
+    else:
+        print(i)
+		</pre>
+		</div>
+
+		<div class = "subtitle">Reference</div>
+		<div class = "block">
+			<ul>
+				<li>Starting out with Python</li>
+			</ul>
+		</div>
+	</body>
+</html>

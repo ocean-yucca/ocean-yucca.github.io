@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+
+<html>
+
+	<head>
+
+		<title>Database</title>
+		<link rel="stylesheet" href="../../css/atelier-sulphurpool-light.css" type="text/css">
+		<script src="../../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+		<style>
+			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+
+			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+
+			div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+
+            span {color: red; font-weight: bold;}
+		</style>
+
+	</head>
+
+	<body>
+
+		<div class = "title">
+            Management
+		</div>
+
+		<div class = "subtitle">Create Compose File</div>
+		<div class = "block">
+			<pre class = "prettyprint linenums">
+# compose.yml
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15
+    container_name: postgres_db
+    restart: always
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin123
+      POSTGRES_DB: mydatabase
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: pgadmin123
+    ports:
+      - "5050:80"
+    depends_on:
+      - db
+
+volumes:
+  postgres_data:
+			</pre>
+		</div>
+		<div class = "subtitle">Start PostgreSQL</div>
+		<div class = "block">
+			<pre class = "prettyprint linenums">
+docker-compose up # start PostgreSQL and pgAdmin
+
+#docker-compose down # stop PostgreSQL and pgAdmin
+			</pre>
+		</div>
+		<div class = "subtitle">Start pgAdmin</div>
+		<div class = "block">
+			<pre class = "prettyprint linenums">
+http://localhost:5050 # admin@example.com, pgadmin123
+			</pre>
+		</div>
+		<div class = "subtitle">Create Server</div>
+		<div class = "block">
+			<pre class = "prettyprint linenums">
+Host: db
+Username: admin # created by ChatGPT
+Password: admin123 # created by ChatGPT
+            </pre>
+        </div>
+    </body>
+</html>

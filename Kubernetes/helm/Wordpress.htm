@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Helm</title>
+		<link rel="stylesheet" href="../../css/atelier-sulphurpool-light.css" type="text/css">
+		<script src="../../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+		<style>
+			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+			div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+			span {color: red; font-weight: bold;}
+		</style>
+	</head>
+	<body>
+		<div class = "title">
+			Wordpress
+		</div>
+        <div class = "subtitle">Start Minikube</div>
+		<div class = "block">
+            <pre class = "prettyprint linenums">
+# start minikube
+minikube start --kubernetes-version=v1.22.1 --driver=hyperkit --container-runtime=docker
+            </pre>
+        </div>
+        <div class = "subtitle">Installation</div>
+		<div class = "block">
+            <pre class = "prettyprint linenums">
+# add repository
+helm repo add bitnami https://charts.bitnami.com/bitnami
+
+# install app
+helm install happy-panda bitnami/wordpress
+            </pre>
+        </div>
+        <div class = "subtitle">Access App</div>
+		<div class = "block">
+            <pre class = "prettyprint linenums">
+# get URL
+minikube service happy-panda-wordpress
+
+# login
+# http://[domain]/wp-admin/
+http://192.168.64.9:32644/wp-admin/
+
+echo Username: user
+echo Password: $(kubectl get secret --namespace default happy-panda-wordpress -o jsonpath="{.data.wordpress-password}" | base64 --decode)
+            </pre>
+        </div>
+        <div class = "subtitle">Reference</div>
+		<div class = "block">
+            <li><a href = "https://helm.sh/docs/intro/using_helm/">Documentation</a></li>
+        </div>
+    </body>
+</html>

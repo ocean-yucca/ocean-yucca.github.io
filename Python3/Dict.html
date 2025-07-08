@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Python</title>
+		<link rel="stylesheet" href="../css/atelier-sulphurpool-light.css" type="text/css">
+		<script src="../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+		<style>
+			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+			div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+		</style>
+	</head>
+	<body>
+		<div class = "title">
+			dict
+		</div>
+		<div class = "block">
+            <li>maps hashable values to arbitrary objects</li>
+            <li>mutable</li>
+            <li>More than one entry per key not allowed</li>
+            <li>Keys must be immutable, like strings, numbers, or tuples</li>
+        </div>
+		<div class = "subtitle">Initialize a dict</div>
+		<div class = "block">
+			<pre class = "prettyprint linenums">
+# Create a dict
+d = {}
+ 
+# Create a dict with initial values
+d = {'Name': 'Zara', 'Age': 7, 'Class': 'First'}
+			</pre>
+		</div>
+		<div class = "subtitle">Update</div>
+		<div class = "block">
+			<pre class = "prettyprint linenums">
+# Change the value of a key word
+d['Name'] = 'Lin'
+ 
+# Add a new key and value
+d['Major'] = 'CS'
+            </pre>
+        </div>
+		<div class = "subtitle">Delete</div>
+		<div class = "block">
+			<pre class = "prettyprint linenums">
+# Delete an element of the dict
+del d['Name']
+ 
+# Remove all elements of the dict
+d.clear()
+ 
+# Remove the whole dict
+del d
+            </pre>
+        </div>
+		<div class = "subtitle">Build-in functions</div>
+		<div class = "block">
+			<pre class = "prettyprint linenums">
+# ==, compare two dicts, cmp has been removed in python 3
+dict1 = {'Name':'Lin', 'Age':37}
+dict2 = {'Name':'Lin', 'Age':37}
+print(dict1 == dict2) # True
+ 
+#len, get the number of items in dict
+print(len(dict1)) # 2
+ 
+#str, convert a dict to a string
+print(str(dict1)) # {'Name': 'Lin', 'Age': 37}
+ 
+#type, check type
+print(type(dict1)) # dict
+ 
+#id, get the memory id of the dict
+print(id(dict1)) #4338527904
+            </pre>
+        </div>
+		<div class = "subtitle">Methods</div>
+		<div class = "block">
+			<pre class = "prettyprint linenums">
+d = {}; #create a dict
+ 
+d['Name'] = 'Lin';
+d['Age'] = 38;
+
+#has_key() has been removed in Python 3
+if 'Name' in d:
+    print('Has key \'Name\'')
+    
+#get, returns a value for the given key; if key is not available then returns default value
+print(d.get('Name'))
+print(d.get('Temp', 'Unknown')) # give a default value
+#print(d['Temp']) # throw KeyError
+
+#items
+items = d.items();
+print(type(items)) # dict_items, instead of list in Python 2
+print(items)
+for item in items:
+    print(item) # each item is a tuple
+    
+#keys, return a list of keys
+keys = d.keys();
+print(type(keys)) # dict_keys, instead of list in Python 2
+print(keys)
+for key in keys:
+    print(key)
+    
+#values, return a list of values
+values = d.values();
+print(type(values)) # dict_values, instead of list in Python 2
+print(values)
+for value in values:
+    print(value)
+    
+#setdefault, get the value of key; if key is not available then set and return default value
+print(d.setdefault('Age', None)) #38
+print(d.setdefault('Sex', None)) #None
+
+#update, add a dict to another dict
+d2 = {'Age': 42, 'Sex': 'M', 'State': 'VA'};
+d.update(d2); # {'Name': 'Lin', 'Age': 42, 'Sex': 'M', 'State': 'VA'}
+print(d)
+
+# removes the last inserted item, which is returned as a tuple
+# remove an arbitrary item before 3.7
+print(d.popitem())
+            </pre>
+        </div>
+		<div class = "block">
+			<pre class = "prettyprint linenums">
+d = {'Name': 'Lin', 'Age': 38, 'Sex': 'M', 'State': 'VA'};
+ 
+#iterkeys() has been removed in Python 3
+#itervalues() has been removed in Python 3
+#iteritems() has been removed in Python 3
+i = iter(d) # equals to iter(d.keys())
+for e in i:
+    print(e) # Name Aage Sex State
+    
+#pop, remove a key and return its value, if the key does not exist, return default
+t = d.pop('Name')
+print(t) # Lin
+
+t = d.pop('Last_name', 'Unknown')
+print(t) # Unknown
+
+k = sorted(d)
+print(type(k)) # list
+print(k) # ['Age', 'Sex', 'State']
+            </pre>
+        </div>
+		<div class = "subtitle">Reference</div>
+		<div class = "block">
+            <li><a href = "https://docs.python.org/3/library/stdtypes.html#dict">Python 3 Standard Library</a></li>
+        </div>
+    </body>
+</html>

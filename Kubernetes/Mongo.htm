@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Kubernetes</title>
+		<link rel="stylesheet" href="../css/atelier-sulphurpool-light.css" type="text/css">
+		<script src="../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+		<style>
+			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+			div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+			span {color: red; font-weight: bold;}
+		</style>
+	</head>
+	<body>
+		<div class = "title">
+			Mongo DB
+		</div>
+        <div class = "block">
+            <p style = "text-align:center;"><img src = "img/k8s_11.png" width = "60%"></p>
+		</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+# mongo-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongo-deployment
+  labels:
+    app: mongodb
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongodb # let deployment know which pod for this deployment
+  template: # configuration for pods
+    metadata:
+      labels:
+        app: mongodb # each pod has a unique name, but pods can share the same label
+    spec:
+      containers: # containers in a pod, usually add one container per pod
+      - name: mongodb
+        image: mongo:5.0 # pull image from Docker Hub
+        ports:
+        - containerPort: 27017
+        env:
+        - name: MONGO_INITDB_ROOT_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: mongo-secret # secret name
+              key: mongo-user
+        - name: MONGO_INITDB_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mongo-secret # secret name
+              key: mongo-password
+        </pre>
+        </div>
+		<div class = "block">
+            <li>Internal service, has an internal IP</li>
+		<pre class = "prettyprint linenums">
+# mongo-service.yaml
+apiVersion: v1
+kind: Service # type
+metadata:
+  name: mongo-service # service name
+spec:
+  selector:
+    app: mongodb # connect pod through label
+  ports:
+    - protocol: TCP
+      port: 27017 # service port
+      targetPort: 27017 # pod port
+        </pre>
+        </div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+# mongo-express-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongo-express-deployment
+  labels:
+    app: mongo-express
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongo-express
+  template:
+    metadata:
+      labels:
+        app: mongo-express
+    spec:
+      containers:
+      - name: mongo-express
+        image: mongo-express
+        ports:
+        - containerPort: 8081
+        env:
+        - name: ME_CONFIG_MONGODB_ADMINUSERNAME
+          valueFrom:
+            secretKeyRef:
+              name: mongo-secret # secret name
+              key: mongo-user
+        - name: ME_CONFIG_MONGODB_ADMINPASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mongo-secret # secret name
+              key: mongo-password
+        - name: ME_CONFIG_MONGODB_SERVER
+          valueFrom:
+            configMapKeyRef:
+              name: mongo-configmap # configMap name
+              key: database_url
+        </pre>
+        </div>
+		<div class = "block">
+            <li>External service, has an internal IP and an external IP</li>
+		<pre class = "prettyprint linenums">
+# mongo-express-service.yaml
+apiVersion: v1
+kind: Service # type
+metadata:
+  name: mongo-express-service # service name
+spec:
+  selector:
+    app: mongo-express
+  type: LoadBalancer
+  ports:
+    - protocol: TCP
+      port: 8081 # service port
+      targetPort: 8081 # pod port
+      nodePort: 30000 # prot for external IP address, must be between 30000-32767
+        </pre>
+        </div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+# mongo-secret.yaml
+apiVersion: v1
+kind: Secret # type
+metadata:
+  name: mongo-secret # name
+type: Opaque # default, for arbitrary key-value pairs
+data:
+  mongo-user: bW9uZ291c2Vy # echo -n 'username' | base64
+  mongo-password: bW9uZ29wYXNzd29yZA== # echo -n 'password' | base64
+        </pre>
+        </div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+# mongo-configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mongo-configmap
+data:
+  database_url: mongo-service # service name
+        </pre>
+        </div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+# minikube on Mac
+minikube service mongo-express-service
+http://192.168.64.4:30000
+
+kubectl port-forward svc/mongo-express-service 8080:8081
+http://127.0.0.1:8080
+        </pre>
+        </div>
+        <div class = "subtitle">Reference</div>
+		<div class = "block">
+            <li><a href = "https://www.youtube.com/watch?v=X48VuDVv0do&t=162s">TechWorld with Nana</a></li>
+        </div>
+    </body>
+</html>
