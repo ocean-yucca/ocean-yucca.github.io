@@ -55,7 +55,7 @@ cur = conn.cursor()
 		<div class = "block">
 			<pre class = "prettyprint linenums">
 cur.execute("""
-    CREATE TABLE IF NOT EXISTS public."Survey3" ( # public is default schema in a database
+    CREATE TABLE IF NOT EXISTS public."Survey" ( # public is default schema in a database
         surveyID SERIAL PRIMARY KEY,
         surveyName TEXT NOT NULL,
         surveyStatus TEXT NOT NULL,
@@ -74,7 +74,7 @@ conn.commit()
 			<pre class = "prettyprint linenums">
 try:
     cur.execute("""
-        SELECT * FROM "Survey"
+        SELECT * FROM public."Survey"
         where "surveyStatus" NOT IN ('Complete', 'Closed') 
         """)
 

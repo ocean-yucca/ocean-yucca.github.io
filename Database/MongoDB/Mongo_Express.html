@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+
+<html>
+
+	<head>
+
+		<title>Database</title>
+		<link rel="stylesheet" href="../../css/atelier-sulphurpool-light.css" type="text/css">
+		<script src="../../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+		<style>
+			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+
+			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+
+			div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+
+            span {color: red; font-weight: bold;}
+		</style>
+
+	</head>
+
+	<body>
+
+		<div class = "title">
+            Mongo Express
+		</div>
+
+		<div class = "subtitle">Insert Document</div>
+		<div class = "block">
+			<pre class = "prettyprint linenums">
+{
+      "_id": ObjectId(), # optional
+      surveyName: "s4", # string
+      surveyStatus: "in progress", # string
+      start: new Date("2025-07-08T14:30:00Z"), # date
+      count: 10 # number
+}
+			</pre>
+		</div>
+    <div class = "subtitle">Insert Index</div>
+    <div class = "block">
+      Index is a special data structure that improves the speed of querie
+      <pre class = "prettyprint linenums">
+{
+        "surveyName": 1 # 1 for an ascending and -1 for a descending index
+}
+      </pre>
+    </div>
+    <div class = "subtitle">Query</div>
+    <div class = "block">
+      <pre class = "prettyprint linenums">
+{} # select all documents
+
+{ surveyStatus: "Complete" } # match a specific field
+
+{ "_id": ObjectId("686ddbf98f349ce18075d3ea") } # specify _id
+
+{count: { "$gte": 1} } # compare with number, $gt, $gte, $lt, $lte, $eq
+
+{ "start": { "$gte": new Date("2024-07-01") } } # compare date
+
+{ "surveyName": "s3", "count": {"$gt": 1} } # multiple conditions
+      </pre>
+    </div>
+    <div class = "subtitle">Project</div>
+    <div class = "block">
+      Specify which fields to include or exclude
+      <pre class = "prettyprint linenums">
+# 1, include; 0, exclude
+
+{ _id: 0 } # exclude the _id field 
+
+{ "surveyName": 1 , "surveyStatus":1} # include surveyName and surveyStatus
+      </pre>
+    </div>
+    </body>
+</html>
