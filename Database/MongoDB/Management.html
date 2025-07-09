@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+
+<html>
+
+	<head>
+
+		<title>Database</title>
+		<link rel="stylesheet" href="../../css/atelier-sulphurpool-light.css" type="text/css">
+		<script src="../../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+		<style>
+			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+
+			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+
+			div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+
+            span {color: red; font-weight: bold;}
+		</style>
+
+	</head>
+
+	<body>
+
+		<div class = "title">
+            Management
+		</div>
+
+		<div class = "subtitle">Create Compose File</div>
+		<div class = "block">
+			<pre class = "prettyprint linenums">
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:6.0
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - mongo-network
+
+  mongo-express:
+    image: mongo-express
+    container_name: mongo-express
+    depends_on:
+      - mongodb
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_MONGODB_SERVER: mongodb
+      ME_CONFIG_BASICAUTH_USERNAME: admin
+      ME_CONFIG_BASICAUTH_PASSWORD: admin
+    networks:
+      - mongo-network
+
+  metabase:
+    image: metabase/metabase
+    container_name: metabase
+    ports:
+      - "3000:3000"
+    environment:
+      MB_DB_TYPE: h2
+    depends_on:
+      - mongodb
+    networks:
+      - mongo-network
+
+volumes:
+  mongodb_data:
+
+networks:
+  mongo-network:
+    driver: bridge
+			</pre>
+		</div>
+		<div class = "subtitle">Start MongoDB</div>
+		<div class = "block">
+			<pre class = "prettyprint linenums">
+docker-compose up # start MongoDB, Mongo Express and Metabase
+
+#docker-compose down # stop MongoDB, Mongo Express and Metabase
+			</pre>
+		</div>
+		<div class = "subtitle">Start Mongo Express</div>
+		<div class = "block">
+			<pre class = "prettyprint linenums">
+http://localhost:8081 # admin, admin
+			</pre>
+		</div>
+		<div class = "subtitle">Start Metabase</div>
+		<div class = "block">
+			<pre class = "prettyprint linenums">
+http://localhost:3000
+      </pre>
+      <pre class = "prettyprint linenums">
+Host: mongodb
+Database name: mydatabase
+Port: 27017
+      </pre>
+    </div>
+    </body>
+</html>
