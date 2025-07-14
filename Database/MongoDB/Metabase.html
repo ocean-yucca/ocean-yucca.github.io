@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+
+<html>
+
+	<head>
+
+		<title>Database</title>
+		<link rel="stylesheet" href="../../css/atelier-sulphurpool-light.css" type="text/css">
+		<script src="../../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+		<style>
+			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+
+			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+
+			div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+
+            span {color: red; font-weight: bold;}
+		</style>
+
+	</head>
+
+	<body>
+
+		<div class = "title">
+            Metabase
+		</div>
+
+		<div class = "subtitle">Flowchart</div>
+        <div class = "block">
+                  <p style = "text-align:center;"><img src = "img/Metabase_1.png" width = "80%"></p>
+            </div>
+            <div class = "subtitle">Question</div>
+            <div class = "block">
+                  <pre class = "prettyprint linenums">
+# New -> Question
+# Select Data and Add Filter
+
+# Create Plot with Visualization
+# Save Plot in Collection
+                  </pre>
+            </div>
+            <div class = "subtitle">Native Query</div>
+		<div class = "block">
+			<pre class = "prettyprint linenums">
+# New -> Native Query
+# Select Database and Collection
+# Use MongoDB aggregation query
+[
+  { "$match": { "median_income": { "$gt": 10 } } },
+  { "$sort": { "total_rooms": 1 } }
+]
+
+# Create Plot with Visualization
+# Save Plot in Collection
+			</pre>
+		</div>
+    <div class = "subtitle">Insert Index</div>
+    <div class = "block">
+      Index is a special data structure that improves the speed of querie
+      <pre class = "prettyprint linenums">
+{
+        "surveyName": 1 # 1 for an ascending and -1 for a descending index
+}
+      </pre>
+    </div>
+    <div class = "subtitle">Automatic Dashbaord</div>
+    <div class = "block">
+      <pre class = "prettyprint linenums">
+# Select a datbase
+# Click X-ray this table of a specific table
+      </pre>
+    </div>
+    <div class = "subtitle">Create Dashboard</div>
+    <div class = "block">
+      <pre class = "prettyprint linenums">
+# New -> Dashboard
+# Add Charts from Collection
+# Add Filters
+      </pre>
+    </div>
+    </body>
+</html>

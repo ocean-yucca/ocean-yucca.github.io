@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+
+<html>
+
+	<head>
+
+		<title>Database</title>
+		<link rel="stylesheet" href="../../css/atelier-sulphurpool-light.css" type="text/css">
+		<script src="../../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+		<style>
+			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+
+			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+
+			div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+
+            span {color: red; font-weight: bold;}
+		</style>
+
+	</head>
+
+	<body>
+
+		<div class = "title">
+            pymongo
+		</div>
+
+		<div class = "subtitle">Installation</div>
+		<div class = "block">
+			<pre class = "prettyprint linenums">
+pip install pymongo
+			</pre>
+		</div>
+    <div class = "subtitle">Access</div>
+    <div class = "block">
+      <pre class = "prettyprint linenums">
+from pymongo import MongoClient
+
+# connect MongoDB
+client = MongoClient("mongodb://localhost:27017/")
+      </pre>
+    </div>
+    <div class = "subtitle">Database</div>
+    <div class = "block">
+      <pre class = "prettyprint linenums">
+# list databases
+for database in client.list_database_names():
+    print(database)
+      </pre>
+      <pre class = "prettyprint linenums">
+# select a database
+db = client["mydatabase"]
+      </pre>
+      <pre class = "prettyprint linenums">
+# create database
+db = client['mydadtabse2']
+
+# create collection
+students = db["students"]
+
+# insert a document
+# MongoDB uses lazy creation, a database or collection is not physically created until insert the first document into it
+students.insert_one({
+    "name": "John Doe",
+    "age": 20,
+    "major": "Computer Science"
+})
+      </pre>
+      <pre class = "prettyprint linenums">
+# drop database
+# dropping a database will permanently delete all its collections and their data
+client.drop_database('mydadtabse2')
+      </pre>
+    </div>
+    <div class = "subtitle">Collection</div>
+    <div class = "block">
+      <pre class = "prettyprint linenums">
+# list collections
+db = client["mydatabase"]
+
+for collection in db.list_collection_names():
+    print(collection)
+      </pre>
+      <pre class = "prettyprint linenums">
+# select a collection
+collection = db["c2"]
+      </pre>
+      <pre class = "prettyprint linenums">
+# create collection
+db = client["mydatabase"]
+collection = db["c2"]
+
+# insert a document
+# MongoDB uses lazy creation, a database or collection is not physically created until insert the first document into it
+from datetime import datetime
+student = {
+    "name": "Jane Doe",
+    "age": 21,
+    "major": "Computer Science",
+    "enrollment_date": datetime(2024, 8, 15)
+}
+
+collection.insert_one(student)
+
+# insert multiple documents
+students_list = [
+    {"name": "Alice", "age": 22, "major": "Math"},
+    {"name": "Bob", "age": 21, "major": "Physics"},
+    {"name": "Charlie", "age": 23, "major": "Engineering"}
+]
+
+# insert multiple documents
+result = collection.insert_many(students_list)
+      </pre>
+      <pre class = "prettyprint linenums">
+# insert table
+import pandas as pd
+
+db = client["mydatabase"]
+collection = db["housing"]
+
+df = pd.read_csv('housing.csv')
+records = df.to_dict(orient='records')
+
+result = collection.insert_many(records)
+      </pre>
+      <pre class = "prettyprint linenums">
+# count
+collection.count_documents(filter={})
+      </pre>
+      <pre class = "prettyprint linenums">
+# update a document
+collection.update_one(
+    {"name": "Alice"},              # Filter
+    {"$set": {"age": 23}}           # Update
+)
+
+# update multiple documents
+collection.update_many(
+    {"major": "Physics"},
+    {"$inc": {"age": 1}}            # Increment operation
+)
+      </pre>
+      <pre class = "prettyprint linenums">
+# replace a document
+new_data = {
+    "name": "Alice",
+    "age": 25,
+    "major": "Data Science"
+}
+
+old_doc = collection.find_one_and_replace(
+    {"name": "Charlie"},
+    new_data
+)
+      </pre>
+      <pre class = "prettyprint linenums">
+# delete a document
+result = collection.delete_one({"name": "Alice"})
+
+# delete a document and return the deleted document
+doc = collection.find_one_and_delete({"name": "Alice"})
+
+# delete multiple documents
+result = collection.delete_many({"major": "Computer Science"})
+      </pre>
+</div>
+      <div class = "subtitle">Query</div>
+      <div class = "block">
+      <pre class = "prettyprint linenums">
+# select all documents
+for doc in collection.find({}): 
+    print(doc)
+      </pre>
+      <pre class = "prettyprint linenums">
+# match a specific field
+for doc in collection.find({"major": "Computer Science"}): 
+    print(doc)
+
+# find the first matched document
+collection.find_one({"major": "Computer Science"})
+      </pre>
+      <pre class = "prettyprint linenums">
+# specify _id
+from bson.objectid import ObjectId
+collection.find({ "_id": ObjectId("68706ff301ec5a84b397f2cc") })[0]
+      </pre>
+      <pre class = "prettyprint linenums">
+# compare with number, $gt, $gte, $lt, $lte, $eq, $ne
+for doc in collection.find({"age": { "$gte": 23}}): 
+    print(doc)
+      </pre>
+      <pre class = "prettyprint linenums">
+# compare date
+for doc in collection.find({"enrollment_date": { "$gte": datetime(2024, 8, 15)}}): 
+    print(doc)
+      </pre>
+      <pre class = "prettyprint linenums">
+# multiple conditions
+for doc in collection.find({"age": { "$gte": 20}, "major": {"$ne": "Engineering"}}): 
+    print(doc)
+      </pre>
+    </div>
+    </body>
+</html>
