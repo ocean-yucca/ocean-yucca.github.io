@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Python</title>
+		<link rel="stylesheet" href="../../css/atelier-sulphurpool-light.css" type="text/css">
+		<script src="../../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+		<style>
+			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+			div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+		</style>
+	</head>
+	<body>
+		<div class = "title">
+			Progress Bar
+		</div>
+
+		<div class = "subtitle">tqdm</div>
+		<div class = "block">
+			<a href = "https://github.com/tqdm/tqdm">Document</a>
+		<pre class = "prettyprint linenums">
+pip install tqdm
+		</pre>
+		<pre class = "prettyprint linenums">
+# loop
+from tqdm import tqdm
+import time
+
+for i in tqdm(range(100)):
+    time.sleep(0.01)
+		</pre>
+		<pre class = "prettyprint linenums">
+# iterable-based
+from tqdm import tqdm
+import time
+
+text = ""
+for char in tqdm(['a', 'b', 'c', 'd']):
+    time.sleep(0.25)
+    text = text + char
+		</pre>
+		<pre class = "prettyprint linenums">
+# manually update
+from tqdm import tqdm
+import time
+
+with tqdm(total=100) as pbar:
+    for i in range(10):
+        time.sleep(0.1)
+        pbar.update(10)
+		</pre>
+		<pre class = "prettyprint linenums">
+from tqdm import tqdm
+import time
+
+weights = [10, 20, 30, 10, 20, 40]
+
+with tqdm(total=sum(weights)) as pbar:
+    for weight in weights:
+        time.sleep(0.1)
+        pbar.update(weight)
+		</pre>
+		</div>
+		<div class = "subtitle">progressbar</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+pip install progressbar2
+		</pre>
+		<pre class = "prettyprint linenums">
+import progressbar
+import time
+
+bar = progressbar.ProgressBar()
+for i in bar(range(200)):
+    time.sleep(0.01)
+		</pre>
+	</div>
+		<div class = "subtitle">alive-progress</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+pip install alive-progress
+		</pre>
+		<pre class = "prettyprint linenums">
+from alive_progress import alive_bar
+import time
+
+with alive_bar(200) as bar:
+    for i in range(200):
+        time.sleep(0.01)
+        bar()
+		</pre>
+	</div>
+	<div class = "subtitle">rich</div>
+		<div class = "block">
+			<a href = "https://typer.tiangolo.com/tutorial/progressbar/">Document</a>
+		<pre class = "prettyprint linenums">
+pip install rich
+pip install ipywidgets
+		</pre>
+		<pre class = "prettyprint linenums">
+from rich.progress import track
+import time
+
+for step in track(range(100), description="Processing ..."):
+    time.sleep(0.01)
+		</pre>
+		<pre class = "prettyprint linenums">
+from rich.progress import Progress
+import time
+
+with Progress(transient=True) as progress:
+    task_a = progress.add_task("Downloading A", total=100)
+    task_b = progress.add_task("Downloading B", total=100)
+
+    while not progress.finished:
+        progress.update(task_a, advance=1)
+        progress.update(task_b, advance=2)
+        time.sleep(0.05)
+		</pre>
+		<pre class = "prettyprint linenums">
+# do not know how long the operation will take
+from rich.progress import Progress, SpinnerColumn, TextColumn
+import time
+
+with Progress(SpinnerColumn(), TextColumn("[red]{task.description}"), transient=True) as progress:
+    progress.add_task(description="Processing ...", total=None)
+    progress.add_task(description="Preparing ...", total=None)
+    time.sleep(5)
+		</pre>
+	</div>
+	<div class = "subtitle">typer</div>
+		<div class = "block">
+			<a href = "https://typer.tiangolo.com/tutorial/progressbar/#typer-progressbar">Document</a>
+		<pre class = "prettyprint linenums">
+pip install typer
+		</pre>
+		<pre class = "prettyprint linenums">
+import typer
+import time
+
+with typer.progressbar(range(200)) as progress:
+    for value in progress:
+        time.sleep(0.01)
+		</pre>
+		<pre class = "prettyprint linenums">
+import typer
+import time
+
+users = ['Camila', 'Rick', 'Morty']
+
+with typer.progressbar(users) as progress:
+    for value in progress:
+        time.sleep(0.1)
+		</pre>
+	</div>
+	</body>
+</html>
