@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Python</title>
+		<link rel="stylesheet" href="../../css/atelier-sulphurpool-light.css" type="text/css">
+		<script src="../../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+		<style>
+			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+			div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+		</style>
+	</head>
+	<body>
+		<div class = "title">
+			Numba
+		</div>
+
+		<div class = "subtitle">Installation</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+pip install numba
+		</pre>
+		</div>
+		<div class = "subtitle">nopython</div>
+		<div class = "block">
+			<li>Compiles Python functions to optimized machine code</li>
+			<li>True, use machine code only; fails if it cannot compile completely</li>
+			<li>False, default</li>
+		<pre class = "prettyprint linenums">
+from numba import jit
+
+# compile when first time call the function
+@jit(nopython=True)
+def sum_array_jit(arr):
+    total = 0.0
+    for i in arr:
+        total += i
+    return total
+
+import numpy as np
+
+array = np.arange(0.0, 10.0, 0.01, dtype='f4')
+total = sum_array_jit(array)
+
+# check compile status
+print(sum_array_jit.nopython_signatures)
+		</pre>
+		<pre class = "prettyprint linenums">
+# use compiled function if compiled; otherwise, use regular function
+from numba import jit
+
+def sum_array(arr):
+    total = 0.0
+    for i in arr:
+        total += i
+    return total
+
+@jit(nopython=True)
+def sum_array_jit(arr):
+    total = 0.0
+    for i in arr:
+        total += i
+    return total
+
+import numpy as np
+
+array = np.arange(0.0, 10.0, 0.01, dtype='f4')
+
+try:
+    total = sum_array_jit(array)
+except TypingError:
+    total = sum_array(array)
+		</pre>
+	</div>
+		<div class = "subtitle">cache</div>
+		<div class = "block">
+			<li>True, save compiled code to disk for reuse
+				<ul>
+					<li>Compiled function is saved as .nbc and .nbi files in __pycache__</li>
+					<li>On Jupyter, the compiled function is saved in memory, not generate __pycache__</li>
+				</ul>
+			</li>
+			<li>False, default, save in memory</li>
+		<pre class = "prettyprint linenums">
+from numba import jit
+
+@jit(nopython=True, cache=True)
+def sum_array_jit(arr):
+    total = 0.0
+    for i in arr:
+        total += i
+    return total
+
+import numpy as np
+
+array = np.arange(0.0, 10.0, 0.01, dtype='f4')
+total = sum_array_jit(array)
+		</pre>
+	</div>
+	<div class = "subtitle">parallel</div>
+		<div class = "block">
+			<li>True, generate multi-threaded machine code using OpenMP</li>
+			<li>False, default, not attemp to parallelize any loops inside the function</li>
+		<pre class = "prettyprint linenums">
+from numba import jit
+import numpy as np
+
+@jit(nopython=True, parallel=True)
+def sum_array_jit(arr):
+    return np.sum(arr)
+
+array = np.arange(0.0, 10.0, 0.01, dtype='f4')
+total = sum_array_jit(array)
+
+print(sum_array_jit.parallel_diagnostics(level=4))
+		</pre>
+	</div>
+	<div class = "subtitle">signature</div>
+		<div class = "block">
+			<li>Define input and output types</li>
+		<pre class = "prettyprint linenums">
+from numba import jit, int32
+import numpy as np
+
+@jit(int32(int32, int32), nopython=True)
+def add(a, b):
+    return a + b
+
+add(1, 2)
+
+print(add.nopython_signatures) # [(int32, int32) -> int32]
+		</pre>
+		<pre class = "prettyprint linenums">
+# define multiple signatures
+from numba import jit, int32, float64
+import numpy as np
+
+@jit([int32(int32, int32), float64(float64, float64)], nopython=True)
+def add(a, b):
+    return a + b
+
+add(1, 2)
+
+print(add.nopython_signatures)
+		</pre>
+	</div>
+	<div class = "subtitle">Reference</div>
+		<div class = "block">
+			<li><a href = "https://numba.readthedocs.io/en/stable/index.html">Documentation</a></li>
+		</div>
+	</body>
+</html>
