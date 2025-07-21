@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+
+<html>
+
+	<head>
+
+		<title>Database</title>
+		<link rel="stylesheet" href="../../css/atelier-sulphurpool-light.css" type="text/css">
+		<script src="../../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+		<style>
+			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+
+			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+
+			div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+
+            span {color: red; font-weight: bold;}
+		</style>
+
+	</head>
+
+	<body>
+
+		<div class = "title">
+            Management
+		</div>
+
+		<div class = "subtitle">Create Compose File</div>
+		<div class = "block">
+			<pre class = "prettyprint linenums">
+services:
+  neo4j:
+    image: neo4j:5.20
+    container_name: neo4j
+    ports:
+      - "7474:7474"   # HTTP / Browser
+      - "7687:7687"   # Bolt (driver connections)
+    environment:
+      NEO4J_AUTH: neo4j/test1234
+      NEO4J_PLUGINS: '["apoc"]'
+      NEO4J_dbms_security_procedures_unrestricted: apoc.*
+    volumes:
+      - neo4j_data:/data
+    restart: unless-stopped
+
+volumes:
+  neo4j_data:
+			</pre>
+		</div>
+		<div class = "subtitle">Start Neo4j</div>
+		<div class = "block">
+			<pre class = "prettyprint linenums">
+docker-compose up # start Neo4j and Neo4j Browser
+
+#docker-compose down # stop Neo4j and Neo4j Browser
+			</pre>
+		</div>
+		<div class = "subtitle">Access Neo4j Browser</div>
+		<div class = "block">
+			<pre class = "prettyprint linenums">
+http://localhost:7474 # neo4j, test1234
+			</pre>
+		</div>
+    </body>
+</html>

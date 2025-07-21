@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+
+<html>
+
+	<head>
+
+		<title>Database</title>
+		<link rel="stylesheet" href="../../css/atelier-sulphurpool-light.css" type="text/css">
+		<script src="../../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+		<style>
+			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+
+			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+
+			div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+
+            span {color: red; font-weight: bold;}
+		</style>
+
+	</head>
+
+	<body>
+
+		<div class = "title">
+            Neo4j Browser
+		</div>
+
+		<div class = "subtitle">Insert Nodes</div>
+		<div class = "block">
+			<pre class = "prettyprint linenums">
+# CREATE (node_alias:Label {property1: value1, property2: value2, ...})
+
+# insert single node
+CREATE (:Person {name: 'Alice', age: 30})
+
+# insert node with alias
+CREATE (bob_alias:Person {name: 'Bob'})
+
+# insert multiple nodes
+CREATE (:Person {name: 'Carol'}), (:Person {name: 'Alice', age:30})
+
+# insert node with multiple labels
+CREATE (:Employee:Person {name: "Trinity"})
+
+# insert only node does not exist
+# (p:Person {name: "Alice"} and (p:Person {name: "Alice"} are same nodes
+# (p:Person {name: "Alice"} and (p:Person {name: "Alice", age: 30}) are two different nodes
+MERGE (:Person {name: "Alice"})
+			</pre>
+		</div>
+		<div class = "subtitle">Insert Relationship</div>
+		<div class = "block">
+			<pre class = "prettyprint linenums">
+# add two nodes and their relationship
+CREATE 
+  (a:Person {name: 'Alice'}),
+  (m:Movie {title: 'The Matrix'}),
+  (a)-[:WATCHED]->(m)
+
+# add relationship with properties
+MATCH (a:Person {name: "Alice"}), (b:Movie {title: "Inception"})
+CREATE (a)-[:ACTED_IN {role: "Lead", year: 2010}]->(b)
+
+# add relationship to existing nodes
+MATCH (a:Person {name: 'Alice'}), (b:Movie {title: 'The Matrix'})
+CREATE (a)-[:be_seen]->(b)
+
+# add relationship if not exist
+MATCH (a:Person {name: 'Alice'}), (b:Movie {title: 'The Matrix'})
+Merge (a)-[:be_seen]->(b)
+
+# add two nodes if they do not exist and add relationship if not exist
+MERGE (a:Person {name: "Alice"})
+MERGE (b:Movie {title: "Inception"})
+MERGE (a)-[:ACTED_IN]->(b)
+			</pre>
+		</div>
+		<div class = "subtitle">Query</div>
+		<div class = "block">
+			<pre class = "prettyprint linenums">
+# view nodes
+MATCH (n) RETURN n LIMIT 25
+
+# view nodes with a specific label
+MATCH (p:Person)
+RETURN p
+
+# view nodes with specific label and specific property values
+MATCH (n:Person {name:"Lin"}) RETURN n LIMIT 25
+
+# select a node with id
+MATCH (n)
+WHERE id(n) = 0
+RETURN n
+
+# select a node with elementId
+MATCH (n)
+WHERE elementId(n) = "4:ddbca2e1-28b9-4ae4-b661-86ed411d76b8:15"
+RETURN n
+
+# select properties of node
+MATCH (p:Person {name: "Alice"})
+RETURN p.name, p.age
+
+# return node properties as a key–value map
+MATCH (p:Person)
+RETURN properties(p)
+
+# list relationships
+MATCH (a)-[r]->(b)
+RETURN r
+
+# select a relationship with id
+MATCH ()-[r]->()
+WHERE id(r) = 0
+RETURN r
+
+# select relationships with specific relationship
+MATCH (a)-[r:ACTED_IN]->(b)
+RETURN r
+
+# select properties of relationship
+MATCH (a)-[r:ACTED_IN]->(b)
+RETURN r.role, r.year
+
+# return relationship properties as a key-value map
+MATCH (a)-[r:ACTED_IN]->(b)
+RETURN properties(r)
+
+# select a relationship with elementId
+MATCH ()-[r]->()
+WHERE elementId(r) = "5:ddbca2e1-28b9-4ae4-b661-86ed411d76b8:3"
+RETURN r
+
+# view graph
+MATCH (a)-[r]->(b)
+RETURN a, r, b
+
+# view graph with specific label and specific property value
+MATCH (a:Person {name:"Trinity"})-[r]->(b:Movie)
+RETURN a, r, b
+			</pre>
+		</div>
+		<div class = "subtitle">Remove Nodes</div>
+		<div class = "block">
+			<pre class = "prettyprint linenums">
+# delete node and relationship
+MATCH (n:Person {name: "Alice"})
+DETACH DELETE n
+
+# delete node by id
+MATCH (n)
+WHERE id(n) = 1
+DETACH DELETE n
+
+# delete all nodes and relationships
+MATCH (n)
+DETACH DELETE n
+			</pre>
+		</div>
+		<div class = "subtitle">Remove Relationship</div>
+		<div class = "block">
+			<pre class = "prettyprint linenums">
+# delete relationship
+MATCH (:Person {name: "Alice"})-[r:FRIENDS_WITH]->(:Person {name: "Bob"})
+DELETE r
+
+# delete relationship by id
+MATCH ()-[r]->()
+WHERE id(r) = 123
+DELETE r
+			</pre>
+		</div>
+    </body>
+</html>
