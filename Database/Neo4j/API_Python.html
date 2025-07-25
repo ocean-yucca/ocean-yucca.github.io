@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+
+<html>
+
+	<head>
+
+		<title>Database</title>
+		<link rel="stylesheet" href="../../css/atelier-sulphurpool-light.css" type="text/css">
+		<script src="../../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+		<style>
+			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+
+			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+
+			div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+
+            span {color: red; font-weight: bold;}
+		</style>
+
+	</head>
+
+	<body>
+
+		<div class = "title">
+            neo4j
+		</div>
+
+		<div class = "subtitle">Installation</div>
+		<div class = "block">
+			<pre class = "prettyprint linenums">
+pip install neo4j
+			</pre>
+		</div>
+    <div class = "subtitle">Connect Neo4j</div>
+    <div class = "block">
+      <pre class = "prettyprint linenums">
+from neo4j import GraphDatabase
+
+# Connect to your Neo4j instance
+uri = "bolt://localhost:7687"
+user = "neo4j"
+password = "test1234"
+
+driver = GraphDatabase.driver(uri, auth=(user, password))
+      </pre>
+    </div>
+    <div class = "subtitle">Insert Node</div>
+    <div class = "block">
+      <pre class = "prettyprint linenums">
+def create_person(tx, name, age):
+    query = "CREATE (p:Person {name: $name, age: $age}) RETURN p"
+    result = tx.run(query, name=name, age=age)
+    return result.single() # return Record
+
+with driver.session() as session:
+    person_node = session.execute_write(create_person, "Alice", 32)
+    print("Created:", person_node['p'].get('name'))
+      </pre>
+  </div>
+  <div class = "subtitle">Insert Relationship</div>
+    <div class = "block">
+      <pre class = "prettyprint linenums">
+def create_knows_relationship(tx, name1, name2):
+    query = """
+    MATCH (a:Person {name: $name1}), (b:Person {name: $name2})
+    CREATE (a)-[r:KNOWS]->(b)
+    RETURN r
+    """
+    result = tx.run(query, name1=name1, name2=name2)
+    return result.single()
+
+with driver.session() as session:
+    relationship = session.execute_write(create_knows_relationship, "Alice", "Lin")
+    print("Created Relationship:", relationship['r'].type)
+      </pre>
+  </div>
+    <div class = "subtitle">Query</div>
+    <div class = "block">
+      <pre class = "prettyprint linenums">
+def display_edge(edge):
+    print('Type: ', edge.type)
+    print('elementId: ', edge._element_id)
+    print('id: ', edge._id)
+    print('Properties: ', edge._properties)
+    print('Start node: ', edge._start_node._id)
+    print('End node: ', edge._end_node._id)
+
+def display_node(node_a):
+    print('Labels: ', list(node_a._labels))
+    print('elementId: ', node_a._element_id)
+    print('id: ', node_a._id)
+    print('Properties: ', node_a._properties)
+    print('Access a specific property: ', node_a.get('name'), node_a['name'])
+
+# define transaction function which takes a transaction (tx) as its first argument.
+def run_cypher(tx):
+    
+    query = """
+    MATCH (a)-[r]->(b)
+    RETURN a, r, b
+    """
+
+    result = tx.run(query) # implement cypher query
+
+    return [record for record in result] # records
+
+with driver.session() as session:
+    records = session.execute_read(run_cypher) # read-only queries
+
+    print(records[0])
+
+    # each record, use alias as key
+    # start node
+    node_a = records[0]['a']
+    display_node(node_a)
+
+    # relationship
+    edge = records[0]['r']
+    display_edge(edge)
+
+    # end node
+    node_b = records[0]['b']
+    display_node(node_b)
+      </pre>
+  </div>
+  <div class = "block">
+      <pre class = "prettyprint linenums">
+# pass parameter as properties
+def get_friends(tx, person_name):
+    query = """
+    MATCH (p:Person {name: $name})-[:DIRECTED]->(m:Movie)
+    RETURN p, m
+    """
+    result = tx.run(query, name=person_name)
+    
+    return [record for record in result]
+
+with driver.session() as session:
+    records = session.execute_read(get_friends, 'Carol')
+    
+    print(records[0]['p']._properties, records[0]['m']._properties)
+      </pre>
+  </div>
+  <div class = "block">
+      <pre class = "prettyprint linenums">
+# pass parameter as label
+def query_with_label(tx, label):
+    cypher = f"MATCH (p:{label}) RETURN p LIMIT 5"
+    return [record for record in tx.run(cypher)]
+
+with driver.session() as session:
+    records = session.execute_read(query_with_label, 'Person')
+    
+    print(records[0]['p'].get('name'))
+      </pre>
+  </div>
+  <div class = "subtitle">Update Node</div>
+    <div class = "block">
+      <pre class = "prettyprint linenums">
+def update_person_age(tx, name, new_age):
+    query = """
+    MATCH (p:Person {name: $name})
+    SET p.age = $new_age
+    RETURN p
+    """
+    result = tx.run(query, name=name, new_age=new_age)
+    return result.single()
+
+with driver.session() as session:
+    updated_node = session.execute_write(update_person_age, "Eve", 35)
+    print("Updated:", dict(updated_node))
+      </pre>
+  </div>
+  <div class = "subtitle">Update Node</div>
+    <div class = "block">
+      <pre class = "prettyprint linenums">
+def update_knows_relationship(tx, name1, name2, new_year):
+    query = """
+    MATCH (a:Person {name: $name1})-[r:KNOWS]->(b:Person {name: $name2})
+    SET r.since = $new_year
+    RETURN r
+    """
+    result = tx.run(query, name1=name1, name2=name2, new_year=new_year)
+    return result.single()
+
+with driver.session() as session:
+    rel = session.execute_write(update_knows_relationship, "Eve", "David", 2024)
+    print("Updated relationship properties:", dict(rel))
+      </pre>
+  </div>
+  <div class = "subtitle">Remove Nodes</div>
+    <div class = "block">
+      <pre class = "prettyprint linenums">
+def delete_person(tx, name):
+    query = """
+    MATCH (p:Person {name: $name})
+    DETACH DELETE p
+    """
+    tx.run(query, name=name)
+
+with driver.session() as session:
+    session.execute_write(delete_person, "Alice")
+      </pre>
+  </div>
+  <div class = "subtitle">Remove Relationship</div>
+    <div class = "block">
+      <pre class = "prettyprint linenums">
+def delete_knows_relationship(tx, name1, name2):
+    query = """
+    MATCH (a:Person {name: $name1})-[r:KNOWS]->(b:Person {name: $name2})
+    DELETE r
+    """
+    tx.run(query, name1=name1, name2=name2)
+
+with driver.session() as session:
+    session.execute_write(delete_knows_relationship, "Eve", "David")
+      </pre>
+  </div>
+  <div class = "subtitle">Close Connection</div>
+    <div class = "block">
+      <pre class = "prettyprint linenums">
+driver.close()
+      </pre>
+  </div>
+    </body>
+</html>

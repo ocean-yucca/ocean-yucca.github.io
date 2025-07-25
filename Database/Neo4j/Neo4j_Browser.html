@@ -78,6 +78,12 @@ MERGE (a)-[:ACTED_IN]->(b)
 		<div class = "subtitle">Query</div>
 		<div class = "block">
 			<pre class = "prettyprint linenums">
+# show all labels
+CALL db.labels()
+
+# show all relationship types
+CALL db.relationshipTypes()
+
 # view nodes
 MATCH (n) RETURN n LIMIT 25
 
@@ -141,6 +147,71 @@ MATCH (a:Person {name:"Trinity"})-[r]->(b:Movie)
 RETURN a, r, b
 			</pre>
 		</div>
+		<div class = "subtitle">Graph Operations</div>
+		<div class = "block">
+			<pre class = "prettyprint linenums">
+# shortest path
+CREATE (a:Person {name: "Alice"})
+CREATE (b:Person {name: "Bob"})
+CREATE (c:Person {name: "Carol"})
+CREATE (d:Person {name: "David"})
+CREATE (e:Person {name: "Eve"})
+
+CREATE (a)-[:KNOWS]->(b)
+CREATE (b)-[:KNOWS]->(c)
+CREATE (c)-[:KNOWS]->(d)
+CREATE (a)-[:KNOWS]->(e)
+CREATE (e)-[:KNOWS]->(d)
+
+MATCH (start:Person {name: "Alice"}), (end:Person {name: "David"})
+MATCH path = shortestPath((start)-[:KNOWS*]-(end))
+RETURN path, length(path)
+			</pre>
+			<pre class = "prettyprint linenums">
+# degree
+MATCH (n:Person)
+OPTIONAL MATCH (n)-[:KNOWS]-(m)
+RETURN n.name, COUNT(m) AS degree
+
+# out degree
+MATCH (n:Person)
+OPTIONAL MATCH (n)-[:KNOWS]->(m)
+RETURN n.name, COUNT(m) AS outDegree
+
+# in degree
+MATCH (n:Person)
+OPTIONAL MATCH (n)<-[:KNOWS]-(m)
+RETURN n.name, COUNT(m) AS degree
+			</pre>
+		</div>
+		<div class = "subtitle">Update Nodes</div>
+		<div class = "block">
+			<pre class = "prettyprint linenums">
+# update or add a property
+MATCH (p:Person {name: "Trinity"})
+SET p.name = "Alice"
+RETURN p
+
+# update or add multiple properties
+MATCH (n:Person {name: "Alice"})
+SET n.age = 30, n.city = "Boston", n.active = true
+RETURN n
+
+# add properties as a map
+MATCH (n:Person {name: "Alice"})
+SET n += {email: "alice@example.com", enrolled: true}
+RETURN n
+			</pre>
+		</div>
+		<div class = "subtitle">Update Relationships</div>
+		<div class = "block">
+			<pre class = "prettyprint linenums">
+# update or add a property
+MATCH (:Person {name: "Carol"})-[r:DIRECTED]->(:Movie {title: "Inception"})
+SET r.since = 2025
+RETURN r
+			</pre>
+		</div>
 		<div class = "subtitle">Remove Nodes</div>
 		<div class = "block">
 			<pre class = "prettyprint linenums">
@@ -170,6 +241,11 @@ MATCH ()-[r]->()
 WHERE id(r) = 123
 DELETE r
 			</pre>
+		</div>
+		<div class = "subtitle">Reference</div>
+		<div class = "block">
+			<li><a href = "https://neo4j.com/docs/cypher/">Cypher Query</a></li>
+			<li><a href = "https://neo4j.com/docs/">Documentation</a></li>
 		</div>
     </body>
 </html>
