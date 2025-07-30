@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Microsoft Azure</title>
+		<link rel="stylesheet" href="../../css/atelier-sulphurpool-light.css" type="text/css">
+		<script src="../../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+		<style>
+			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+			div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+			span {color: red;}
+		</style>
+	</head>
+	<body>
+		<div class = "title">
+			Azure OAuth 2.0
+		</div>
+
+		<div class = "subtitle">Application Registration</div>
+		<div class = "block">
+			<li>Access https://portal.azure.com/</li>
+			<li>Access Microsoft Entra ID
+				<ul>
+					<li>tenant_id, for each organization</li>
+				</ul>
+			</li>
+			<li>Create application
+				<ul>
+					<li>client_id, for each application</li>
+					<li>client_secret, for each application</li>
+				</ul>
+			</li>
+			<li>API permission at Microsoft Graph
+				<ul>
+					<li>Delegated Permissions, grant permission to signed-in user</li>
+					<li>Application Permissions, grant permission to access resources of all users</li>
+				</ul>
+			</li>
+		</div>
+		<div class = "subtitle">Client Credentials Flow</div>
+		<div class = "block">
+		<li>Pros
+				<ul>
+					<li>No user login required</li>
+					<li>Simple to implment, best for backend systems</li>
+					<li>Access to org-wide data</li>
+				</ul>
+			</li>
+			<li>Cons
+				<ul>
+					<li>Only works with Application permissions, not Delegated, cannot control to access specific user resoruces</li>
+					<li>Requires admin consent</li>
+					<li>Safety risk</li>
+				</ul>
+			</li>
+		</div>
+		<div class = "block">
+			<p style = "text-align:center;"><img src = "img/Azure_7.png" width = "45%"></p>
+		</div>
+		<div class = "block">
+            <pre class = "prettyprint linenums">
+# request access token
+import requests
+
+TENANT_ID = 'your_tenant_id'
+CLIENT_ID = 'your_client_id'
+CLIENT_SECRET = 'your_client_secret'
+
+# OAuth2 token endpoint for your tenant
+token_url = f'https://login.microsoftonline.com/{TENANT_ID}/oauth2/v2.0/token'
+
+# Request token
+data = {
+    'grant_type': 'client_credentials',
+    'client_id': CLIENT_ID,
+    'client_secret': CLIENT_SECRET,
+    'scope': 'https://graph.microsoft.com/.default'
+}
+
+response = requests.post(token_url, data=data)
+access_token = response.json().get('access_token')
+print("Access Token:", access_token)
+            </pre>
+            <pre class = "prettyprint linenums">
+# access resource with access token
+# Application Permissions, User.Read.All
+# Grant admin consent
+headers = {
+    "Authorization": f"Bearer {access_token}"
+}
+url = "https://graph.microsoft.com/v1.0/users"
+resp = requests.get(url, headers=headers)
+
+resp.json()
+            </pre>
+        </div>
+        <div class = "subtitle">Authorization Code Flow</div>
+        <div class = "block">
+        <li>Pros
+				<ul>
+					<li>Secure</li>
+				</ul>
+			</li>
+			<li>Cons
+				<ul>
+					<li>Need to store client_secret</li>
+					<li>Needs user interaction</li>
+				</ul>
+			</li>
+		</div>
+		<div class = "block">
+			<li>Create a Web platform to add redirect_uri in Authentication of the application in Microsoft Entra ID</li>
+			<li>Add https://login.microsoftonline.com/common/oauth2/nativeclient as the redirect URI for the application in Microsoft Entra ID</li>
+			<p style = "text-align:center;"><img src = "img/Azure_8.png" width = "65%"></p>
+		</div>
+		<div class = "block">
+            <pre class = "prettyprint linenums">
+# send code request to auth server
+import requests
+from urllib.parse import urlencode, urlparse, parse_qs
+
+# Replace with your actual values from Azure AD app registration
+TENANT_ID = 'your_tenant_id'
+CLIENT_ID = 'your_client_id'
+CLIENT_SECRET = 'your_client_secret'
+REDIRECT_URI = 'https://login.microsoftonline.com/common/oauth2/nativeclient'
+SCOPES = [
+    'https://graph.microsoft.com/User.Read',
+    'https://graph.microsoft.com/Files.ReadWrite'
+]
+
+params = {
+    'client_id': CLIENT_ID,
+    'response_type': 'code',
+    'redirect_uri': REDIRECT_URI,
+    'scope': ' '.join(SCOPES)
+}
+
+auth_url = f"https://login.microsoftonline.com/{TENANT_ID}/oauth2/v2.0/authorize?{urlencode(params)}"
+
+print("Opening browser for user login...")
+print(auth_url)
+            </pre>
+            <pre class = "prettyprint linenums">
+# copy and paste the auth_url to a web browser
+# the redirect uri server will return a code
+# get code from the response from redirect uri
+
+redirect_response = 'received_message_in_url'
+
+code = parse_qs(urlparse(redirect_response).query).get('code', [None])[0]
+if not code:
+    raise Exception("No authorization code found.")
+            </pre>
+            <pre class = "prettyprint linenums">
+# request access token
+token_url = f"https://login.microsoftonline.com/{TENANT_ID}/oauth2/v2.0/token"
+token_data = {
+    'client_id': CLIENT_ID,
+    'client_secret': CLIENT_SECRET,
+    'scope': ' '.join(SCOPES),
+    'code': code,
+    'redirect_uri': REDIRECT_URI,
+    'grant_type': 'authorization_code'
+}
+
+token_response = requests.post(token_url, data=token_data)
+tokens = token_response.json()
+access_token = tokens.get('access_token')
+            </pre>
+            <pre class = "prettyprint linenums">
+# access resource with access token
+# Delegated, User.Read
+# Delegated, Files.ReadWrite
+
+# access signed-in user's profile
+headers = {
+    'Authorization': f'Bearer {access_token}'
+}
+me_response = requests.get('https://graph.microsoft.com/v1.0/me', headers=headers)
+print("👤 Signed-in user profile:")
+print(me_response.json())
+            </pre>
+        </div>
+        <div class = "block">
+			<li>Create a Web platform to add redirect_uri in Authentication of the application in Microsoft Entra ID</li>
+			<li>Add http://localhost:8000/callback as the redirect URI for the application in Microsoft Entra ID</li>
+			<li>Check Access tokens (used for implicit flows) in Settings</li>
+			<p style = "text-align:center;"><img src = "img/Azure_10.png" width = "65%"></p>
+		</div>
+		<div class = "block">
+            <pre class = "prettyprint linenums">
+import os
+import urllib.parse
+import webbrowser
+from http.server import BaseHTTPRequestHandler, HTTPServer
+import requests
+
+# === CONFIG ===
+TENANT_ID = 'your_tenant_id'
+CLIENT_ID = 'your_client_id'
+CLIENT_SECRET = 'your_client_secret'
+REDIRECT_URI = 'http://localhost:8000/callback'
+AUTHORITY = f'https://login.microsoftonline.com/{TENANT_ID}'
+AUTH_ENDPOINT = f'{AUTHORITY}/oauth2/v2.0/authorize'
+TOKEN_ENDPOINT = f'{AUTHORITY}/oauth2/v2.0/token'
+SCOPES = [
+    'https://graph.microsoft.com/User.Read',
+    'https://graph.microsoft.com/Files.ReadWrite'
+]
+
+# === redirect user to Microsoft login ===
+params = {
+    'client_id': CLIENT_ID,
+    'response_type': 'code',
+    'redirect_uri': REDIRECT_URI,
+    'response_mode': 'query',
+    'scope': ' '.join(SCOPES)
+}
+auth_url = AUTH_ENDPOINT + '?' + urllib.parse.urlencode(params)
+print("Opening browser for login...")
+webbrowser.open(auth_url)
+
+# === local redirect_uri server (same app) ===
+class AuthHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        parsed = urllib.parse.urlparse(self.path)
+        query_params = urllib.parse.parse_qs(parsed.query)
+        self.server.auth_code = query_params.get('code', [None])[0]
+        self.send_response(200)
+        self.end_headers()
+        self.wfile.write(b'Login successful. You may close this window.')
+
+server = HTTPServer(('localhost', 8000), AuthHandler)
+server.handle_request()
+auth_code = server.auth_code
+print('Code: ', auth_code)
+
+# === exchange code for access token ===
+data = {
+    'client_id': CLIENT_ID,
+    'client_secret': CLIENT_SECRET,
+    'grant_type': 'authorization_code',
+    'code': auth_code,
+    'redirect_uri': REDIRECT_URI,
+    'scope': ' '.join(SCOPES)
+}
+
+token_response = requests.post(TOKEN_ENDPOINT, data=data)
+tokens = token_response.json()
+print('Token Response: ', tokens)
+access_token = tokens.get('access_token')
+print('Token: ', access_token)
+
+# === access signed-in user's profile ===
+headers = {'Authorization': f'Bearer {access_token}'}
+response = requests.get('https://graph.microsoft.com/v1.0/me', headers=headers)
+
+print("\n✅ Signed-in user info:")
+print(response.json())
+            </pre>
+        </div>
+        <div class = "subtitle">Authorization Code Flow with PKEC</div>
+        <div class = "block">
+        	<li>Pros
+        		<ul>
+        			<li>No client secret needed</li>
+        			<li>Secure against code interception attacks</li>
+        		</ul>
+        	</li>
+        	<li>Cons
+        		<ul>
+        			<li>Initial user interaction required</li>
+        		</ul>
+        	</li>
+        </div>
+		<div class = "block">
+			<li>Create a Mobile and desktop applications platform to add redirect_uri in Authentication of the application in Microsoft Entra ID</li>
+			<li>Add http://localhost:8000/callback as the redirect URI for the application in Microsoft Entra ID</li>
+			<p style = "text-align:center;"><img src = "img/Azure_9.png" width = "65%"></p>
+			<p style = "text-align:center;"><img src = "img/Azure_12.png" width = "65%"></p>
+		</div>
+		<div class = "block">
+            <pre class = "prettyprint linenums">
+import base64
+import hashlib
+import os
+import urllib.parse
+import webbrowser
+from http.server import BaseHTTPRequestHandler, HTTPServer
+import requests
+
+# === CONFIG ===
+TENANT_ID = 'your_tenant_id'
+CLIENT_ID = 'your_client_id'
+REDIRECT_URI = 'http://localhost:8000/callback'
+AUTHORITY = f'https://login.microsoftonline.com/{TENANT_ID}'
+AUTH_ENDPOINT = f'{AUTHORITY}/oauth2/v2.0/authorize'
+TOKEN_ENDPOINT = f'{AUTHORITY}/oauth2/v2.0/token'
+SCOPE = 'User.Read'
+
+# === PKCE Helper ===
+def create_pkce_pair():
+    verifier = base64.urlsafe_b64encode(os.urandom(40)).rstrip(b'=').decode()
+    challenge = base64.urlsafe_b64encode(
+        hashlib.sha256(verifier.encode()).digest()
+    ).rstrip(b'=').decode()
+    return verifier, challenge
+
+code_verifier, code_challenge = create_pkce_pair()
+
+# === redirect user to Microsoft login ===
+params = {
+    'client_id': CLIENT_ID,
+    'response_type': 'code',
+    'redirect_uri': REDIRECT_URI,
+    'response_mode': 'query',
+    'scope': SCOPE,
+    'code_challenge': code_challenge,
+    'code_challenge_method': 'S256',
+}
+auth_url = AUTH_ENDPOINT + '?' + urllib.parse.urlencode(params)
+print("Opening browser for login...")
+webbrowser.open(auth_url)
+
+# === local redirect_uri server (same app) ===
+class AuthHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        parsed = urllib.parse.urlparse(self.path)
+        query_params = urllib.parse.parse_qs(parsed.query)
+        self.server.auth_code = query_params.get('code', [None])[0]
+        self.send_response(200)
+        self.end_headers()
+        self.wfile.write(b'Login successful. You may close this window.')
+
+server = HTTPServer(('localhost', 8000), AuthHandler)
+server.handle_request()
+auth_code = server.auth_code
+
+# === exchange code for access token ===
+data = {
+    'client_id': CLIENT_ID,
+    'grant_type': 'authorization_code',
+    'code': auth_code,
+    'redirect_uri': REDIRECT_URI,
+    'code_verifier': code_verifier,
+    'scope': SCOPE,
+}
+
+token_response = requests.post(TOKEN_ENDPOINT, data=data)
+tokens = token_response.json()
+access_token = tokens.get('access_token')
+
+# === access signed-in user's profile
+headers = {'Authorization': f'Bearer {access_token}'}
+response = requests.get('https://graph.microsoft.com/v1.0/me', headers=headers)
+
+print("\n✅ Signed-in user info:")
+print(response.json())
+            </pre>
+        </div><div class = "block">
+			<li>Create a Mobile and desktop applications platform to add redirect_uri in Authentication of the application in Microsoft Entra ID</li>
+			<li>Add http://localhost:8000/callback as the redirect URI for the application in Microsoft Entra ID</li>
+			<p style = "text-align:center;"><img src = "img/Azure_11.png" width = "65%"></p>
+		</div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+from flask import Flask, request, redirect
+import requests
+import hashlib
+import base64
+import os
+import urllib.parse
+import webbrowser
+
+app = Flask(__name__)
+access_token = None  # global token
+
+# === CONFIG ===
+TENANT_ID = 'your_tenant_id'
+CLIENT_ID = 'your_client_id'
+REDIRECT_URI = 'http://localhost:8000/callback'
+AUTHORITY = f'https://login.microsoftonline.com/{TENANT_ID}'
+AUTH_ENDPOINT = f'{AUTHORITY}/oauth2/v2.0/authorize'
+TOKEN_ENDPOINT = f'{AUTHORITY}/oauth2/v2.0/token'
+SCOPE = 'User.Read'
+
+# === Generate PKCE code_verifier and code_challenge ===
+code_verifier = base64.urlsafe_b64encode(os.urandom(40)).rstrip(b'=').decode()
+code_challenge = base64.urlsafe_b64encode(
+    hashlib.sha256(code_verifier.encode()).digest()
+).rstrip(b'=').decode()
+
+@app.route('/')
+def login():
+    auth_params = {
+        'client_id': CLIENT_ID,
+        'response_type': 'code',
+        'redirect_uri': REDIRECT_URI,
+        'response_mode': 'query',
+        'scope': SCOPE,
+        'code_challenge': code_challenge,
+        'code_challenge_method': 'S256'
+    }
+    auth_url = AUTH_ENDPOINT + '?' + urllib.parse.urlencode(auth_params)
+    return redirect(auth_url)
+
+@app.route('/callback')
+def callback():
+    global access_token
+    auth_code = request.args.get('code')
+    if not auth_code:
+        return "No code received", 400
+
+    data = {
+        'grant_type': 'authorization_code',
+        'client_id': CLIENT_ID,
+        'code': auth_code,
+        'redirect_uri': REDIRECT_URI,
+        'code_verifier': code_verifier,
+        'scope': SCOPE
+    }
+
+    token_resp = requests.post(TOKEN_ENDPOINT, data=data)
+    token_json = token_resp.json()
+
+    if 'access_token' not in token_json:
+        return f"Error getting token: {token_json}", 400
+
+    access_token = token_json['access_token']
+    return "Login successful. Access token stored. You may now go to &lt;a href='/me'&gt;/me&lt;/a&gt;."
+
+@app.route('/me')
+def get_user_info():
+    global access_token
+    if not access_token:
+        return "No token available. Please login via / first.", 403
+
+    headers = {'Authorization': f'Bearer {access_token}'}
+    response = requests.get('https://graph.microsoft.com/v1.0/me', headers=headers)
+    return response.json()
+
+if __name__ == '__main__':
+    webbrowser.open('http://localhost:8000/')
+    app.run(port=8000)
+            </pre>
+        </div>
+        <div class = "subtitle">Device Code Flow</div>
+        <div class = "block">
+        	<li>Pros
+        		<ul>
+        			<li>No redirect URI needed</li>
+        			<li>No client secret required</li>
+        		</ul>
+        	</li>
+        	<li>Cons
+        		<ul>
+        			<li>User must verify</li>
+        			<li>Browser still required</li>
+        		</ul>
+        	</li>
+        </div>
+		<div class = "block">
+			<p style = "text-align:center;"><img src = "img/Azure_13.png" width = "65%"></p>
+		</div>
+		<div class = "block">
+            <pre class = "prettyprint linenums">
+# get device code
+import requests
+import time
+
+# === CONFIG ===
+TENANT_ID = 'your_tenant_id'
+CLIENT_ID = 'your_client_id'
+AUTHORITY = f'https://login.microsoftonline.com/{TENANT_ID}'
+DEVICE_CODE_ENDPOINT = f'{AUTHORITY}/oauth2/v2.0/devicecode'
+TOKEN_ENDPOINT = f'{AUTHORITY}/oauth2/v2.0/token'
+SCOPE = 'User.Read'
+
+device_code_payload = {
+    'client_id': CLIENT_ID,
+    'scope': SCOPE
+}
+
+device_code_resp = requests.post(DEVICE_CODE_ENDPOINT, data=device_code_payload)
+device_code_json = device_code_resp.json()
+            </pre>
+            <pre class = "prettyprint linenums">
+# user verify access
+print("\n🔑 Visit the following URL and enter the code:")
+print("➡️  URL:", device_code_json['verification_uri'])
+print("🔢 Code:", device_code_json['user_code'])
+            </pre>
+            <pre class = "prettyprint linenums">
+# get access token
+poll_payload = {
+    'grant_type': 'urn:ietf:params:oauth:grant-type:device_code',
+    'client_id': CLIENT_ID,
+    'device_code': device_code_json['device_code']
+}
+
+print("\n⏳ Waiting for user authentication...")
+while True:
+    time.sleep(device_code_json['interval'])
+    token_resp = requests.post(TOKEN_ENDPOINT, data=poll_payload)
+    token_json = token_resp.json()
+
+    if 'access_token' in token_json:
+        print("\n✅ Token received.")
+        break
+    elif token_json.get('error') == 'authorization_pending':
+        print("⏳ Waiting...", end='\r')
+        continue
+    else:
+        print("❌ Error:", token_json)
+        exit()
+            </pre>
+            <pre class = "prettyprint linenums">
+# access signed-in user's profile
+access_token = token_json['access_token']
+headers = {'Authorization': f'Bearer {access_token}'}
+
+me_response = requests.get('https://graph.microsoft.com/v1.0/me', headers=headers)
+print("\n👤 Signed-in user info:")
+print(me_response.json())
+            </pre>
+        </div>
+        <div class = "subtitle">Reference</div>
+		<div class = "block">
+			<li><a href = "https://www.youtube.com/watch?v=tpIXmmV4ib4">Exploring OAuth 2.0: Must-Know Flows Explained</a></li>
+		</div>
+    </body>
+</html>
