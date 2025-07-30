@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Python</title>
+		<link rel="stylesheet" href="../css/atelier-sulphurpool-light.css" type="text/css">
+		<script src="../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+		<style>
+			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+			div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+		</style>
+	</head>
+	<body>
+		<div class = "title">
+			http.server
+		</div>
+
+		<div class = "subtitle">Start Server</div>
+		<div class = "block">
+			<p style = "text-align:center;"><img src = "img/httpserver_1.png" width = "15%"></p>
+		</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+# server.py
+from http.server import HTTPServer, SimpleHTTPRequestHandler
+
+# Define server address and port
+HOST = "localhost"
+PORT = 8000
+
+# Create the server
+server = HTTPServer((HOST, PORT), SimpleHTTPRequestHandler)
+
+print(f"Serving on http://{HOST}:{PORT}")
+server.serve_forever()
+		</pre>
+		<pre class = "prettyprint linenums">
+# access server
+http://localhost:8000
+		</pre>
+	</div>
+	<div class = "subtitle">Get</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+from http.server import HTTPServer
+from http.server import BaseHTTPRequestHandler
+from urllib import parse
+
+class GetHandler(BaseHTTPRequestHandler):
+
+    def do_GET(self):
+        # parse get request
+        parsed_path = parse.urlparse(self.path)
+        print('Path: ', parsed_path.path) # /search
+        print('Query: ', parsed_path.query) # q=python&t=test
+
+        # send header
+        self.send_response(200)
+        self.send_header('Content-Type',
+                         'text/plain; charset=utf-8')
+        self.end_headers()
+
+        # send page content
+        self.wfile.write(b'Hello World!')
+
+
+if __name__ == '__main__':
+    server = HTTPServer(('localhost', 8080), GetHandler)
+    server.serve_forever()
+		</pre>
+	</div>
+	<div class = "block">
+	<pre class = "prettyprint linenums">
+# access server on browser
+http://localhost:8080/search?q=python&t=test
+
+# access server via curl
+curl "http://localhost:8080/search?q=python"
+		</pre>
+	</div>
+	<div class = "subtitle">Post</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+from http.server import BaseHTTPRequestHandler, HTTPServer
+from urllib.parse import parse_qs
+
+class MyHandler(BaseHTTPRequestHandler):
+    def do_POST(self):
+        content_length = int(self.headers.get('Content-Length', 0))
+        body = self.rfile.read(content_length).decode()
+        params = parse_qs(body)
+
+        print(params)
+
+        self.send_response(200)
+        self.send_header("Content-Type", "text/plain")
+        self.end_headers()
+        self.wfile.write(str(params).encode())
+
+server = HTTPServer(('localhost', 8000), MyHandler)
+server.serve_forever()
+		</pre>
+	</div>
+	<div class = "block">
+		<pre class = "prettyprint linenums">
+# access server via curl
+curl -X POST http://localhost:8000 -d "name=Lin&age=20"
+		</pre>
+	</div>
+		<div class = "subtitle">Reference</div>
+		<div class = "block">
+			<li><a href = "https://pymotw.com/3/http.server/index.html">Documentation</a></li>
+		</div>
+	</body>
+</html>
