@@ -445,6 +445,35 @@ if __name__ == '__main__':
     app.run(port=8000)
             </pre>
         </div>
+        <div class = "block">
+            <li>Create a Mobile and desktop applications platform to add redirect_uri in Authentication of the application in Microsoft Entra ID</li>
+            <li>Add http://localhost as the redirect URI for the application in Microsoft Entra ID</li>
+            <pre class = "prettyprint linenums">
+import msal
+import requests
+
+# === CONFIG ===
+TENANT_ID = 'your_tenant_id'
+CLIENT_ID = 'your_client_id'
+AUTHORITY = f"https://login.microsoftonline.com/{TENANT_ID}"
+SCOPES = ["User.Read"]
+
+# === Create Public Client (PKCE support is automatic) ===
+app = msal.PublicClientApplication(client_id=CLIENT_ID, authority=AUTHORITY)
+            </pre>
+            <pre class = "prettyprint linenums">
+# get token
+result = app.acquire_token_interactive(
+    scopes=SCOPES,
+)
+            </pre>
+            <pre class = "prettyprint linenums">
+# access signed-in user's profile
+headers = {'Authorization': f"Bearer {result['access_token']}"}
+response = requests.get("https://graph.microsoft.com/v1.0/me", headers=headers)
+print("\n👤 User Info:", response.json())
+            </pre>
+        </div>
         <div class = "subtitle">Device Code Flow</div>
         <div class = "block">
         	<li>Pros
@@ -461,6 +490,7 @@ if __name__ == '__main__':
         	</li>
         </div>
 		<div class = "block">
+            <li>Allow public client flows in Settings of Authentication</li>
 			<p style = "text-align:center;"><img src = "img/Azure_13.png" width = "65%"></p>
 		</div>
 		<div class = "block">
@@ -523,6 +553,39 @@ headers = {'Authorization': f'Bearer {access_token}'}
 me_response = requests.get('https://graph.microsoft.com/v1.0/me', headers=headers)
 print("\n👤 Signed-in user info:")
 print(me_response.json())
+            </pre>
+        </div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+# get device code
+import msal
+
+# === CONFIG ===
+TENANT_ID = '0b0c6bf0-d154-4215-b7dd-4eb1f75167b0'
+CLIENT_ID = '5fd48464-19e2-456e-b7e6-c6b99c26ce78'
+AUTHORITY = f'https://login.microsoftonline.com/{TENANT_ID}'
+SCOPE = ['User.Read']  # Microsoft Graph delegated scope
+
+# === Create a PublicClientApplication ===
+app = msal.PublicClientApplication(client_id=CLIENT_ID, authority=AUTHORITY)
+
+flow = app.initiate_device_flow(scopes=SCOPE)
+            </pre>
+            <pre class = "prettyprint linenums">
+# sign in with user code
+print("🔐 To sign in, visit:", flow['verification_uri'])
+print("🔢 Enter the code:", flow['user_code'])
+            </pre>
+            <pre class = "prettyprint linenums">
+# get token
+result = app.acquire_token_by_device_flow(flow)
+            </pre>
+            <pre class = "prettyprint linenums">
+# access signed-in user's profile
+import requests
+headers = {'Authorization': f"Bearer {result['access_token']}"}
+response = requests.get("https://graph.microsoft.com/v1.0/me", headers=headers)
+print("\n👤 User Info:", response.json())
             </pre>
         </div>
         <div class = "subtitle">Reference</div>
