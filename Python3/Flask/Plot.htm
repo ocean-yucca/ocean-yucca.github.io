@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+
+<html>
+
+	<head>
+
+		<title>Python</title>
+
+		<link rel="stylesheet" href="../../css/atelier-sulphurpool-light.css" type="text/css">
+
+		<script src="../../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+
+		<style>
+
+			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+
+			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+
+			div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+			span {color: red; font-weight: bold;}
+		</style>
+
+	</head>
+
+	<body>
+		<div class = "title">
+			Plot
+		</div>
+		<div class = "subtitle">Matplotlib</div>
+		<div class = "block">
+            <p style = "text-align:center;"><img src = "img/flask_4.png" width = "25%"></p>
+        </div>
+        <div class = "block">
+		<pre class = "prettyprint linenums">
+# app.py
+import os
+from flask import Flask, render_template, Response, url_for
+import matplotlib.pyplot as plt
+import matplotlib
+import io
+
+matplotlib.use('Agg')
+
+app = Flask(__name__)
+
+@app.route('/')
+def get_page():
+    return render_template('page.html')
+
+@app.route('/plot.png')
+def get_plot():
+    fig, ax = plt.subplots()
+    ax.plot([1, 2, 3, 4], [10, 5, 8, 12])
+
+    buf = io.BytesIO()
+    fig.savefig(buf, format='png')
+    buf.seek(0)
+
+    return Response(buf.getvalue(), mimetype='image/png')
+
+if __name__ == '__main__':
+    app.run(port = 8080)
+		</pre>
+	</div>
+	<div class = "block">
+		<pre class = "prettyprint linenums">
+# page.html
+&lt;!doctype html&gt;
+&lt;html&gt;
+    &lt;body&gt;
+        &lt;h1&gt;Plot&lt;/h1&gt;
+        &lt;img src = "{{ url_for('get_plot')  }}" alt='plot'&gt;
+    &lt;/body&gt;
+&lt;/html&gt;
+		</pre>
+	</div>
+	<div class = "subtitle">Plotly</div>
+        <div class = "block">
+		<pre class = "prettyprint linenums">
+import plotly.express as px
+from flask import Flask, Response, render_template_string
+
+app = Flask(__name__)
+
+@app.route('/')
+def home():
+    fig = px.line(x=[1, 2, 3], y=[4, 1, 2], title='Simple Line Plot')
+    graph_html = fig.to_html(full_html=False)
+
+    return render_template_string("""
+        &lt;html&gt;&lt;body&gt;
+        &lt;h1&gt;Plotly Plot&lt;/h1&gt;
+        {{ plot | safe }}
+        &lt;/body&gt;&lt;/html&gt;
+    """, plot=graph_html)
+
+if __name__ == '__main__':
+    app.run(port=8080)
+		</pre>
+	</div>
+    </body>
+</html>

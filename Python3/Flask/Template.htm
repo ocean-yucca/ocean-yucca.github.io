@@ -1,35 +1,180 @@
-<!DOCTYPE html>
-<html>
-	<head>
-		<title>Python</title>
-		<link rel="stylesheet" href="../../css/atelier-sulphurpool-light.css" type="text/css">
-		<script src="../../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
-		<style>
-			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
-			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+<!DOCTYPE html>
+
+<html>
+
+	<head>
+
+		<title>Python</title>
+
+		<link rel="stylesheet" href="../../css/atelier-sulphurpool-light.css" type="text/css">
+
+		<script src="../../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+
+		<style>
+
+			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+
+			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+
 			div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
 			span {color: red; font-weight: bold;}
-		</style>
-	</head>
+		</style>
+
+	</head>
+
 	<body>
 		<div class = "title">
 			Template
 		</div>
+		<div class = "subtitle">Layout</div>
 		<div class = "block">
-            <li>Jinja2 is a feature rich templating language</li>
-            <li>Allow creation of text based documents where some of the content can be dynamically generated</li>
-            <li>Resulting files can be HTML, JSON, XML, or anything that uses pure text as the encoding</li>
+            <p style = "text-align:center;"><img src = "img/flask_4.png" width = "25%"></p>
         </div>
-
-		<div class = "subtitle">Install</div>
-		<div class = "block">
-            <li>A dependency package of Flask, does not need an independent installation</li>
+        <div class = "block">
 		<pre class = "prettyprint linenums">
-pip install Jinja2
-        </pre>
-        </div>
-		<div class = "subtitle">Reference</div>
+# app.py
+import os
+from flask import Flask, render_template
+
+app = Flask(__name__)
+
+@app.route('/')
+def get_page():
+    return render_template('page.html')
+
+if __name__ == '__main__':
+    app.run(port = 8080)
+		</pre>
+	</div>
+	<div class = "block">
+		<pre class = "prettyprint linenums">
+# page.html
+&lt;!doctype html&gt;
+&lt;html&gt;
+    &lt;body&gt;
+        &lt;h1&gt;Hello World!&lt;/h1&gt;
+    &lt;/body&gt;
+&lt;/html&gt;
+		</pre>
+	</div>
+	<div class = "subtitle">Link</div>
 		<div class = "block">
+            <p style = "text-align:center;"><img src = "img/flask_5.png" width = "25%"></p>
         </div>
+        <div class = "block">
+		<pre class = "prettyprint linenums">
+# app.py
+import os
+from flask import Flask, render_template
+
+app = Flask(__name__)
+
+@app.route('/')
+@app.route('/page_1')
+def get_page_1():
+    return render_template('page_1.html')
+
+@app.route('/page_2')
+def get_page_2():
+    return render_template('page_2.html')
+
+if __name__ == '__main__':
+    app.run(port = 8080)
+		</pre>
+	</div>
+	<div class = "block">
+		<pre class = "prettyprint linenums">
+# page_1.html
+&lt;!doctype html&gt;
+&lt;html&gt;
+    &lt;body&gt;
+        &lt;h1&gt;Page 1&lt;/h1&gt;
+        &lt;a href = "{{url_for('get_page_2')}}"&gt;Go to Page 2&lt;/a&gt;
+    &lt;/body&gt;
+&lt;/html&gt;
+		</pre>
+	</div>
+	<div class = "block">
+		<pre class = "prettyprint linenums">
+# page_2.html
+&lt;!doctype html&gt;
+&lt;html&gt;
+    &lt;body&gt;
+        &lt;h1&gt;Page 2&lt;/h1&gt;
+        &lt;a href = "{{url_for('get_page_1')}}"&gt;Go to Page 1&lt;/a&gt;
+    &lt;/body&gt;
+&lt;/html&gt;
+		</pre>
+	</div>
+	<div class = "subtitle">If</div>
+		<div class = "block">
+            <p style = "text-align:center;"><img src = "img/flask_4.png" width = "25%"></p>
+        </div>
+        <div class = "block">
+		<pre class = "prettyprint linenums">
+# app.py
+import os
+from flask import Flask, render_template
+
+app = Flask(__name__)
+
+@app.route('/')
+def get_page():
+    return render_template('page.html', name = 'Lin')
+
+if __name__ == '__main__':
+    app.run(port = 8080)
+		</pre>
+	</div>
+	<div class = "block">
+		<pre class = "prettyprint linenums">
+# page.html
+&lt;!doctype html&gt;
+&lt;html&gt;
+    &lt;body&gt;
+        {# comment #}
+        {# if ... else ... #}
+        {% if name %}
+            &lt;h1&gt;Hello World, {{name}}!&lt;/h1&gt;
+        {% else %}
+            &lt;h1&gt;Please log in.&lt;/h1&gt;
+        {% endif %}
+    &lt;/body&gt;
+&lt;/html&gt;
+		</pre>
+	</div>
+	<div class = "subtitle">For</div>
+		<div class = "block">
+            <p style = "text-align:center;"><img src = "img/flask_4.png" width = "25%"></p>
+        </div>
+        <div class = "block">
+		<pre class = "prettyprint linenums">
+# app.py
+import os
+from flask import Flask, render_template
+
+app = Flask(__name__)
+
+@app.route('/')
+def get_page():
+    return render_template('page.html', items = ['a', 10, 'b'])
+
+if __name__ == '__main__':
+    app.run(port = 8080)
+		</pre>
+	</div>
+	<div class = "block">
+		<pre class = "prettyprint linenums">
+# page.html
+&lt;!doctype html&gt;
+&lt;html&gt;
+    &lt;body&gt;
+        {% for item in items %}
+            &lt;li&gt;{{item}}&lt;/li&gt;
+        {% endfor %}
+    &lt;/body&gt;
+&lt;/html&gt;
+		</pre>
+	</div>
     </body>
 </html>

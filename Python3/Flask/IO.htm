@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+
+<html>
+
+	<head>
+
+		<title>Python</title>
+
+		<link rel="stylesheet" href="../../css/atelier-sulphurpool-light.css" type="text/css">
+
+		<script src="../../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+
+		<style>
+
+			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+
+			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+
+			div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+			span {color: red; font-weight: bold;}
+		</style>
+
+	</head>
+
+	<body>
+		<div class = "title">
+			IO
+		</div>
+
+		<div class = "subtitle">Parameter in Route</div>
+        <div class = "block">
+            <li>Pass value to prameter in function via route</li>
+            <li>Variable name in route must be same as the parameter name in function</li>
+		<pre class = "prettyprint linenums">
+import os
+from flask import Flask
+
+app = Flask(__name__)
+
+@app.route('/route/&lt;var&gt;')
+def get_var(var):
+    print(var, type(var)) # 10, str, default
+    return "Get variable: "+str(var)
+
+if __name__ == '__main__':
+    app.run(port = 8080)
+
+# http://localhost:8080/route/10
+# pass 10 to var of get_var()
+        </pre>
+        </div>
+        <div class = "subtitle">Parameter Types</div>
+        <div class = "block">
+        <pre class = "prettyprint linenums">
+import os
+from flask import Flask
+
+app = Flask(__name__)
+
+@app.route('/route/&lt;int:var&gt;')
+def get_int(var):
+    print(var, type(var))
+    return "Get variable: "+str(var)
+
+@app.route('/route/&lt;float:var&gt;')
+def get_float(var):
+    print(var, type(var))
+    return "Get variable: "+str(var)
+
+@app.route('/route/&lt;string:var&gt;')
+def get_string(var):
+    print(var, type(var))
+    return "Get variable: "+str(var)
+
+@app.route('/route/&lt;path:var&gt;')
+def get_path(var):
+    print(var, type(var))
+    return "Get variable: "+str(var)
+
+if __name__ == '__main__':
+    app.run(port = 8080)
+
+# http://localhost:8080/route/10, int
+
+# http://localhost:8080/route/3.14, str
+
+# http://localhost:8080/route/test, str
+
+# http://localhost:8080/route/my_path/sub_path, path
+        </pre>
+    </div>
+    <div class = "subtitle">Multiple Parameters</div>
+        <div class = "block">
+        <pre class = "prettyprint linenums">
+import os
+from flask import Flask
+
+app = Flask(__name__)
+
+@app.route('/route/&lt;var_1&gt;/&lt;var_2&gt;')
+def get_int(var_1, var_2):
+    return 'Get variable: '+str(var_1)+' '+str(var_2)
+
+if __name__ == '__main__':
+    app.run(port = 8080)
+
+# http://localhost:8080/route/my_var_1/my_var_2
+        </pre>
+    </div>
+    <div class = "block">
+        <pre class = "prettyprint linenums">
+import os
+from flask import Flask
+
+app = Flask(__name__)
+
+@app.route('/route/&lt;var_1&gt;/subroute/&lt;var_2&gt;')
+def get_int(var_1, var_2):
+    return 'Get variable: '+str(var_1)+' '+str(var_2)
+
+if __name__ == '__main__':
+    app.run(port = 8080)
+
+# http://localhost:8080/route/my_var_1/subroute/my_var_2
+        </pre>
+    </div>
+    <div class = "subtitle">Get</div>
+        <div class = "block">
+        <pre class = "prettyprint linenums">
+import os
+from flask import Flask, url_for, request
+
+app = Flask(__name__)
+
+@app.route('/search')
+def get_search():
+    name = request.args.get('name')
+    id_num = request.args.get('id')
+
+    url = url_for('get_search', name=name, id=id_num) # /search?name=lin&id=10
+
+    return url
+
+if __name__ == '__main__':
+    app.run(port = 8080)
+
+# http://localhost:8080/search?name=lin&id=10
+# curl "http://localhost:8080/search?name=lin&id=10"
+        </pre>
+    </div>
+    <div class = "block">
+            <p style = "text-align:center;"><img src = "img/flask_2.png" width = "25%"></p>
+        </div>
+        <div class = "block">
+        <pre class = "prettyprint linenums">
+# app.py
+import os
+from flask import Flask, request, render_template
+
+app = Flask(__name__)
+
+@app.route('/')
+def get_input():
+    return render_template('form.html')
+
+@app.route('/process', methods=['GET'])
+def get_search():
+    name = request.args.get('name')
+    email = request.args.get('email')
+
+    return f"Received name: {name}, email: {email}"
+
+if __name__ == '__main__':
+    app.run(port = 8080)
+        </pre>
+    </div>
+    <div class = "block">
+        <pre class = "prettyprint linenums">
+# form.html
+&lt;!doctype html&gt;
+&lt;html&gt;
+    &lt;body&gt;
+        &lt;form action="/process" method="get"&gt;
+            &lt;input type="text" name="name"&gt;
+            &lt;input type="email" name="email"&gt;
+            &lt;input type="submit" value = "Submit"&gt;
+        &lt;/form&gt;
+    &lt;/body&gt;
+&lt;/html&gt;
+        </pre>
+    </div>
+    <div class = "subtitle">Post</div>
+    <div class = "block">
+            <p style = "text-align:center;"><img src = "img/flask_2.png" width = "25%"></p>
+        </div>
+        <div class = "block">
+        <pre class = "prettyprint linenums">
+# app.py
+import os
+from flask import Flask, request, render_template
+
+app = Flask(__name__)
+
+@app.route('/')
+def get_input():
+    return render_template('form.html')
+
+@app.route('/process', methods=['POST'])
+def get_search():
+    name = request.form.get('name')
+    email = request.form.get('email')
+
+    return f"Received name: {name}, email: {email}"
+
+if __name__ == '__main__':
+    app.run(port = 8080)
+        </pre>
+    </div>
+    <div class = "block">
+        <pre class = "prettyprint linenums">
+# form.html
+&lt;!doctype html&gt;
+&lt;html&gt;
+    &lt;body&gt;
+        &lt;form action="/process" method="post"&gt;
+            &lt;input type="text" name="name"&gt;
+            &lt;input type="email" name="email"&gt;
+            &lt;input type="submit" value = "Submit"&gt;
+        &lt;/form&gt;
+    &lt;/body&gt;
+&lt;/html&gt;
+        </pre>
+    </div>
+    <div class = "subtitle">Upload</div>
+    <div class = "block">
+            <p style = "text-align:center;"><img src = "img/flask_3.png" width = "25%"></p>
+        </div>
+        <div class = "block">
+        <pre class = "prettyprint linenums">
+# app.py
+import os
+from flask import Flask, request, render_template
+from werkzeug.utils import secure_filename
+
+app = Flask(__name__)
+UPLOAD_FOLDER = 'uploads'
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+@app.route('/')
+def get_input():
+    return render_template('form.html')
+
+@app.route('/upload', methods=['POST'])
+def upload_file():
+    uploaded_file = request.files.get('file')
+
+    if uploaded_file and uploaded_file.filename != '':
+        filename = secure_filename(uploaded_file.filename) # avoid dangerous paths
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        uploaded_file.save(file_path)
+        return f"File saved to {file_path}"
+
+    return "No file uploaded"
+
+if __name__ == '__main__':
+    app.run(port = 8080)
+        </pre>
+    </div>
+    <div class = "block">
+        <pre class = "prettyprint linenums">
+# form.html
+&lt;!doctype html&gt;
+&lt;html&gt;
+    &lt;body&gt;
+        &lt;form action="/upload" method="post" enctype="multipart/form-data"&gt;
+            &lt;input type="file" name="file"&gt;
+            &lt;input type="submit" value = "Upload"&gt;
+        &lt;/form&gt;
+    &lt;/body&gt;
+&lt;/html&gt;
+        </pre>
+    </div>
+    </body>
+</html>
