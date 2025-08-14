@@ -149,6 +149,62 @@ if __name__ == '__main__':
         </pre>
     </div>
     <div class = "block">
+            <p style = "text-align:center;"><img src = "img/flask_6.png" width = "35%"></p>
+        </div>
+        <div class = "block">
+        <pre class = "prettyprint linenums">
+# server.py
+from flask import Flask, request, jsonify, Response
+
+app = Flask(__name__)
+
+@app.get("/ping") # equals to @app.route("/ping", methods=["GET"])
+def ping():
+    # read query parameters from url
+    print('parameters: ', request.args)
+
+    # inspect headers
+    print('headers:', request.headers)
+
+    return Response(
+            response = jsonify({'Name: ': 'Lin', 'Age: ': 25}).get_data(as_text=True), # body
+            status = 200, # status
+            mimetype="application/json", # content type
+            headers={ # headers
+            "X-Custom-Header": "DemoValue",
+            "Cache-Control": "no-cache"
+        })
+
+if __name__ == "__main__":
+    app.run(port=8080)
+
+# http://localhost:8080/ping?name=lin&n=10
+# curl "http://localhost:8080/ping?name=lin&n=10"
+        </pre>
+    </div>
+    <div class = "block">
+        <pre class = "prettyprint linenums">
+# client.py
+import requests
+
+params = { # ?name=Lin&n=3
+    "name": "Lin",
+    "n": 3,    
+}
+
+headers = {
+    "X-Api-Key": "demo-key",
+    "User-Agent": "requests-demo/1.0",
+}
+
+r = requests.get(f"http://127.0.0.1:8080/ping", params=params, headers=headers, timeout=5)
+
+print('Body:', r.json())
+print('Header:', r.headers)
+print("Status:", r.status_code)
+        </pre>
+    </div>
+    <div class = "block">
             <p style = "text-align:center;"><img src = "img/flask_2.png" width = "25%"></p>
         </div>
         <div class = "block">
@@ -190,6 +246,52 @@ if __name__ == '__main__':
         </pre>
     </div>
     <div class = "subtitle">Post</div>
+    <div class = "block">
+        <pre class = "prettyprint linenums">
+# server.py
+from flask import Flask, request, jsonify
+
+app = Flask(__name__)
+
+@app.post("/submit") # equals to @app.route("/submit", methods=["POST"])
+def submit():
+    # client sends JSON
+    json_data = request.get_json(silent=True) or {}
+
+    # client sends data
+    form_data = request.form.to_dict()
+
+    return jsonify({
+        "received_json": json_data,
+        "received_form": form_data
+    }), 200
+
+if __name__ == "__main__":
+    app.run(port=8080)
+        </pre>
+    </div>
+        <div class = "block">
+        <pre class = "prettyprint linenums">
+# client.py
+import requests
+
+url = "http://127.0.0.1:8080/submit"
+
+# send json
+payload = {"name": "Lin", "score": 98}
+r = requests.post(url, json=payload)
+
+print("Status:", r.status_code)
+print("Response JSON:", r.json())
+
+# send form data
+payload = {"username": "lin", "password": "123"}
+r = requests.post(url, data=payload)
+
+print("Status:", r.status_code)
+print("Response JSON:", r.json())
+        </pre>
+    </div>
     <div class = "block">
             <p style = "text-align:center;"><img src = "img/flask_2.png" width = "25%"></p>
         </div>
@@ -278,6 +380,94 @@ if __name__ == '__main__':
         &lt;/form&gt;
     &lt;/body&gt;
 &lt;/html&gt;
+        </pre>
+    </div>
+    <div class = "subtitle">Server Output</div>
+        <div class = "block">
+        <pre class = "prettyprint linenums">
+# server.py
+from flask import Flask, request, jsonify, Response, send_file
+
+app = Flask(__name__)
+
+@app.get("/string")
+def get_string():
+    return "Hello, world"
+
+@app.get('/tuple')
+def get_tuple():
+    return "Hello", 201, {"X-Custom": "Value"} # body, status, headers
+
+@app.get('/dict')
+def get_dict():
+    return {"message": "hello"} # json
+
+@app.get("/json")
+def get_json():
+    return jsonify(message="hello", score=99) # json
+
+@app.get("/response")
+def get_resp():
+    resp = Response(response="Hello", status=200, mimetype="text/plain")
+    resp.headers["X-Custom"] = "Value"
+    return resp
+
+@app.get("/file")
+def get_file():
+    return send_file("readme.md", as_attachment=True) # download
+
+if __name__ == "__main__":
+    app.run(port=8080)
+
+# http://localhost:8080/string
+        </pre>
+    </div>
+    <div class = "block">
+        <pre class = "prettyprint linenums">
+# client.py
+import requests
+
+url = "http://127.0.0.1:8080/string"
+r = requests.get(url)
+
+print("Status:", r.status_code)
+print('Text: ', r.text)
+        </pre>
+    </div>
+    <div class = "subtitle">Stream Output</div>
+        <div class = "block">
+        <pre class = "prettyprint linenums">
+# server.py
+from flask import Flask, Response
+import time
+
+app = Flask(__name__)
+
+def generate_numbers():
+    for i in range(5):
+        yield f"Number: {i}\n"  # Send a chunk
+        time.sleep(1)           # Wait before sending next chunk
+
+@app.get("/stream")
+def stream():
+    return Response(generate_numbers(), mimetype="text/plain")
+
+if __name__ == "__main__":
+    app.run(port=8080)
+        </pre>
+    </div>
+    <div class = "block">
+        <pre class = "prettyprint linenums">
+# client.py
+import requests
+
+url = "http://127.0.0.1:8080/stream"
+
+with requests.get(url, stream=True, timeout=10) as r:
+    r.raise_for_status() # raises an exception if the server returned an error status
+    for line in r.iter_lines(decode_unicode=True):
+        if line:
+            print("got:", line)
         </pre>
     </div>
     </body>
