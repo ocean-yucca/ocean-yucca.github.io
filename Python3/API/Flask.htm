@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+
+<html>
+
+	<head>
+
+		<title>Python</title>
+
+		<link rel="stylesheet" href="../../css/atelier-sulphurpool-light.css" type="text/css">
+
+		<script src="../../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+
+		<style>
+
+			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+
+			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+
+			div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+			span {color: red; font-weight: bold;}
+		</style>
+
+	</head>
+
+	<body>
+		<div class = "title">
+			Flask API
+		</div>
+
+		<div class = "subtitle">Flowchart</div>
+		<div class = "block">
+            <p style = "text-align:center;"><img src = "img/api_1.png" width = "35%"></p>
+        </div>
+        <div class = "block">
+		<pre class = "prettyprint linenums">
+# server.py
+from flask import Flask, request, jsonify
+import secrets
+import time
+
+app = Flask(__name__)
+
+@app.post("/token")
+def get_token():
+    # get username and password
+    data = request.get_json(silent=True) or request.form or {}
+    username = data.get("username", "")
+    password = data.get("password", "")
+    print(username, password)
+
+    # validate username and password
+
+    # send token
+    token = secrets.token_urlsafe(32)
+    return jsonify(access_token=token, token_type="Bearer"), 200
+
+@app.get("/data")
+def get_data():
+    # get token
+    token = request.headers.get("Authorization", "")
+    print(token)
+
+    # validate token
+
+    # return data
+    return jsonify(data='Hello World!'), 200
+
+if __name__ == "__main__":
+    app.run(port=8080)
+        </pre>
+        </div>
+        <div class = "block">
+		<pre class = "prettyprint linenums">
+# client.py
+import requests
+
+url = "http://127.0.0.1:8080/"
+
+# sent username and password to exchange token
+resp = requests.post(f"{url}/token", json={"username": "lin", "password": "my_password"})
+token = resp.json()["access_token"]
+print(token)
+
+# request data with token
+headers = {"Authorization": f"Bearer {token}"}
+resp2 = requests.get(f"{url}/data", headers=headers)
+print("Protected response JSON:", resp2.json())
+		</pre>
+	</div>
+        <div class = "subtitle">API Methods</div>
+        <div class = "block">
+        	<span>GET</span>
+        	<li>Retrieve data from the server</li>
+        	<li>Read only</li>
+		<pre class = "prettyprint linenums">
+# server.py
+from flask import Flask, request, jsonify, Response
+import pandas as pd
+
+app = Flask(__name__)
+df = pd.read_csv('housing.csv')
+df = df.where(pd.notnull(df), None) # Clean NaNs
+
+@app.get("/data")
+def get_data():
+    json_str = df.to_json(orient="records")
+    return Response(json_str, mimetype="application/json")
+
+@app.get("/data/&lt;int:start&gt;/&lt;int:end&gt;")
+def get_rows(start, end):
+    json_str = df.iloc[start:end, :].to_json(orient="records")
+    return Response(json_str, mimetype="application/json")
+
+@app.get("/data/size")
+def get_data_size():
+    size = len(df)
+    return jsonify(size = size)
+
+if __name__ == "__main__":
+    app.run(port=8080)
+        </pre>
+        <pre class = "prettyprint linenums">
+# client.py
+import requests
+import json
+import pandas as pd
+
+# get table
+url = "http://127.0.0.1:8080/data"
+resp = requests.get(url)
+df = pd.DataFrame(resp.json())
+print(len(df), "rows received")
+print(df.iloc[0:10, :])
+
+# get rows
+url = "http://127.0.0.1:8080/data//20/100"
+resp = requests.get(url)
+df = pd.DataFrame(resp.json())
+print(len(df), "rows received")
+print(df.iloc[0:10, :])
+
+# get size
+url = "http://127.0.0.1:8080/data/size"
+resp = requests.get(url)
+print(resp.json())
+        </pre>
+        <pre class = "prettyprint linenums">
+# curl access
+curl -X GET "http://127.0.0.1:8080/data"
+
+curl -X GET "http://127.0.0.1:8080/data/10/100"
+
+curl -X GET "http://127.0.0.1:8080/data/size"
+        </pre>
+        </div>
+        <div class = "block">
+        	<span>POST</span>
+        	<li>Retrieve data from the server</li>
+        	<li>Send data to the server to create a resource or trigger an action</li>
+        	<li>Change server state</li>
+		<pre class = "prettyprint linenums">
+# server.py
+from flask import Flask, request, jsonify, Response
+import pandas as pd
+
+app = Flask(__name__)
+df = pd.read_csv('housing.csv')
+df = df.where(pd.notnull(df), None) # Clean NaNs
+
+@app.post("/data")
+def get_data():
+    data = request.get_json(silent=True)
+    start = data['start']
+    end = data['end']
+
+    json_str = df.iloc[start:end, :].to_json(orient="records")
+    return Response(json_str, mimetype="application/json")
+
+if __name__ == "__main__":
+    app.run(port=8080)
+        </pre>
+        <pre class = "prettyprint linenums">
+# client.py
+import requests
+import json
+import pandas as pd
+
+# get rows
+url = "http://127.0.0.1:8080/data"
+payload = {"start": 10, 'end': 100}
+resp = requests.post(url, json=payload)
+
+df = pd.DataFrame(resp.json())
+print(len(df), "rows received")
+print(df.iloc[0:10, :])
+        </pre>
+        <pre class = "prettyprint linenums">
+# curl access
+curl -X POST "http://127.0.0.1:8080/data" -H "Content-Type: application/json" -d '{"start": 10, "end": 100}'
+        </pre>
+        </div>
+        <div class = "block">
+        	<span>PUT</span>
+        	<li>Create or fully replace a resource</li>
+		<pre class = "prettyprint linenums">
+# server.py
+from flask import Flask, request, jsonify, Response
+import pandas as pd
+
+app = Flask(__name__)
+df = pd.read_csv('housing.csv')
+df = df.where(pd.notnull(df), None) # Clean NaNs
+
+@app.put("/insert")
+def insert_row():
+    global df
+    new_row = request.get_json(silent=True)
+    print(new_row)
+
+    size_before = len(df)
+
+    df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
+    size_after = len(df)
+
+    print(size_before, size_after)
+
+    return jsonify(before=size_before, after=size_after)
+
+if __name__ == "__main__":
+    app.run(port=8080)
+        </pre>
+        <pre class = "prettyprint linenums">
+# client.py
+import requests
+import json
+import pandas as pd
+
+url = "http://127.0.0.1:8080/insert"
+
+new_row = {"longitude":-122.26,"latitude":37.82,"housing_median_age":37.0,"total_rooms":3633.0,"total_bedrooms":1085.0,"population":1838.0,"households":980.0,"median_income":2.6104,"median_house_value":193100.0,"ocean_proximity":"NEAR BAY"}
+
+resp = requests.put(url, json=new_row)
+print(resp.json())
+        </pre>
+        <pre class = "prettyprint linenums">
+# url access
+curl -X PUT "http://127.0.0.1:8080/insert" \
+     -H "Content-Type: application/json" \
+     -d '{"longitude":-122.26,"latitude":37.82,"housing_median_age":37.0,"total_rooms":3633.0,"total_bedrooms":1085.0,"population":1838.0,"households":980.0,"median_income":2.6104,"median_house_value":193100.0,"ocean_proximity":"NEAR BAY"}'
+        </pre>
+        </div>
+        <div class = "block">
+        	<span>DELETE</span>
+        	<li>Remove a resource</li>
+		<pre class = "prettyprint linenums">
+# server.py
+from flask import Flask, request, jsonify, Response
+import pandas as pd
+
+app = Flask(__name__)
+df = pd.read_csv('housing.csv')
+df = df.where(pd.notnull(df), None) # Clean NaNs
+
+@app.delete("/delete/&lt;int:index&gt;")
+def delete_row(index):
+    global df
+    size_before = len(df)
+
+    df = df.drop(index=index)
+    size_after = len(df)
+
+    print(size_before, size_after)
+
+    return jsonify(before=size_before, after=size_after)
+
+if __name__ == "__main__":
+    app.run(port=8080)
+        </pre>
+        <pre class = "prettyprint linenums">
+# client.py
+import requests
+import json
+import pandas as pd
+
+url = "http://127.0.0.1:8080/delete/1"
+resp = requests.delete(url)
+print(resp.json())
+        </pre>
+        <pre class = "prettyprint linenums">
+# curl access
+curl -X DELETE "http://127.0.0.1:8080/delete/1"
+        </pre>
+        </div>
+        <div class = "subtitle">Cache</div>
+        <div class = "block">
+        	<li>GET, requests should be cachable by default</li>
+        	<li>POST, requests are not cacheable by default but can be made cacheable if either an Expires</li>
+		<pre class = "prettyprint linenums">
+# server.py
+from flask import Flask, request, jsonify, Response
+import pandas as pd
+
+app = Flask(__name__)
+df = pd.read_csv('housing.csv')
+df = df.where(pd.notnull(df), None) # Clean NaNs
+
+@app.get("/data")
+def get_data():
+    json_str = df.to_json(orient="records")
+    return Response(json_str,
+                    mimetype="application/json",
+                    headers={
+                        "X-Custom-Header": "DemoValue",
+                        "Cache-Control": "public, max-age=30"
+                    })
+
+if __name__ == "__main__":
+    app.run(port=8080)
+		</pre>
+		<pre class = "prettyprint linenums">
+# client.py
+import requests
+import requests_cache
+import json
+import pandas as pd
+import time
+
+requests_cache.install_cache("my_cache", expire_after=30)
+
+url = "http://127.0.0.1:8080/data"
+
+start = time.time()
+resp = requests.get(url)
+df = pd.DataFrame(resp.json())
+end = time.time()
+
+print("Firt time took:", end - start, "seconds")
+
+start = time.time()
+resp = requests.get(url)
+df = pd.DataFrame(resp.json())
+end = time.time()
+
+print("Second time took:", end - start, "seconds")
+		</pre>
+	</div>
+        <div class = "subtitle">Status</div>
+        <div class = "block">
+        	<li>1xx: informational responses
+        		<ul>
+        			<li>Let the client know the server has received the request and is continuing to process it</li>
+        			<li>102 Processing</li>
+        		</ul>
+        	</li>
+			<li>2xx: Success
+				<ul>
+					<li>The client’s request was received, understood, and accepted</li>
+					<li>200 OK, 201 Created, 202 Accepted</li>
+				</ul>
+			</li>
+			<li>3xx: Redirection
+				<ul>
+					<li>The resource isn’t here directly, use a different URL</li>
+					<li>300 Multiple Choices, 301 Moved Permanently</li>
+				</ul>
+			</li>
+			<li>4xx: Client Error
+				<ul>
+					<li>Something is wrong with the request (syntax, authentication, permissions, etc.)</li>
+					<li>400 Bad Request, 401 Unauthorized, 403 Forbidden, 404 Not Found</li>
+				</ul>
+			</li>
+			<li>5xx: Server Error
+				<ul>
+					<li>Request was valid, but the server failed to fulfill it</li>
+					<li>500 Internal Server Error</li>
+				</ul>
+			</li>
+        </div>
+        <div class = "subtitle">Reference</div>
+        <div class = "block">
+        	<li><a href = "https://restfulapi.net">REST API Tutorial</a></li>
+        	<li><a href = "https://restfulapi.net/http-status-codes/">HTTP Status Codes</a></li>
+        </div>
+    </body>
+</html>

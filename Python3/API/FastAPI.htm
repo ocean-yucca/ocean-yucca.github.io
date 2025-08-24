@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+
+<html>
+
+	<head>
+
+		<title>Python</title>
+
+		<link rel="stylesheet" href="../../css/atelier-sulphurpool-light.css" type="text/css">
+
+		<script src="../../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+
+		<style>
+
+			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+
+			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+
+			div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+			span {color: red; font-weight: bold;}
+		</style>
+
+	</head>
+
+	<body>
+		<div class = "title">
+			FastAPI
+		</div>
+
+		<div class = "subtitle">Installation</div>
+        <div class = "block">
+		<pre class = "prettyprint linenums">
+pip install "fastapi[standard]"
+        </pre>
+    </div>
+    <div class = "subtitle">Create API</div>
+        <div class = "block">
+        	<li>Maps a route path to a function</li>
+        	<li>sync route
+        		<ul>
+        			<li>Use threadpool</li>
+        			<li>Multiple requests use multiple threads</li>
+        		</ul>
+        	</li>
+        	<li>async route
+        		<ul>
+        			<li>Use event loop</li>
+        			<li>Multiple requests can share one thread and implement at the same time</li>
+        			<li>Run another request and runs that while one is waiting</li>
+        		</ul>
+        	</li>
+		<pre class = "prettyprint linenums">
+# server.py
+from fastapi import FastAPI
+
+app = FastAPI()
+
+@app.get("/")
+async def get_root():
+    return {"msg": "Hello World!"}
+        </pre>
+        <pre class = "prettyprint linenums">
+# start server
+fastapi dev server.py --port=8080
+        </pre>
+        <pre class = "prettyprint linenums">
+# access server
+http://localhost:8080/
+
+# access docs
+http://localhost:8080/docs
+http://localhost:8080/redoc
+        </pre>
+        <pre class = "prettyprint linenums">
+# curl access
+curl -X 'GET' 'http://localhost:8080/' -H 'accept: application/json'
+        </pre>
+        <pre class = "prettyprint linenums">
+# python access
+# client.py
+import requests
+
+headers = {
+    'accept': 'application/json'
+}
+
+r = requests.get(f"http://127.0.0.1:8080/", headers=headers)
+print(r.json())
+        </pre>
+    </div>
+    <div class = "subtitle">Flowchart</div>
+		<div class = "block">
+            <p style = "text-align:center;"><img src = "img/api_1.png" width = "35%"></p>
+        </div>
+    </body>
+    <div class = "block">
+		<pre class = "prettyprint linenums">
+# server.py
+from fastapi import FastAPI, Body, Header
+from fastapi.responses import JSONResponse
+import secrets
+
+app = FastAPI()
+
+@app.post("/login")
+async def login(username:str = Body(...), password:str = Body(...)):
+    print(username, password)
+    # validate username and password
+
+    # send token
+    token = secrets.token_urlsafe(32)
+    return JSONResponse({'access_token':token, 'token_type':"Bearer"})
+
+@app.get("/data")
+async def get_data(token: str = Header(...)):
+    print(token)
+
+    # validate token
+
+    return JSONResponse({'data': 'content'})
+		</pre>
+		<pre class = "prettyprint linenums">
+# client.py
+import requests
+
+url = "http://127.0.0.1:8080/"
+
+# sent username and password to exchange token
+resp = requests.post(f"{url}/login", json={"username": "lin", "password": "my_password"})
+token = resp.json()["access_token"]
+print(token)
+
+headers = {"token": token, "Accept": "application/json"}
+r = requests.get(f"{url}/data", headers=headers, timeout=10)
+print(r.json())
+		</pre>
+	</div>
+    <div class = "subtitle">Get</div>
+        <div class = "block">
+        	<li>What are passed to API server
+        		<ul>
+        			<li><span>url</span></li>
+        			<li><span>parameters</span>, are added to the URL after a ?, separated by &</li>
+        			<li><span>header</span>, is used for authorization, content-type, cache-control, etc.</li>
+        			<li><span>cookies</span>, are used for session management or authentication</li>
+        		</ul>
+        	</li>
+        	<pre class = "prettyprint linenums">
+curl -X GET "https://api.example.com/search?q=apple&page=2" \
+  -H "Authorization: Bearer my_token_123" \
+  -H "Accept: application/json" \
+  --cookie "sessionid=abcd1234"
+        	</pre>
+        	<pre class = "prettyprint linenums">
+import requests
+
+url = "https://api.example.com/search"
+
+# Query parameters
+params = {
+    "q": "apple",
+    "page": 2
+}
+
+# Headers
+headers = {
+    "Authorization": "Bearer my_token_123",
+    "Accept": "application/json"
+}
+
+# Cookies
+cookies = {
+    "sessionid": "abcd1234"
+}
+
+# Send GET request
+response = requests.get(url, params=params, headers=headers, cookies=cookies)
+        	</pre>
+        	<li>What is used for in API access
+        		<ul>
+        			<li>Retrieve data from the server</li>
+					<li>Read only, not change anything on the server</li>
+				</ul>
+			</li>
+		</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+# server.py
+from fastapi import FastAPI, Response
+import pandas as pd
+
+app = FastAPI()
+df = pd.read_csv('housing.csv')
+df = df.where(pd.notnull(df), None) # Clean NaNs
+
+@app.get("/data")
+async def get_data():
+    json_str = df.to_json(orient="records")
+    return Response(content=json_str, media_type="application/json")
+
+@app.get("/data/{start}/{end}")
+async def get_rows(start:int, end:int):
+    json_str = df.iloc[start:end, :].to_json(orient="records")
+    return Response(json_str, media_type="application/json")
+
+@app.get("/data/size")
+async def get_data_size():
+    size = len(df)
+    return {'size': size}
+		</pre>
+		<pre class = "prettyprint linenums">
+# client.py
+import requests
+import json
+import pandas as pd
+
+# get table
+url = "http://localhost:8080/data"
+resp = requests.get(url)
+df = pd.DataFrame(resp.json())
+print(len(df), "rows received")
+print(df.iloc[0:10, :])
+
+# get rows
+url = "http://localhost:8080/data/20/100"
+resp = requests.get(url)
+df = pd.DataFrame(resp.json())
+print(len(df), "rows received")
+print(df.iloc[0:10, :])
+
+# get size
+url = "http://localhost:8080/data/size"
+resp = requests.get(url)
+print(resp.json())
+		</pre>
+		<pre class = "prettyprint linenums">
+# curl access
+curl -X GET "http://127.0.0.1:8080/data"
+ 
+curl -X GET "http://127.0.0.1:8080/data/10/100"
+ 
+curl -X GET "http://127.0.0.1:8080/data/size"
+		</pre>
+	</div>
+	<div class = "subtitle">Post</div>
+        <div class = "block">
+        	<li>What are passed to API server
+        		<ul>
+        			<li><span>url</span></li>
+        			<li><span>header</span>, is used for authorization, content-type, cache-control, etc.</li>
+        			<li><span>body</span>, data</li>
+        			<li><span>cookies</span>, are used for session management or authentication</li>
+        		</ul>
+        	</li>
+        	<pre class = "prettyprint linenums">
+curl -X POST "https://api.example.com/login" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer my_token_123" \
+  -d '{"username": "alice", "password": "1234"}' \
+  --cookie "sessionid=abcd1234"
+        	</pre>
+        	<pre class = "prettyprint linenums">
+import requests
+
+url = "https://api.example.com/login"
+
+data = {
+    "username": "alice",
+    "password": "1234"
+}
+
+headers = {
+    "Content-Type": "application/json",
+    "Authorization": "Bearer my_token_123"
+}
+
+cookies = {
+    "sessionid": "abcd1234"
+}
+
+response = requests.post(url, json=data, headers=headers, cookies=cookies)
+        	</pre>
+        	<li>What is used for in API access
+        		<ul>
+        			<li>Retrieve data from the server</li>
+					<li>Send data to the server to create a resource or trigger an action</li>
+					<li>Change server state</li>
+				</ul>
+			</li>
+		</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+# server.py
+from fastapi import FastAPI, Body, Response
+import pandas as pd
+
+app = FastAPI()
+df = pd.read_csv('housing.csv')
+df = df.where(pd.notnull(df), None) # Clean NaNs
+
+@app.post("/data")
+async def get_rows(start:int = Body(...), end:int = Body(...)):
+    print('Start:', start, 'End: ', end)
+    json_str = df.iloc[start:end, :].to_json(orient="records")
+    return Response(json_str, media_type="application/json")
+		</pre>
+		<pre class = "prettyprint linenums">
+# client.py
+import requests
+import json
+import pandas as pd
+
+# get rows
+url = "http://localhost:8080/data"
+payload = {"start": 10, 'end': 100}
+resp = requests.post(url, json=payload)
+
+df = pd.DataFrame(resp.json())
+print(len(df), "rows received")
+print(df.iloc[0:10, :])
+		</pre>
+		<pre class = "prettyprint linenums">
+# curl access
+curl -X POST "http://127.0.0.1:8080/data" -H "Content-Type: application/json" -d '{"start": 10, "end": 100}'
+		</pre>
+	</div>
+	<div class = "subtitle">Put</div>
+        <div class = "block">
+        	<li>What are passed to API server
+        		<ul>
+        			<li><span>url</span></li>
+        			<li><span>header</span>, is used for authorization, content-type, cache-control, etc.</li>
+        			<li><span>body</span>, data</li>
+        			<li><span>cookies</span>, are used for session management or authentication</li>
+        		</ul>
+        	</li>
+        	<pre class = "prettyprint linenums">
+curl -X PUT "https://api.example.com/users/123" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer my_token_123" \
+  -d '{"username": "alice", "email": "alice@example.com"}' \
+  --cookie "sessionid=abcd1234"
+        	</pre>
+        	<pre class = "prettyprint linenums">
+import requests
+
+url = "https://api.example.com/users/123"
+
+data = {
+    "username": "alice",
+    "email": "alice@example.com"
+}
+
+headers = {
+    "Content-Type": "application/json",
+    "Authorization": "Bearer my_token_123"
+}
+
+cookies = {
+    "sessionid": "abcd1234"
+}
+
+response = requests.put(url, json=data, headers=headers, cookies=cookies)
+        	</pre>
+        	<li>What is used for in API access
+        		<ul>
+        			<li>Create or fully replace a resource</li>
+				</ul>
+			</li>
+        </div>
+        <div class = "block">
+		<pre class = "prettyprint linenums">
+# server.py
+from fastapi import FastAPI, Body, Response
+from pydantic import BaseModel
+import pandas as pd
+
+app = FastAPI()
+df = pd.read_csv('housing.csv')
+df = df.where(pd.notnull(df), None) # Clean NaNs
+
+class Item(BaseModel):
+    longitude: float
+    latitude: float
+    housing_median_age: float
+    total_rooms: float
+    total_bedrooms: float
+    population: float
+    households: float
+    median_income: float
+    median_house_value: float
+    ocean_proximity: str
+
+@app.put("/insert")
+async def insert_rows(row: Item):
+    global df
+    size_before = len(df)
+
+    df = pd.concat([df, pd.DataFrame([row.dict()])], ignore_index=True)
+
+    size_after = len(df)
+    return {'Size before insertion: ', size_before, 'Size after insertion: ', size_after}
+		</pre>
+		<pre class = "prettyprint linenums">
+# client.py
+import requests
+import json
+import pandas as pd
+
+url = "http://127.0.0.1:8080/insert"
+
+new_row = {"longitude":-122.26,"latitude":37.82,"housing_median_age":37.0,"total_rooms":3633.0,"total_bedrooms":1085.0,"population":1838.0,"households":980.0,"median_income":2.6104,"median_house_value":193100.0,"ocean_proximity":"NEAR BAY"}
+
+resp = requests.put(url, json=new_row)
+print(resp.json())
+		</pre>
+		<pre class = "prettyprint linenums">
+# curl access
+curl -X PUT "http://127.0.0.1:8080/insert" \
+     -H "Content-Type: application/json" \
+     -d '{"longitude":-122.26,"latitude":37.82,"housing_median_age":37.0,"total_rooms":3633.0,"total_bedrooms":1085.0,"population":1838.0,"households":980.0,"median_income":2.6104,"median_house_value":193100.0,"ocean_proximity":"NEAR BAY"}'
+		</pre>
+	</div>
+	<div class = "subtitle">DELETE</div>
+        <div class = "block">
+        	<li>What are passed to API server
+        		<ul>
+        			<li><span>url</span></li>
+        			<li><span>parameters</span>, are added to the URL after a ?, separated by &</li>
+        			<li><span>header</span>, is used for authorization, content-type, cache-control, etc.</li>
+        			<li><span>cookies</span>, are used for session management or authentication</li>
+        		</ul>
+        	</li>
+        	<pre class = "prettyprint linenums">
+curl -X DELETE "https://api.example.com/users/123?hard=true&reason=cleanup" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Accept: application/json" \
+  --cookie "sessionid=abc123; theme=dark"
+        	</pre>
+        	<pre class = "prettyprint linenums">
+import requests
+
+url = "https://api.example.com/users/123"
+params = {"hard": "true", "reason": "cleanup"}      # will be URL-encoded
+headers = {
+    "Authorization": "Bearer YOUR_TOKEN",
+    "Accept": "application/json",
+}
+cookies = {"sessionid": "abc123", "theme": "dark"}
+
+response = requests.delete(url, params=params, headers=headers, cookies=cookies, timeout=15)
+        	</pre>
+        	<li>What is used for in API access
+        		<ul>
+        			<li>Remove a resource</li>
+				</ul>
+			</li>
+        </div>
+        <div class = "block">
+        	<pre class = "prettyprint linenums">
+# server.py
+from fastapi import FastAPI
+import pandas as pd
+
+app = FastAPI()
+df = pd.read_csv('housing.csv')
+df = df.where(pd.notnull(df), None) # Clean NaNs
+
+@app.delete("/delete/{index}")
+async def delete_row(index:int):
+    print(index)
+    global df
+    size_before = len(df)
+
+    df = df.drop(index=index)
+
+    size_after = len(df)
+    return {'Size before deletion: ', size_before, 'Size after deletion: ', size_after}
+        	</pre>
+        	<pre class = "prettyprint linenums">
+# client.py
+import requests
+import json
+import pandas as pd
+
+url = "http://127.0.0.1:8080/delete/1"
+resp = requests.delete(url)
+print(resp.json())
+        	</pre>
+        	<pre class = "prettyprint linenums">
+# curl access
+curl -X DELETE "http://127.0.0.1:8080/delete/1
+        	</pre>
+        </div>
+	<div class = "subtitle">Pass Data to Server</div>
+		<div class = "block">
+        	Pass Parameters in URL
+		<pre class = "prettyprint linenums">
+from fastapi import FastAPI
+
+app = FastAPI()
+
+@app.get("/search")
+async def get_search(
+    username: str, password:str
+    ):
+
+    print(username, password)
+    return {"username": username}
+		</pre>
+		<pre class = "prettyprint linenums">
+curl "http://127.0.0.1:8080/search?username=Lin&password=secret"
+		</pre>
+	</div>
+		<div class = "block">
+        	Pass Parameters to Function
+		<pre class = "prettyprint linenums">
+from fastapi import FastAPI, Request
+
+app = FastAPI()
+
+@app.post("/data/{value}")
+async def get_value(value):
+    print(value)
+    return {"Value": value}
+		</pre>
+		<pre class = "prettyprint linenums">
+curl -X POST "http://127.0.0.1:8080/data/10"
+		</pre>
+	</div>
+        <div class = "block">
+        	JSON Body
+		<pre class = "prettyprint linenums">
+from fastapi import FastAPI
+from pydantic import BaseModel
+
+app = FastAPI()
+
+# Define a request body model
+class Item(BaseModel):
+    name: str
+    price: float
+    quantity: int
+
+@app.post("/items")
+async def create_item(item: Item):
+    return {"message": "Item received", "data": item}
+		</pre>
+		<pre class = "prettyprint linenums">
+curl -X POST "http://127.0.0.1:8080/items" \
+  -H "Content-Type: application/json" \
+  -d '{"name": "Apple", "price": 1.2, "quantity": 10}'
+		</pre>
+	</div>
+	<div class = "block">
+        	Form
+		<pre class = "prettyprint linenums">
+from fastapi import FastAPI
+from fastapi import Form
+
+app = FastAPI()
+
+@app.post("/login/")
+async def login(username: str = Form(...), password: str = Form(...)):
+    print(username, password)
+    return {"username": username}
+		</pre>
+		<pre class = "prettyprint linenums">
+curl -X POST "http://127.0.0.1:8080/login/" \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "username=hannah&password=secret"
+		</pre>
+		<pre class = "prettyprint linenums">
+&lt;!doctype html&gt;
+&lt;html&gt;
+    &lt;body&gt;
+        &lt;form action="http://127.0.0.1:8080/login" method="post"&gt;
+            &lt;input type="username" name="name"&gt;
+            &lt;input type="password" name="email"&gt;
+            &lt;input type="submit" value = "Submit"&gt;
+        &lt;/form&gt;
+    &lt;/body&gt;
+&lt;/html&gt;
+		</pre>
+	</div>
+	<div class = "block">
+        	Body
+		<pre class = "prettyprint linenums">
+from fastapi import FastAPI, Body
+
+app = FastAPI()
+
+@app.post("/login")
+async def login(username:str = Body(...), password:str = Body(...)):
+    print(username, password)
+    return {"username": username}
+		</pre>
+		<pre class = "prettyprint linenums">
+curl -X POST "http://127.0.0.1:8080/login" -H "Content-Type: application/json" -d '{"username": "Lin", "password": "secret"}'
+		</pre>
+	</div>
+	<div class = "block">
+        	Raw Body
+		<pre class = "prettyprint linenums">
+from fastapi import FastAPI, Request
+
+app = FastAPI()
+
+@app.post("/login")
+async def raw_body(request: Request):
+    data = await request.json()
+    return {"username": data['username']}
+		</pre>
+		<pre class = "prettyprint linenums">
+curl -X POST "http://127.0.0.1:8080/login" -H "Content-Type: application/json" -d '{"username": "Lin", "password": "secret"}'
+		</pre>
+	</div>
+	<div class = "block">
+        	File Upload
+		<pre class = "prettyprint linenums">
+from fastapi import FastAPI,  File, UploadFile
+
+app = FastAPI()
+
+@app.post("/upload")
+async def upload_file(file: UploadFile = File(...)):
+    # save the received file
+    with open('housing2.csv', "wb") as out:
+        while True:
+            chunk = await file.read(1024 * 1024)  # 1 MB
+            if not chunk:
+                break
+            out.write(chunk)
+
+    return {"filename": file.filename}
+		</pre>
+		<pre class = "prettyprint linenums">
+curl -X POST "http://127.0.0.1:8080/upload" -F "file=@housing.csv"
+		</pre>
+	</div>
+	<div class = "subtitle">Response from Server</div>
+        <div class = "block">
+		<pre class = "prettyprint linenums">
+# server.py
+from fastapi import FastAPI
+from fastapi.responses import Response, JSONResponse, HTMLResponse, PlainTextResponse, FileResponse
+import json
+
+app = FastAPI()
+
+@app.get("/string")
+async def get_string():
+    return PlainTextResponse('Hello World!')
+
+@app.get("/html")
+async def get_html():
+    return HTMLResponse('&lt;h1&gt;Hello&lt;/h1&gt;')
+
+@app.get("/json")
+async def get_json():
+    return JSONResponse({'username': 'Lin'})
+
+@app.get("/file")
+async def get_file():
+    return FileResponse("./housing.csv", media_type="application/csv")
+
+@app.get("/raw_string")
+def get_raw_string():
+    return Response(content="Hello World!", media_type="text/custom")
+
+@app.get("/raw_json")
+def get_raw_json():
+    data = {"ok": True, "items": [1, 2, 3]}
+    return Response(content=json.dumps(data, ensure_ascii=False), media_type="application/json", status_code=200)
+		</pre>
+		<pre class = "prettyprint linenums">
+# client.py
+import requests
+
+# string
+url = "http://localhost:8080/string"
+resp = requests.get(url)
+print(resp.text)
+
+# string
+url = "http://localhost:8080/raw_string"
+resp = requests.get(url)
+print(resp.text)
+
+# html
+url = "http://localhost:8080/html"
+resp = requests.get(url)
+print(resp.text)
+
+# json
+url = "http://localhost:8080/json"
+resp = requests.get(url)
+print(resp.json())
+
+# json
+url = "http://localhost:8080/raw_json"
+resp = requests.get(url)
+print(resp.json())
+
+# file
+url = "http://localhost:8080/file"
+
+with requests.get(url, stream=True) as r:
+    with open('test.csv', "wb") as f:
+        for chunk in r.iter_content(chunk_size=8192):
+            if chunk:  # skip keep-alive chunks
+                f.write(chunk)
+		</pre>
+	</div>
+
+        <div class = "subtitle">Reference</div>
+        <div class = "block">
+        	<li><a href = "https://restfulapi.net">REST API Tutorial</a></li>
+        	<li><a href = "https://restfulapi.net/http-status-codes/">HTTP Status Codes</a></li>
+        </div>
+    </body>
+</html>
