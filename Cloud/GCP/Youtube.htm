@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Google Cloud</title>
+		<link rel="stylesheet" href="../../css/atelier-sulphurpool-light.css" type="text/css">
+		<script src="../../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+		<style>
+			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+			div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+			span {color: red; font-weight: bold;}
+		</style>
+	</head>
+	<body>
+		<div class = "title">
+			Youtube
+		</div>
+
+		<div class = "subtitle">Google Cloud Side</div>
+		<div class = "block">
+			<ol>
+				<li>Enable People API
+					<ul>
+						<li>APIs & Services -> Library -> YouTube Data API v3</li>
+						<li>Enable API</a></li>
+					</ul>
+				</li>
+				<li>Create API Key
+					<ul>
+						<li>APIs & Services -> Credentials -> Create Credentials -> API Key</li>
+					</ul>
+				</li>
+			</ol>
+		</div>
+		<div class = "subtitle">App Side</div>
+		<div class = "block">
+            <pre class = "prettyprint linenums">
+import requests
+
+def search_video(query, API_KEY):
+    MAX_RESULTS = 5
+    URL = "https://www.googleapis.com/youtube/v3/search"
+
+    params = {
+        "part": "snippet",
+        "q": query,
+        "type": "video",
+        "maxResults": MAX_RESULTS,
+        "key": API_KEY,
+    }
+
+    response = requests.get(URL, params=params)
+    data = response.json()
+
+    return data
+            </pre>
+            <pre class = "prettyprint linenums">
+API_KEY = 'your_key'
+search_query = "swim"
+
+search = search_video(search_query, API_KEY)
+
+for item in search['items']:
+    print('thumbnail: ', item['snippet']['thumbnails']['high'])
+    print('url: ', 'https://youtu.be/'+item['id']['videoId'])
+            </pre>
+        </div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+            </pre>
+        </div>
+		<div class = "subtitle">Reference</div>
+		<div class = "block">
+			<li><a href = "https://developers.google.com/youtube/v3/docs/?apix=true">Youtube API</a></li>
+		</div>
+	</body>
+</html>

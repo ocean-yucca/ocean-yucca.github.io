@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Google Cloud</title>
+		<link rel="stylesheet" href="../../css/atelier-sulphurpool-light.css" type="text/css">
+		<script src="../../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+		<style>
+			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+			div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+			span {color: red; font-weight: bold;}
+		</style>
+	</head>
+	<body>
+		<div class = "title">
+			Google Cloud Storage
+		</div>
+
+		<div class = "subtitle">Access with Key</div>
+		<div class = "block">
+			<li style = "color: blue; font-weight: bold">Google Cloud Side</li>
+			<ol>
+				<li>Create a Service Account
+					<ul>
+						<li>IAM & Admin -> Service Accounts -> Create service account</li>
+						<li>Permissions -> Cloud Storage -> Storage Object Admin (IAM permission)</li>
+					</ul>
+				</li>
+				<li>Create a Key for the Service Account
+					<ul>
+						<li>Open the service account created, create a json key and save</li>
+					</ul>
+				</li>
+				<li>Enable the Cloud Storage API in APIs & Services</li>
+			</ol>
+		</div>
+		<div class = "block">
+			<li style = "color: blue; font-weight: bold">App Side - Access with Requests</li>
+            <pre class = "prettyprint linenums">
+pip install google-cloud-storage
+            </pre>
+        </div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+from google.oauth2.service_account import Credentials
+from google.cloud import storage
+import json
+
+# load credentials from key
+with open("key.json", "r") as f:
+    key_data = json.load(f)
+
+credentials = Credentials.from_service_account_info(key_data)
+client = storage.Client(credentials=credentials)
+            </pre>
+        </div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+# list blobs in bucket
+bucket = client.bucket("app-operations-bucket")
+for blob in bucket.list_blobs():
+    print(blob.name)
+		</pre>
+		</div>
+		<div class = "block">
+            <pre class = "prettyprint linenums">
+# list blobs begin with a prefix
+bucket = client.bucket("app-operations-bucket")
+blobs = bucket.list_blobs(prefix="data")
+for blob in blobs:
+    print(blob.name)
+            </pre>
+        </div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+# list blobs in a directory
+# delimiter="/", restrict the results to only the files in the given folder
+bucket = client.bucket("app-operations-bucket")
+blobs = bucket.list_blobs(prefix="data/", delimiter="/")
+for blob in blobs:
+    print(blob.name)
+            </pre>
+        </div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+# download file
+bucket = client.bucket("app-operations-bucket")
+blob = bucket.blob('data/housing.csv') # source on Cloud Storage
+blob.download_to_filename('housing.csv') # destination in local
+            </pre>
+        </div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+# upload file
+bucket = client.bucket("app-operations-bucket")
+blob = bucket.blob('data_2/housing.csv') # destination on Cloud Storage
+
+blob.upload_from_filename('housing.csv') # source in local
+            </pre>
+        </div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+# delete file
+bucket = client.bucket("app-operations-bucket")
+blob = bucket.blob('data_2/housing.csv') # blob on Cloud Storage
+blob.delete()
+            </pre>
+        </div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+# rename or move file
+bucket = client.bucket("app-operations-bucket")
+blob = bucket.blob('data/housing.csv')
+
+new_blob = bucket.copy_blob(blob, bucket, 'data_2/housing.csv')
+blob.delete()
+            </pre>
+        </div>
+        <div class = "subtitle">Access with Token Creator</div>
+		<div class = "block">
+			<center><img src = "img/gcp_3.png" width = 60%></center>
+		</div>
+		<div class = "block">
+			<li style = "color: blue; font-weight: bold">Google Cloud Side</li>
+			<ol>
+				<li>Create a Service Account (SA)
+					<ul>
+						<li>IAM & Admin -> Service Accounts -> Create service account</li>
+						
+					</ul>
+				</li>
+				<li>Enable the Cloud Storage API in APIs & Services</li>
+				<li>Grant SA the access to Cloud Storage
+					<ul>
+						<li>SA -> Permissions -> Manage Access -> Storage Object Admin (IAM permission)</li>
+					</ul>
+				</li>
+				<li>Grant a user to impersonate the SA
+					<ul>
+						<li>SA -> Principals with access -> select a user -> Add Service Account Token Creator</li>
+					</ul>
+				</li>
+			</ol>
+		</div>
+		<div class = "block">
+				<li style = "color: blue; font-weight: bold">App Side - Access with Requests</li>
+				<li>Creates credential file for the user</li>
+            <pre class = "prettyprint linenums">
+gcloud auth application-default login
+
+# create ~/.config/gcloud/application_default_credentials.json
+            </pre>
+		</div>
+		<div class = "block">
+            <pre class = "prettyprint linenums">
+from google.auth import default
+from google.auth.impersonated_credentials import Credentials as ImpersonatedCredentials
+from google.cloud import storage
+
+TARGET_SA = "storage-app@spheric-gasket-476418-h5.iam.gserviceaccount.com" # SA email
+BUCKET_NAME = "app-operations-bucket" # bucket name
+
+SCOPES = ["https://www.googleapis.com/auth/devstorage.read_write"]
+source_credentials, project_id = default() # get user credentials from ~/.config/gcloud/application_default_credentials.json
+
+target_credentials = ImpersonatedCredentials(
+        source_credentials=source_credentials,
+        target_principal=TARGET_SA,
+        target_scopes=SCOPES,
+        lifetime=3600,
+    )
+
+client = storage.Client(credentials=target_credentials, project=project_id)
+
+bucket = client.bucket(BUCKET_NAME)
+
+print("Files in bucket:")
+for blob in bucket.list_blobs():
+    print(" -", blob.name)
+            </pre>
+        </div>
+		<div class = "subtitle">Reference</div>
+		<div class = "block">
+			<li><a href = "https://cloud.google.com/storage/docs/listing-objects#storage-list-objects-python">List Objects</a></li>
+		</div>
+	</body>
+</html>

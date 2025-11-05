@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Google Cloud</title>
+		<link rel="stylesheet" href="../../css/atelier-sulphurpool-light.css" type="text/css">
+		<script src="../../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+		<style>
+			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+			div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+			span {color: red; font-weight: bold;}
+		</style>
+	</head>
+	<body>
+		<div class = "title">
+			Google Contacts
+		</div>
+
+		<div class = "subtitle">Google Cloud Side</div>
+		<div class = "block">
+			<ol>
+				<li>Enable People API
+					<ul>
+						<li>APIs & Services -> Library -> Google People API</li>
+						<li>Enable API</a></li>
+					</ul>
+				</li>
+				<li>Setup App name, logo, support email, privacy policy
+					<ul>
+						<li>APIs & Services -> OAuth consent screen -> Branding</li>
+						<li>OAuth consent screen -> Branding
+							<ul>
+								<li>User Type, External</li>
+								<li>User support email, your gmail</li>
+								<li>Developer contact information, your email</li>
+							</ul>
+						</li>
+					</ul>
+				</li>
+				<li>Setup App Access Permission
+					<ul>
+						<li>APIs & Services -> OAuth consent screen -> Audience
+							<ul>
+								<li>Test mode
+									<ul>
+										<li>Test users, add test users's emails</li>
+									</ul>
+								</li>
+								<li>Production mode
+									<ul>
+										<li>Click <span>Publish app</span></li>
+									</ul>
+								</li>
+							</ul>
+						</li>
+					</ul>
+				</li>
+				<li>Create Client ID
+					<ul>
+						<li>APIs & Services -> Credentials -> Create Credentials -> OAuth client ID
+							<ul>
+								<li>Desktop App</li>
+							</ul>
+						</li>
+					</ul>
+				</li>
+				<li>Download credentials.json</li>
+			</ol>
+		</div>
+		<div class = "subtitle">App Side - Access with Requests</div>
+		<div class = "block">
+            <pre class = "prettyprint linenums">
+pip install requests google-auth-oauthlib
+            </pre>
+        </div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+# Create
+import requests
+from google_auth_oauthlib.flow import InstalledAppFlow
+import json
+
+# get token for creating
+SCOPES = ['https://www.googleapis.com/auth/contacts']
+
+flow = InstalledAppFlow.from_client_secrets_file('credentials.json', SCOPES)
+creds = flow.run_local_server(port=0)
+# user grant permission on web browser
+
+access_token = creds.token
+
+# create contact
+url = "https://people.googleapis.com/v1/people:createContact"
+
+body = {
+    "names": [{"givenName": "Hannah", "familyName": "Chen"}],
+    "emailAddresses": [{"value": "hchen@example.com"}],
+    "phoneNumbers": [{"value": "+1-757-123-4567"}],
+    "organizations": [{"name": "University of Virginia", "title": "Data Scientist"}],
+}
+
+headers = {
+    "Authorization": f"Bearer {access_token}",
+    "Content-Type": "application/json"
+}
+
+response = requests.post(url, headers=headers, data=json.dumps(body))
+            </pre>
+        </div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+# Read
+import requests
+from google_auth_oauthlib.flow import InstalledAppFlow
+import json
+
+# get token for reading
+SCOPES = ['https://www.googleapis.com/auth/contacts.readonly']
+
+flow = InstalledAppFlow.from_client_secrets_file('credentials.json', SCOPES)
+creds = flow.run_local_server(port=0)
+# user grant permission on web browser
+
+access_token = creds.token
+
+# retrieve contacts
+url = "https://people.googleapis.com/v1/people/me/connections"
+params = {
+        "pageSize": 50,
+        "personFields": "names,emailAddresses,phoneNumbers"
+    }
+headers = {
+    "Authorization": f"Bearer {access_token}"
+}
+
+response = requests.get(url, headers=headers, params=params)
+data = response.json()
+            </pre>
+        </div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+# Update
+import requests
+from google_auth_oauthlib.flow import InstalledAppFlow
+import json
+
+# get token for updating
+SCOPES = ['https://www.googleapis.com/auth/contacts']
+
+flow = InstalledAppFlow.from_client_secrets_file('credentials.json', SCOPES)
+creds = flow.run_local_server(port=0)
+# user grant permission on web browser
+
+access_token = creds.token
+
+# get etag of target contact
+RESOURCE_NAME = "people/c6347803971844442572" # each contact has a unique resource name
+UPDATE_FIELDS = "emailAddresses,phoneNumbers" # update fields
+
+get_url = f"https://people.googleapis.com/v1/{RESOURCE_NAME}"
+params = {"personFields": UPDATE_FIELDS}
+headers = {"Authorization": f"Bearer {access_token}"}
+
+resp = requests.get(get_url, headers=headers, params=params)
+etag = resp.json().get("etag")
+
+# update contact with etag
+patch_url = f"https://people.googleapis.com/v1/{RESOURCE_NAME}:updateContact"
+params = {"updatePersonFields": "emailAddresses,phoneNumbers"}
+headers = {
+    "Authorization": f"Bearer {access_token}",
+    "Content-Type": "application/json"
+}
+body = {
+    "etag": resp.json().get("etag"),
+    "emailAddresses": [{"value": "new.email@example.com"}],
+    "phoneNumbers": [{"value": "+1-555-987-6543"}]
+}
+
+patch_resp = requests.patch(patch_url, headers=headers, params=params, json=body)
+            </pre>
+        </div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+# Delete
+import requests
+from google_auth_oauthlib.flow import InstalledAppFlow
+import json
+
+# get token
+SCOPES = ['https://www.googleapis.com/auth/contacts']
+
+flow = InstalledAppFlow.from_client_secrets_file('credentials.json', SCOPES)
+creds = flow.run_local_server(port=0)
+# user grant permission on web browser
+
+access_token = creds.token
+
+# delete contact
+RESOURCE_NAME = "people/c6347803971844442572" # each contact has a unique resource name
+
+delete_url = f"https://people.googleapis.com/v1/{RESOURCE_NAME}:deleteContact"
+headers = {"Authorization": f"Bearer {access_token}"}
+
+resp = requests.delete(delete_url, headers=headers)
+            </pre>
+        </div>
+        <div class = "subtitle">App Side - Access with Google OAuth Package</div>
+		<div class = "block">
+            <pre class = "prettyprint linenums">
+pip install google-auth-oauthlib google-auth google-api-python-client
+            </pre>
+        </div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+# Create
+from google_auth_oauthlib.flow import InstalledAppFlow
+from googleapiclient.discovery import build
+
+# get credential
+SCOPES = ["https://www.googleapis.com/auth/contacts"]
+CREDENTIALS_FILE = "credentials.json"
+
+flow = InstalledAppFlow.from_client_secrets_file(CREDENTIALS_FILE, SCOPES)
+# user grant permission on web browser
+
+creds = flow.run_local_server(port=0)
+
+# create contact
+service = build("people", "v1", credentials=creds)
+
+new_contact = {
+    "names": [{"givenName": "John", "familyName": "Doe"}],
+    "emailAddresses": [{"value": "john.doe@example.com"}],
+    "phoneNumbers": [{"value": "+1-555-123-4567"}],
+    "organizations": [{"name": "Acme Corp", "title": "Data Scientist"}],
+    "addresses": [{"streetAddress": "123 Main St", "city": "Charlottesville", "region": "VA", "postalCode": "22903"}],
+}
+
+created_contact = service.people().createContact(body=new_contact).execute()
+            </pre>
+        </div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+# Read
+from google_auth_oauthlib.flow import InstalledAppFlow
+from googleapiclient.discovery import build
+
+# get credential
+SCOPES = ["https://www.googleapis.com/auth/contacts.readonly"]
+CREDENTIALS_FILE = "credentials.json" 
+flow = InstalledAppFlow.from_client_secrets_file(CREDENTIALS_FILE, SCOPES)
+# user grant permission on web browser
+
+creds = flow.run_local_server(port=0)
+
+# read contacts
+service = build("people", "v1", credentials=creds)
+results = service.people().connections().list(
+    resourceName="people/me",             # 'me' refers to the authenticated user
+    personFields="names,emailAddresses,phoneNumbers",
+    pageSize=100                          # adjust as needed (max 1000)
+).execute()
+            </pre>
+        </div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+# Update
+from google_auth_oauthlib.flow import InstalledAppFlow
+from googleapiclient.discovery import build
+
+# get credential
+SCOPES = ["https://www.googleapis.com/auth/contacts"]
+CREDENTIALS_FILE = "credentials.json"  # from Google Cloud Console
+flow = InstalledAppFlow.from_client_secrets_file(CREDENTIALS_FILE, SCOPES)
+# user grant permission on web browser
+
+creds = flow.run_local_server(port=0)
+
+# get etag
+RESOURCE_NAME = "people/c8814488620804988199" # each contact has a unique resource name
+
+service = build("people", "v1", credentials=creds)
+
+# retrieve etag of target contact
+person = service.people().get(
+    resourceName=RESOURCE_NAME,
+    personFields="names,emailAddresses,phoneNumbers"
+).execute()
+
+etag = person.get("etag")
+
+# update contact with etag
+person["emailAddresses"] = [{"value": "updated.email@example.com"}]
+person["phoneNumbers"] = [{"value": "+1-555-999-8888"}]
+
+updated_person = service.people().updateContact(
+    resourceName=RESOURCE_NAME,
+    updatePersonFields="emailAddresses,phoneNumbers",
+    body=person
+).execute()
+            </pre>
+        </div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+# Delete
+from google_auth_oauthlib.flow import InstalledAppFlow
+from googleapiclient.discovery import build
+
+# get credential
+SCOPES = ["https://www.googleapis.com/auth/contacts"]
+CREDENTIALS_FILE = "credentials.json"  # from Google Cloud Console
+flow = InstalledAppFlow.from_client_secrets_file(CREDENTIALS_FILE, SCOPES)
+# user grant permission on web browser
+
+creds = flow.run_local_server(port=0)
+
+# delete contact
+RESOURCE_NAME = "people/c8814488620804988199" # each contact has a unique resource name
+
+service = build("people", "v1", credentials=creds)
+service.people().deleteContact(resourceName=RESOURCE_NAME).execute()
+            </pre>
+        </div>
+		<div class = "subtitle">Reference</div>
+		<div class = "block">
+			<li><a href = "https://developers.google.com/people">People API</a></li>
+		</div>
+	</body>
+</html>

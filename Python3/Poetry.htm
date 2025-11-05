@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Python</title>
+		<link rel="stylesheet" href="../css/atelier-sulphurpool-light.css" type="text/css">
+		<script src="../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+		<style>
+			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+			div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+			span {color: red;}
+		</style>
+	</head>
+	<body>
+		<div class = "title">
+			Poetry
+		</div>
+		<div class = "subtitle">Install</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+curl -sSL https://install.python-poetry.org | python3 -
+		</pre>
+	</div>
+	<div class = "subtitle">Layout</div>
+		<div class = "block">
+			<a href = "https://ocean-yucca.github.io/Python3/Unittest_source.htm">Code</a>, <a href = "https://github.com/ocean-yucca/prime1">Repo at GitHub</a>
+			<p style = "text-align:center;"><img src = "img/Build_3.png" width = "40%"></p>
+	</div>
+		<div class = "block">
+			<span>pyproject.toml</span>
+		<pre class = "prettyprint linenums">
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+# Project Metadata
+[tool.poetry]
+name = "primepackage"
+version = "0.1.0"
+description = "Demo project managed by Poetry"
+authors = ["firstname lastname &lt;firstname.lastname@example.com&gt;"]
+readme = "README.md"
+
+packages = [
+  { include = "primepackage", from = "src" }
+]
+
+# Include Extra Files
+include = [
+  { path = "README.md", format = "sdist" }, # ignorde
+  { path = "LICENSE", format = "sdist" }, # ignored
+  { path = "data/*.csv", format = "sdist" } # will be copied to the package folder
+]
+
+# List of Dependencies
+[tool.poetry.dependencies]
+python = "^3.10"
+requests = "^2.31"
+pandas = "^2.0"
+matplotlib = "^3.10.6"
+
+# Executable Script
+[tool.poetry.scripts]
+myprimes = "primepackage.generator:main"
+
+# Dev extras
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.0"
+black = "^23.0"
+
+# Unit test
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+		</pre>
+	</div>
+	<div class = "block">
+			<span>README.md</span>, use <a href = "https://www.markdownguide.org">Markdown</a>
+		<pre class = "prettyprint linenums">
+This is a simple example package. You can use
+[Github-flavored Markdown](https://guides.github.com/features/mastering-markdown/)
+to write your content.
+		</pre>
+	</div>
+	<div class = "block">
+			<span>LICENSE</span>, choose a license at <a href = "https://choosealicense.com">Choose an open source license</a>
+		<pre class = "prettyprint linenums">
+Copyright (c) 2025 The Python Packaging Authority
+ 
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+ 
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+ 
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+		</pre>
+	</div>
+	<div class = "subtitle">Development</div>
+		<div class = "block">
+			<li><span>poetry install</span>
+				<ul>
+			<li>Create a virtual environment using pyproject.toml for the current project</li>
+			<li>Install dependencies</li>
+			<li>Create poetry.lock</li>
+			<li>Install the project package and executable script in the virtual environment in editable mode, equals to pip install -e .</li>
+		</ul>
+	</li>
+			<pre class = "prettyprint linenums">
+poetry install
+			</pre>
+	</div>
+		<div class = "block">
+			<span>display virtual environment</span>
+		<pre class = "prettyprint linenums">
+poetry env info
+		</pre>
+	</div>
+		<div class = "block">
+			<span>execute script in virtual environment</span>
+		<pre class = "prettyprint linenums">
+# run executable script
+poetry run myprimes
+		</pre>
+		<pre class = "prettyprint linenums">
+# run interactive python
+poetry run python
+		</pre>
+		<pre class = "prettyprint linenums">
+# run a script which uses the project package
+
+# test.py
+import primepackage
+
+print(primepackage.is_prime(13))
+
+poetry run python test.py
+		</pre>
+	</div>
+		<div class = "block">
+			<span>add new dependency</span>
+			<pre class = "prettyprint linenums">
+poetry add matplotlib
+			</pre>
+		</div>
+		<div class = "block">
+			<span>implement unit test</span>
+		<pre class = "prettyprint linenums">
+poetry run pytest
+		</pre>
+	</div>
+	<div class = "subtitle">Publish Option 1 - GitHub</div>
+		<div class = "block">
+			<span>developers push the project to a repository at GitHub</span>
+		</div>
+		<div class = "block">
+			<span>users install from GitHub</span>
+		<pre class = "prettyprint linenums">
+# pip install git+ssh://git@github.com/&lt;username&gt;/&lt;repo&gt;.git
+pip install git+ssh://git@github.com/ocean-yucca/prime1.git
+		</pre>
+	</div>
+	</body>
+</html>

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Google Cloud</title>
+		<link rel="stylesheet" href="../../css/atelier-sulphurpool-light.css" type="text/css">
+		<script src="../../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+		<style>
+			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+			div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+			span {color: red; font-weight: bold;}
+		</style>
+	</head>
+	<body>
+		<div class = "title">
+			Google APIs & Services
+		</div>
+
+		<div class = "block">
+			<li>Controls access to Google APIs & ddata scope</li>
+		</div>
+
+		<div class = "subtitle">Enable APIs & Services</div>
+		<div class = "block">
+			<li>List the enabled APIs</li>
+		</div>
+		<div class = "subtitle">Library</div>
+		<div class = "block">
+			<li>API library</li>
+		</div>
+		<div class = "subtitle">Credentials</div>
+		<div class = "block">
+			<center><img src = "img/gcp_1.png" width=90%></center>
+		</div>
+		<div class = "block">
+			<li>API Key
+				<ul>
+					<li>Simple access to <span>public data</span> or non-sensitive APIs</li>
+					<li>An API Key belongs to a project
+						<ul>
+							<li>When no restrictions, the API key can access any enabled APIs in the project</li>
+							<li>With restrictions, the API key only can access the selected APIs in the project</li>
+						</ul>
+					</li>
+					<li>APIs
+						<ul>
+							<li>Google Map APIs</li>
+							<li>Youtube Data API</li>
+							<li>Books API</li>
+							<li>Knowledge Graph API</li>
+							<li>Translation API</li>
+						</ul>
+					</li>
+				</ul>
+			</li>
+			<li>OAuth Client ID
+				<ul>
+					<li>Access on behalf of <span>a user</span> — user login + consent</li>
+					<li>Web / mobile / desktop apps with user interaction</li>
+					<li>OAuth Client IDs rely on the script/application code to specify what permissions (scopes) it is requesting for each API</li>
+					<li>APIs
+						<ul>
+							<li>Gmail API</li>
+							<li>Google Calendar API</li>
+							<li>Google Contacts API</li>
+							<li>Google Drive API</li>
+							<li>Google Sign-In (Authentication)</li>
+						</ul>
+					</li>
+				</ul>
+			</li>
+			<li>Service Account (SA)
+				<ul>
+					<center><img src = "img/gcp_2.png" width=40%></center>
+					<li>Secure <span>server-to-server</span> or <span>service-to-API</span> communication</li>
+					<li>Backend systems, automated jobs, compute resources, with fine-grained IAM access control</li>
+					<li>SA is a non-human identity, has permission via assigning IAM roles, user/group/SA impersonate the SA</li>
+					<li>APIs
+						<ul>
+							<li>Cloud Storage API</li>
+							<li>Cloud Run API</li>
+							<li>Kubernetes Engine API</li>
+							<li>Cloud Functions API</li>
+						</ul>
+					</li>
+				</ul>
+			</li>
+		</div>
+		<div class = "subtitle">OAuth consent screen</div>
+		<div class = "block">
+			<li>Contrls how the app asks users for permission to access Google account data</li>
+			<li>Branding
+				<ul>
+					<li>Define how the app appears to users, such as app name, app logo, developer contact email, application homepage, privacy policy</li>
+				</ul>
+			</li>
+			<li>Audience
+				<ul>
+					<li>Define who can use the app</li>
+					<li>Internal, users in the same organization</li>
+					<li>External + Publish app, any google user</li>
+					<li>Test users, specific users</li>
+				</ul>
+			</li>
+			<li>Clients
+				<ul>
+					<li>Create an OAuth 2.0 Client IDs</li>
+				</ul>
+			</li>
+			<li>Data Access
+				<ul>
+					<li>Two layers of permission
+						<ul>
+							<li><span>Data Access</span> define a whitelist of what permission the app can request</li>
+							<li><span>OAuth flow</span> defines what the acutal permissoins requested in the app</li>
+						</ul>
+					</li>
+				</ul>
+			</li>
+			<li>Verificaiton Center
+				<ul>
+					<li>Verification Center is required to release an OAuth app that accesses sensitive Google user data to the public</li>
+					<li>By default, does not need verification, either non-sensitive, or Testing mode's test-user limit (100 users)</li>
+				</ul>
+			</li>
+            <pre class = "prettyprint linenums">
+            </pre>
+        </div>
+		<div class = "subtitle">Reference</div>
+		<div class = "block">
+			<li><a href = "https://developers.google.com/people">People API</a></li>
+		</div>
+	</body>
+</html>
