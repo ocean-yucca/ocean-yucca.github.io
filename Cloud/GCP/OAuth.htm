@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Google Cloud</title>
+		<link rel="stylesheet" href="../../css/atelier-sulphurpool-light.css" type="text/css">
+		<script src="../../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+		<style>
+			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+			div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+			span {color: red; font-weight: bold;}
+		</style>
+	</head>
+	<body>
+		<div class = "title">
+			Google OAuth Flow
+		</div>
+
+		<div class = "subtitle">OAuth Implicit Flow</div>
+		<div class = "block">
+			<ul>
+			<li>Use cases
+				<ul>
+					<li>Client-side app using only using client_id</li>
+					<li>does not use a client secret</li>
+				</ul>
+			</li>
+		</ul>
+		</div>
+		<div class = "block">
+			<center><img src = "img/gcp_4.png" width=60%></center>
+		</div>
+		<div class = "block">
+			<ol>
+			<li>Enable People API
+				<ul>
+					<li>APIs & Services -> Library -> Google People API</li>
+					<li>Enable API</li>
+				</ul>
+			</li>
+			<li>Setup App Access Permission
+				<ul>
+					<li>APIs & Services -> OAuth consent screen -> Audience
+						<ul>
+							<li>Test users, add test users' emails</li>
+						</ul>
+					</li>
+				</ul>
+			</li>
+			<li>Create Client ID
+				<ul>
+					<li>APIs & Services -> Credentials -> Create Credentials -> OAuth client ID
+						<ul>
+							<li>Web Application</li>
+							<li>Authorized JavaScript origins, http://localhost:8080</li>
+							<li>Authorized redirect URIs, http://localhost:8080/auth</li>
+						</ul>
+					</li>
+				</ul>
+			</li>
+			</ol>
+		</div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+from flask import Flask, request, jsonify, render_template_string
+import requests
+
+app = Flask(__name__)
+
+# Home page: button to start implicit flow
+@app.route("/")
+def home():
+    return render_template_string("""
+    &lt;h2&gt;Google Contacts - Implicit Flow Demo&lt;/h2&gt;
+    &lt;a href="/login"&gt;Login with Google&lt;/a&gt;
+    """)
+
+# Redirect user to Google
+@app.route("/login")
+def login():
+    client_id = "107858899591-23696e1ca9vs61meo0h1pqfgo5j74cep.apps.googleusercontent.com"
+
+    redirect_uri = "http://localhost:8080/auth"
+    scope = "https://www.googleapis.com/auth/contacts.readonly"
+
+    auth_url = (
+        "https://accounts.google.com/o/oauth2/v2/auth"
+        "?response_type=token"
+        f"&client_id={client_id}"
+        f"&redirect_uri={redirect_uri}"
+        f"&scope={scope}"
+        "&prompt=consent"
+        "&include_granted_scopes=false"
+    )
+
+    return f"&lt;script&gt;window.location='{auth_url}'&lt;/script&gt;"
+
+# The redirect page receives the access_token in the URL fragment
+@app.route("/auth")
+def auth():
+    return render_template_string("""
+    &lt;h3&gt;Google OAuth Redirect&lt;/h3&gt;
+    &lt;p&gt;Extracting access token…&lt;/p&gt;
+
+    &lt;script&gt;
+    // Extract the fragment part (#access_token=....)
+    const hash = window.location.hash.substring(1);
+    const params = new URLSearchParams(hash);
+    const token = params.get("access_token");
+
+    if (!token) {
+        document.body.innerHTML = "&lt;p&gt;No token found.&lt;/p&gt;";
+    } else {
+        document.body.innerHTML = "&lt;p&gt;Access token received. Fetching contacts...&lt;/p&gt;";
+
+        // Send token to Flask backend
+        fetch("/fetch_contacts", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({ access_token: token })
+        })
+        .then(resp =&gt; resp.json())
+        .then(data =&gt; {
+            document.body.innerHTML = "&lt;h3&gt;Your Contacts&lt;/h3&gt;&lt;pre&gt;" + JSON.stringify(data, null, 2) + "&lt;/pre&gt;";
+        });
+    }
+    &lt;/script&gt;
+    """)
+
+# Flask backend: receives token from browser & calls Google People API
+@app.route("/fetch_contacts", methods=["POST"])
+def fetch_contacts():
+    data = request.get_json()
+    access_token = data.get("access_token")
+    print('Access token: ', access_token)
+
+    headers = {
+        "Authorization": f"Bearer {access_token}"
+    }
+
+    url = "https://people.googleapis.com/v1/people/me/connections"
+    params = {
+        "pageSize": 50,
+        "personFields": "names,emailAddresses"
+    }
+
+    response = requests.get(url, headers=headers, params=params)
+    return jsonify(response.json())
+
+if __name__ == "__main__":
+    app.run(port=8080, debug=True)
+            </pre>
+        </div>
+        <div class = "subtitle">Authorization Code Flow</div>
+        <div class = "block">
+			<center><img src = "img/gcp_6.png" width=60%></center>
+		</div>
+		<div class = "block">
+			<ol>
+			<li>Enable Cloud Storage API
+				<ul>
+					<li>APIs & Services -&gt; Library -&gt; Cloud Storage</li>
+					<li>Enable API</li>
+				</ul>
+			</li>
+			<li>Setup App Access Permission
+				<ul>
+					<li>APIs & Services -&gt; OAuth consent screen -&gt; Audience
+						<ul>
+							<li>Test users, add test users' emails</li>
+						</ul>
+					</li>
+				</ul>
+			</li>
+			<li>Create Client ID
+				<ul>
+					<li>APIs & Services -&gt; Credentials -&gt; Create Credentials -&gt; OAuth client ID
+						<ul>
+							<li>Web Application</li>
+							<li>Authorized redirect URIs, http://localhost:8080/callback</li>
+						</ul>
+					</li>
+					<li>Download credentials.json</li>
+				</ul>
+			</li>
+			<li>IAM permission
+				<ul>
+					<li>IAM & Admin -&gt; Grant Access 
+						<ul>
+							<li>Add principals</li>
+							<li>Add roles/storage.objectAdmin</li>
+						</ul>
+					</li>
+				</ul>
+			</li>
+			</ol>
+		</div>
+		<div class = "block">
+            <pre class = "prettyprint linenums">
+import os
+from flask import Flask, redirect, request, session
+from google_auth_oauthlib.flow import Flow
+from googleapiclient.discovery import build
+
+os.environ['OAUTHLIB_RELAX_TOKEN_SCOPE'] = '1'
+os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
+
+app = Flask(__name__)
+app.secret_key = os.urandom(24)
+
+CLIENT_SECRETS_FILE = "../authorization_code_credentials.json"
+SCOPES = ["https://www.googleapis.com/auth/devstorage.read_write"]
+REDIRECT_URI = "http://localhost:8080/callback"
+
+
+@app.route("/")
+def index():
+    # Create OAuth2 Flow (NO PKCE)
+    flow = Flow.from_client_secrets_file(
+        CLIENT_SECRETS_FILE,
+        scopes=SCOPES,
+        redirect_uri=REDIRECT_URI
+    )
+
+    authorization_url, state = flow.authorization_url(
+        access_type="offline",
+        include_granted_scopes="true",
+        prompt="consent"
+    )
+
+    session["state"] = state
+    return redirect(authorization_url)
+
+
+@app.route("/callback")
+def callback():
+    # Reconstruct flow with the same redirect_uri + state
+    flow = Flow.from_client_secrets_file(
+        CLIENT_SECRETS_FILE,
+        scopes=SCOPES,
+        redirect_uri=REDIRECT_URI,
+        state=session["state"]
+    )
+
+    # This extracts ?code=XXX and exchanges for token
+    flow.fetch_token(authorization_response=request.url)
+
+    credentials = flow.credentials
+
+    # Use credentials to access Google Cloud Storage
+    service = build("storage", "v1", credentials=credentials)
+
+    buckets = service.buckets().list(project="spheric-gasket-476418-h5").execute()
+
+    return {
+        "message": "Success!",
+        "buckets": buckets.get("items", [])
+    }
+
+
+if __name__ == "__main__":
+    app.run("localhost", 8080, debug=True)
+            </pre>
+        </div>
+		<div class = "subtitle">Authorization Code Flow with PKCE</div>
+		<div class = "block">
+			<center><img src = "img/gcp_5.png" width=60%></center>
+		</div>
+		<div class = "block">
+			<ul>
+				<li>Use cases
+					<ul>
+						<li>Jupyter notebooks</li>
+						<li>Desktop apps</li>
+						<li>CLI tools</li>
+						<li>Local scripts</li>
+					</ul>
+				</li>
+			</ul>
+		</div>
+		<div class = "block">
+			<ol>
+				<li>Enable Cloud Storage API
+				<ul>
+					<li>APIs & Services -&gt; Library -&gt; Cloud Storage</li>
+					<li>Enable API</li>
+				</ul>
+				</li>
+				<li>Setup App name, logo, support email, privacy policy
+					<ul>
+						<li>APIs & Services -> OAuth consent screen -> Branding</li>
+						<li>OAuth consent screen -> Branding
+							<ul>
+								<li>User Type, External</li>
+								<li>User support email, your gmail</li>
+								<li>Developer contact information, your email</li>
+							</ul>
+						</li>
+					</ul>
+				</li>
+				<li>Setup App Access Permission
+					<ul>
+						<li>APIs & Services -> OAuth consent screen -> Audience
+							<li>Test mode
+								<ul>
+									<li>Test users, add test users's emails</li>
+								</ul>
+							</li>
+						</li>
+					</ul>
+				</li>
+				<li>Create Client ID
+					<ul>
+						<li>APIs & Services -> Credentials -> Create Credentials -> OAuth client ID
+							<ul>
+								<li>Desktop App</li>
+							</ul>
+						</li>
+					</ul>
+				</li>
+				<li>Download credentials.json</li>
+			</ol>
+		</div>
+		<div class = "block">
+            <pre class = "prettyprint linenums">
+from google_auth_oauthlib.flow import InstalledAppFlow
+from google.oauth2.credentials import Credentials
+from google.cloud import storage
+
+# 1. OAuth settings
+CLIENT_SECRET_FILE = "credentials.json"
+SCOPES = ["https://www.googleapis.com/auth/devstorage.read_only"]
+
+# 2. Start Authorization Code Flow
+flow = InstalledAppFlow.from_client_secrets_file(
+    CLIENT_SECRET_FILE,
+    scopes=SCOPES
+)
+
+# This opens a browser for Google Login
+# use a local host as redirect_uri
+creds = flow.run_local_server(port=0)
+
+# 3. Use official Cloud Storage client
+storage_client = storage.Client(credentials=creds, project = 'project_id')
+
+# 4. List buckets
+buckets = list(storage_client.list_buckets())
+bucket_names = [b.name for b in buckets]
+bucket_names
+            </pre>
+        </div>
+		<div class = "block">
+			<ul>
+			<li>Use cases
+				<ul>
+					<li>Web application</li>
+					<li>Replacement for implicit flow</li>
+					<li>Running on localhost for development</li>
+				</ul>
+			</li>
+		</ul>
+		</div>
+		<div class = "block">
+			<ol>
+			<li>Enable Cloud Storage API
+				<ul>
+					<li>APIs & Services -&gt; Library -&gt; Cloud Storage</li>
+					<li>Enable API</li>
+				</ul>
+			</li>
+			<li>Setup App Access Permission
+				<ul>
+					<li>APIs & Services -&gt; OAuth consent screen -&gt; Audience
+						<ul>
+							<li>Test users, add test users' emails</li>
+						</ul>
+					</li>
+				</ul>
+			</li>
+			<li>Create Client ID
+				<ul>
+					<li>APIs & Services -&gt; Credentials -&gt; Create Credentials -&gt; OAuth client ID
+						<ul>
+							<li>Web Application</li>
+							<li>Authorized redirect URIs, http://localhost:8080/callback</li>
+						</ul>
+					</li>
+					<li>Download credentials.json</li>
+				</ul>
+			</li>
+			<li>IAM permission
+				<ul>
+					<li>IAM & Admin -&gt; Grant Access 
+						<ul>
+							<li>Add principals</li>
+							<li>Add roles/storage.objectAdmin</li>
+						</ul>
+					</li>
+				</ul>
+			</li>
+			</ol>
+		</div>
+		<div class = "block">
+            <pre class = "prettyprint linenums">
+import os
+import base64
+import hashlib
+import secrets
+from flask import Flask, redirect, request, session, jsonify
+import json
+
+import google.auth.transport.requests
+import requests
+
+from google.oauth2.credentials import Credentials
+from google.cloud import storage
+
+app = Flask(__name__)
+app.secret_key = os.urandom(24)
+
+# OAuth configuration
+with open("credentials.json") as f:
+    data = json.load(f)["web"]
+
+CLIENT_ID = data["client_id"]
+CLIENT_SECRET = data["client_secret"]
+REDIRECT_URI = data["redirect_uris"][0]
+
+AUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth"
+TOKEN_URL = "https://oauth2.googleapis.com/token"
+
+SCOPES = "https://www.googleapis.com/auth/devstorage.read_only"
+
+
+# ---- Generate PKCE values ----------------------------------------------------
+def generate_pkce_pair():
+    code_verifier = base64.urlsafe_b64encode(secrets.token_bytes(32)).rstrip(b"=").decode()
+    code_challenge = base64.urlsafe_b64encode(
+        hashlib.sha256(code_verifier.encode()).digest()
+    ).rstrip(b"=").decode()
+    return code_verifier, code_challenge
+
+
+# ---- Step 1: Login -----------------------------------------------------------
+@app.route("/")
+def index():
+    return '&lt;a href="/login"&gt;Login with Google&lt;/a&gt;'
+
+
+@app.route("/login")
+def login():
+    # Generate a PKCE verifier & challenge
+    code_verifier, code_challenge = generate_pkce_pair()
+
+    # Store in session
+    session["code_verifier"] = code_verifier
+
+    # Build Google authorization URL
+    auth_url = (
+        f"{AUTH_URL}?client_id={CLIENT_ID}"
+        f"&redirect_uri={REDIRECT_URI}"
+        f"&response_type=code"
+        f"&scope={SCOPES}"
+        f"&code_challenge={code_challenge}"
+        f"&code_challenge_method=S256"
+        f"&access_type=offline"
+        f"&prompt=consent"
+    )
+
+    return redirect(auth_url)
+
+
+# ---- Step 2: Handle callback --------------------------------------------------
+@app.route("/callback")
+def callback():
+    code = request.args.get("code")
+    code_verifier = session["code_verifier"]
+
+    # Exchange authorization code for tokens
+    data = {
+        "client_id": CLIENT_ID,
+        "client_secret": CLIENT_SECRET,
+        "code": code,
+        "grant_type": "authorization_code",
+        "redirect_uri": REDIRECT_URI,
+        "code_verifier": code_verifier,
+    }
+
+    token_response = requests.post(TOKEN_URL, data=data).json()
+
+    # Store OAuth credentials in session
+    session["credentials"] = token_response
+
+    return redirect("/list_buckets")
+
+
+# ---- Step 3: Use Google Cloud Storage API -----------------------------------
+@app.route("/list_buckets")
+def list_buckets():
+    if "credentials" not in session:
+        return redirect("/login")
+
+    creds_info = session["credentials"]
+
+    creds = Credentials(
+        creds_info["access_token"],
+        refresh_token=creds_info.get("refresh_token"),
+        token_uri=TOKEN_URL,
+        client_id=CLIENT_ID,
+        client_secret=CLIENT_SECRET,
+        scopes=[SCOPES],
+    )
+
+    # add quota project so Cloud Storage works
+    storage_client = storage.Client(credentials=creds, project="project_id")
+
+    buckets = [b.name for b in storage_client.list_buckets()]
+
+    return "&lt;h3&gt;Your Buckets:&lt;/h3&gt&lt;pre&gt" + "\n".join(buckets) + "&lt;/pre&gt"
+
+
+if __name__ == "__main__":
+    app.run(port=8080, debug=True)
+            </pre>
+        </div>
+		<div class = "subtitle">Reference</div>
+		<div class = "block">
+			<li><a href = "https://developers.google.com/people">People API</a></li>
+		</div>
+	</body>
+</html>
