@@ -524,9 +524,125 @@ if __name__ == "__main__":
     app.run(port=8080, debug=True)
             </pre>
         </div>
+        <div class = "subtitle">Service Account OAuth Flow/JWT Bear Token Flow</div>
+        <div class = "block">
+			<center><img src = "img/gcp_7.png" width=60%></center>
+		</div>
+		<div class = "block">
+			<ul>
+			<li>Use cases
+				<ul>
+					<li>Local machine</li>
+					<li>On-prem/Another Cloud</li>
+				</ul>
+			</li>
+		</ul>
+		</div>
+		<div class = "block">
+			<ol>
+			<li>Enable Cloud Storage API
+				<ul>
+					<li>APIs & Services -&gt; Library -&gt; Cloud Storage</li>
+					<li>Enable API</li>
+				</ul>
+			</li>
+			<li>Create a Service Account
+					<ul>
+						<li>IAM & Admin -> Service Accounts -> Create service account</li>
+					</ul>
+				</li>
+			<li>Create a Key for the Service Account
+				<ul>
+					<li>Open the service account created, create a json key and save</li>
+				</ul>
+			</li>
+			<li>IAM permission
+				<ul>
+					<li>IAM & Admin -&gt; Grant IAM
+						<ul>
+							<li>Edit the created service account, add roles/storage.objectAdmin, add storage bucket viewer</li>
+						</ul>
+					</li>
+				</ul>
+			</li>
+			</ol>
+		</div>
+		<div class = "block">
+            <pre class = "prettyprint linenums">
+import time
+import json
+import jwt  # PyJWT
+import requests
+
+# Load your service account file
+with open("key.json") as f:
+    sa = json.load(f)
+
+private_key = sa["private_key"]
+client_email = sa["client_email"] # service account email
+
+# Google OAuth token URL
+token_url = "https://oauth2.googleapis.com/token"
+
+# Scopes required
+scope = "https://www.googleapis.com/auth/devstorage.read_write"
+
+# JWT claim set
+issued_at = int(time.time())
+expires_at = issued_at + 3600   # 1 hour
+
+payload = {
+    "iss": client_email,
+    "scope": scope,
+    "aud": token_url,
+    "exp": expires_at,
+    "iat": issued_at,
+}
+
+# Create signed JWT (RS256 using service account private key)
+signed_jwt = jwt.encode(
+    payload,
+    private_key,
+    algorithm="RS256"
+)
+
+print("Signed JWT:")
+print(signed_jwt)
+            </pre>
+            <pre class = "prettyprint linenums">
+# OAuth token request
+response = requests.post(
+    token_url,
+    data={
+        "grant_type": "urn:ietf:params:oauth:grant-type:jwt-bearer",
+        "assertion": signed_jwt,
+    }
+)
+
+token_response = response.json()
+print("OAuth Token Response:")
+print(json.dumps(token_response, indent=2))
+
+access_token = token_response["access_token"]
+            </pre>
+            <pre class = "prettyprint linenums">
+project_id = sa["project_id"]
+
+headers = {
+    "Authorization": f"Bearer {access_token}"
+}
+
+url = f"https://storage.googleapis.com/storage/v1/b?project={project_id}"
+
+resp = requests.get(url, headers=headers)
+
+print("Buckets:")
+print(resp.json())
+            </pre>
+        </div>
 		<div class = "subtitle">Reference</div>
 		<div class = "block">
-			<li><a href = "https://developers.google.com/people">People API</a></li>
+			<li><a href = "https://google-auth.readthedocs.io/en/latest/">Google Auth</a></li>
 		</div>
 	</body>
 </html>
