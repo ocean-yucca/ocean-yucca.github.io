@@ -20,49 +20,32 @@
             <li>Private registry, GitLab Registry, ECR (AWS), ACR (Azure), GCR (Google)</li>
             <li>Local registry</li>
         </div>
-        <div class = "subtitle">Public Registry Image Naming</div>
-        <div class = "block">
-		<pre class = "prettyprint linenums">
-# Docker Hub
-# https://hub.docker.com/r/registryDomain/imageName:Tag
-https://hub.docker.com/r/lchenlangley/cat:latest
-
-# or
-# registryDomain/imageName:Tag
-lchenlangley/cat:latest
-        </pre>
-        </div>
-        <div class = "subtitle">Private Registry</div>
-        <div class = "block">
-            <li><span>ECR</span>
-                <ul>
-                    <li>One registry for one app</li>
-                    <li>Different versions of the same app are deposited in the same registry</li>
-                </ul>
-            </li>
-        </div>
         <div class = "subtitle">Login Registry</div>
         <div class = "block">
-		<pre class = "prettyprint linenums">
-docker login # login Docker Hub
-docker login [domainName] # login a private registry
+        <pre class = "prettyprint linenums">
+# login Docker Hub
+docker login 
+docker login https://index.docker.io/v1/
+
+# login a private registry
+docker login [domainName]
         </pre>
         </div>
         <div class = "subtitle">Local Registry</div>
         <div class = "block">
 		<pre class = "prettyprint linenums">
 # start a local registry
-docker run -d -p 5000:5000 --restart=always --name registry registry:2
+docker run -d -p 8000:5000 --restart=always --name registry registry:2
 
 # push image
-docker tag redis localhost:5000/redis
-docker push localhost:5000/redis
+docker tag redis localhost:8000/redis
+docker push localhost:8000/redis
 
 # pull image
-docker pull localhost:5000/redis
+docker pull localhost:8000/redis
 
 # list images on local registry
-http://localhost:5000/v2/_catalog
+http://localhost:8000/v2/_catalog
         </pre>
         </div>
         <div class = "subtitle">Multiple Registries</div>

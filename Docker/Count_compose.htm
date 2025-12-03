@@ -87,9 +87,9 @@ services:
     image: lchenlangley/count
     build: .
     ports:
-      - 5000:5000
+      - 8000:5000
     volumes:
-      - .:/code # enable hot reloading
+      - $PWD:/code # enable hot reloading
     environment:
       - MYREDIS_HOST=redisserver
       - FLASK_ENV=development
@@ -111,7 +111,7 @@ services:
 docker-compose up
 
 # 6. Access the app
-http://localhost:5000/
+http://localhost:8000/
 
 # 7. Continue to edit app.py with hot reloading
         </pre>

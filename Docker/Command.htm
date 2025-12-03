@@ -38,6 +38,7 @@ docker rmi $(docker images -a -q)
 # fetch an Docker image from Docker Registry
 docker pull [imageName]
 docker image pull [imageName]
+docker pull [registry/account/imageName:tag@sha256]
         </pre>
         <li>Create Image</li>
 		<pre class = "prettyprint linenums">
@@ -227,7 +228,15 @@ docker volume rm [volumeName]
         <div class = "subtitle">Docker Registry</div>
         <div class = "block">
 		<pre class = "prettyprint linenums">
-docker login [registry_url] # log in a registry, default registry is Docker Hub
+# log in a registry and add store credentials to ~/.docker/config.json
+# docker login [registry_url]
+
+# default registry is Docker Hub
+docker login
+docker login https://index.docker.io/v1/
+
+# logout
+docker logout
         </pre>
         </div>
         <div class = "subtitle">Others</div>
