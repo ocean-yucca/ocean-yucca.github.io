@@ -151,6 +151,107 @@ if __name__ == "__main__":
     app.run(port=8080, debug=True)
             </pre>
         </div>
+        <div class = "subtitle">Out-of-Band Authorization Code Flow</div>
+		<div class = "block">
+			<center><img src = "img/gcp_8.png" width=45%></center>
+		</div>
+		<div class = "block">
+			<ol>
+				<li>Use Cases
+					<ul>
+						<li>Servers with no browser and no listening port</li>
+					</ul>
+				</li>
+			</ol>
+		</div>
+		<div class = "block">
+			<ol>
+				<li>Enable People API
+				<ul>
+					<li>APIs & Services -> Library -> Google People API</li>
+					<li>Enable API</li>
+				</ul>
+			</li>
+			<li>Setup App Access Permission
+				<ul>
+					<li>APIs & Services -> OAuth consent screen -> Audience
+						<ul>
+							<li>Test users, add test users' emails</li>
+						</ul>
+					</li>
+				</ul>
+			</li>
+				<li>Create Client ID
+					<ul>
+						<li>APIs & Services -> Credentials -> Create Credentials -> OAuth client ID
+							<ul>
+								<li>Desktop App</li>
+							</ul>
+						</li>
+					</ul>
+				</li>
+				<li>Download credentials.json</li>
+			</ol>
+		</div>
+		<div class = "block">
+            <pre class = "prettyprint linenums">
+from google_auth_oauthlib.flow import Flow
+from googleapiclient.discovery import build
+
+# ======================================
+# CONFIGURATION
+# ======================================
+SCOPES = ["https://www.googleapis.com/auth/contacts.readonly"]
+CREDENTIALS_FILE = "credentials.json"
+
+# ======================================
+# STEP 1: Initialize flow
+# ======================================
+flow = Flow.from_client_secrets_file(
+    CREDENTIALS_FILE,
+    scopes=SCOPES,
+    redirect_uri="urn:ietf:wg:oauth:2.0:oob"  # special URI for non-local environments
+)
+
+# ======================================
+# STEP 2: Get authorization URL
+# ======================================
+auth_url, _ = flow.authorization_url(prompt="consent")
+print("\n🔗 Go to this URL and authorize the app:\n")
+print(auth_url)
+
+# ======================================
+# STEP 3: Paste authorization code
+# ======================================
+code = input("\n📋 Enter the authorization code here: ").strip()
+
+# ======================================
+# STEP 4: Exchange code for token
+# ======================================
+flow.fetch_token(code=code)
+creds = flow.credentials
+print("✅ Access token obtained successfully.")
+
+# ======================================
+# STEP 5: Use the credentials with People API
+# ======================================
+service = build("people", "v1", credentials=creds)
+results = service.people().connections().list(
+    resourceName="people/me",
+    personFields="names,emailAddresses",
+).execute()
+
+connections = results.get("connections", [])
+print(f"✅ Retrieved {len(connections)} contacts")
+for person in connections:
+    names = person.get("names", [])
+    emails = person.get("emailAddresses", [])
+    if names:
+        print("Name:", names[0].get("displayName"))
+    if emails:
+        print("Email:", emails[0].get("value"))
+            </pre>
+        </div>
         <div class = "subtitle">Authorization Code Flow</div>
         <div class = "block">
 			<center><img src = "img/gcp_6.png" width=60%></center>
