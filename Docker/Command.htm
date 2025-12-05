@@ -35,9 +35,11 @@ docker rmi $(docker images -a -q)
         </pre>
         <li>Pull Image</li>
 		<pre class = "prettyprint linenums">
-# fetch an Docker image from Docker Registry
-docker pull [imageName]
+# fetch an image from Docker Hub
+docker pull [imageName] # fetch image from docker.io/library/[imageName]
 docker image pull [imageName]
+
+# fetch image from a registry
 docker pull [registry/account/imageName:tag@sha256]
         </pre>
         <li>Create Image</li>
