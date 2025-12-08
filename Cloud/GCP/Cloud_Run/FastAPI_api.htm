@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Google Cloud</title>
+		<link rel="stylesheet" href="../../../css/atelier-sulphurpool-light.css" type="text/css">
+		<script src="../../../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+		<style>
+			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+			div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+			span {color: red; font-weight: bold;}
+		</style>
+	</head>
+	<body>
+		<div class = "title">
+			FastAPI API
+		</div>
+
+		<div class = "block">
+            Create API server with docker image
+            <ul>
+                <li>Pros
+                    <ul>
+                        <li>Multiple access pathes</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+        <div class = "subtitle">Server Side</div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+# app.py
+from fastapi import FastAPI, Body, Header
+from fastapi.responses import JSONResponse
+ 
+app = FastAPI()
+ 
+@app.post("/message")
+async def get_message(name:str = Body(...), password:str = Body(...)):
+    return JSONResponse({'name':name, 'message':"Hello World!"})
+ 
+@app.get("/data")
+async def get_data(name:str = Header(...), password:str = Header(...)):
+    return JSONResponse({'name':name, 'data': 'content'})
+            </pre>
+        </div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+# requirements.txt
+fastapi[standard]
+uvicorn
+            </pre>
+        </div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+# Dockerfile
+# Use an official Python runtime as a parent image
+FROM python:3.9-slim
+
+# Set the working directory in the container
+WORKDIR /app
+
+# Copy the current directory contents into the container at /app
+COPY . /app
+
+# Install dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Expose port 8080 for the Cloud Run service
+EXPOSE 8080
+
+# Define the function to run when the container starts
+# CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+CMD ["fastapi", "dev", "app.py", "--host", "0.0.0.0", "--port", "8080"]
+            </pre>
+        </div>
+        <div class = "subtitle">Setup</div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+# login
+gcloud auth login
+
+# select project
+gcloud auth set project [PROJECT_ID]
+
+# add a list of registries in Artifact Registry to ~/.docker/config.json
+gcloud auth configure-docker
+            </pre>
+        </div>
+        <div class = "subtitle">Build and Deploy</div>
+        <div class = "block">
+            <center><img src = "img/cloud_run_2.png" width=60%></center>
+        </div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+# build and push with Cloud Build
+# gcloud builds submit --tag gcr.io/[project_id]/[image_name]
+gcloud builds submit --tag gcr.io/spheric-gasket-476418-h5/fastapi_api
+
+# deploy
+gcloud run deploy myapi \
+  --image=gcr.io/$GOOGLE_CLOUD_PROJECT/fastapi_api \
+  --region=us-east1 \
+  --allow-unauthenticated
+            </pre>
+        </div>
+        <div class = "subtitle">Client Side</div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+import requests
+ 
+url = "api_url"
+ 
+resp = requests.post(f"{url}/message", json={"name": "lin", "password": "my_password"})
+result = resp.json()
+print(result)
+
+headers = {"name": 'lin', 'password': 'my_password', "Accept": "application/json"}
+r = requests.get(f"{url}/data", headers=headers)
+result = r.json()
+print(result)
+
+            </pre>
+        </div>
+	</body>
+</html>

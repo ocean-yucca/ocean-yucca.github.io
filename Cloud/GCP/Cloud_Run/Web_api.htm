@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Google Cloud</title>
+		<link rel="stylesheet" href="../../../css/atelier-sulphurpool-light.css" type="text/css">
+		<script src="../../../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+		<style>
+			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+			div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+			span {color: red; font-weight: bold;}
+		</style>
+	</head>
+	<body>
+		<div class = "title">
+			Web API
+		</div>
+
+		<div class = "block">
+			Create API on a web-based editor
+			<ul>
+				<li>Pros
+					<ul>
+						<li>Simple</li>
+					</ul>
+				</li>
+				<li>Cons
+					<ul>
+						<li>Cannot upload files or models</li>
+						<li>One access point</li>
+					</ul>
+				</li>
+			</ul>
+		</div>
+		<div class = "subtitle">Serve Side</div>
+        <div class = "block">
+            Cloud Run -&gt; Services -&gt; Deploy container -&gt; Use an inline editor to create a function
+            <pre class = "prettyprint linenums">
+import functions_framework
+from flask import Flask, request, jsonify
+
+@functions_framework.http
+def hello_http(request):
+    request_json = request.get_json(silent=True)
+
+    if request_json and 'name' in request_json:
+        name = request_json['name']
+        return jsonify(name = name, data='Hello World!')
+    else:
+        return jsonify(data='Need input ...')
+            </pre>
+        </div>
+        <div class = "subtitle">Client Side</div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+import requests
+ 
+url = "api_url"
+ 
+# hello_http is called no matter what the path is
+resp = requests.post(f"{url}", json={"name": "lin", "password": "my_password"})
+result = resp.json()
+print(result)
+
+resp = requests.post(f"{url}/data", json={"name": "lin", "password": "my_password"})
+result = resp.json()
+print(result)
+
+resp = requests.post(f"{url}/hello_http", json={"name": "lin", "password": "my_password"})
+result = resp.json()
+print(result)
+
+resp = requests.post(f"{url}/bye_htpp", json={"name": "lin", "password": "my_password"})
+result = resp.json()
+print(result)
+            </pre>
+        </div>
+	</body>
+</html>
