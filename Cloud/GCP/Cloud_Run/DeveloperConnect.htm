@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Google Cloud</title>
+		<link rel="stylesheet" href="../../../css/atelier-sulphurpool-light.css" type="text/css">
+		<script src="../../../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+		<style>
+			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+			div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+			span {color: red; font-weight: bold;}
+		</style>
+	</head>
+	<body>
+		<div class = "title">
+			CI/CD with Developer Connect
+		</div>
+
+		<div class = "block">
+            <center><img src = "img/cloud_run_5.png" width=60%></center>
+        </div>
+        <div class = "subtitle">Steps</div>
+        <div class = "block">
+            <ol>
+                <li>Create Project, <a href = "Intro.htm">source code</a></li>
+                <li>Push to a <a href = "https://github.com/ocean-yucca/click">repository</a> on GitHub</li>
+                <li>Setup connection on <span>Developer Connect</span></li>
+                <li>Add the role for the <span>Service Account</span></li>
+                <li>Deploy on <span>Cloud Run</span></li>
+                <li>Access the application</li>
+                <li>Update code and push it to the repository on GitHub</li>
+                <li>Access the application to view the update</li>
+            </ol>
+        </div>
+        <div class = "subtitle">Developer Connect</div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+# Access Developer Connect, https://console.cloud.google.com/developer-connect
+# Git repositories -&gt; Connections -&gt; Create connection -&gt; GitHub
+# Set location and name, click Connect
+# Connect a GitHub account and select repositories
+# Click Link to link the selected repository
+            </pre>
+        </div>
+        <div class = "subtitle">Service Account</div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+# Access IAM & Admin -&gt; Service Accounts
+# identify the service account which is PROJECT_ID-compute@developer.gserviceaccount.com
+# Add the role of Developer Donnect Token Accessor
+            </pre>
+        </div>
+        <div class = "subtitle">Cloud Run</div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+# Deploy container -&gt; Continuously deploy from a repository &gt; Developer Connect
+# Click Set up with Developer Connect
+# Select repository and branch, click Save
+# Create deployment
+            </pre>
+        </div>
+	</body>
+</html>
