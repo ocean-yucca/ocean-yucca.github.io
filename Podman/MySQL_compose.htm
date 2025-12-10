@@ -24,24 +24,36 @@
 		<div class = "block">
 		<pre class = "prettyprint linenums">
 # docker-compose.yml
-version: "3.9"  # optional since v1.27.0
 services:
-  mysqlserver:
-    image: mysql:8.0.12
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: mydb
+      MYSQL_USER: user
+      MYSQL_PASSWORD: userpass
     volumes:
-      - type: volume
-        source: sandbox-home
-        target: /var/lib/mysql
-    environment:
-      - MYSQL_ROOT_PASSWORD=root
-  phpmyadmin:
-    image: phpmyadmin/phpmyadmin
+      - mysql_data:/var/lib/mysql
     ports:
-      - 8080:80
+      - "3306:3306"
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: phpmyadmin
+    restart: always
+    depends_on:
+      - mysql
     environment:
-      - PMA_HOST=mysqlserver
+      PMA_HOST: mysql         # must match mysql service name
+      PMA_USER: root
+      PMA_PASSWORD: root
+    ports:
+      - "8080:80"
+
 volumes:
-  sandbox-home:
+  mysql_data:
 		</pre>
 		</div>
 		<div class = "block">

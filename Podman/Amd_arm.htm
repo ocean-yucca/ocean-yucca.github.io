@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Podman</title>
+		<link rel="stylesheet" href="../css/atelier-sulphurpool-light.css" type="text/css">
+		<script src="../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+		<style>
+			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+			div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+			span {color: red; font-weight: bold;}
+		</style>
+	</head>
+	<body>
+		<div class = "title">
+			Linux & Mac Images
+		</div>
+		<div class = "subtitle">Create Project</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+# Dockerfile
+FROM python:3
+WORKDIR /usr/src/app
+COPY . .
+RUN pip install --no-cache-dir -r requirements.txt
+EXPOSE 8080
+CMD ["python", "./app.py"]
+		</pre>
+		</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+# requirements.txt
+dash
+		</pre>
+		</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+# app.py
+import dash
+from dash import html
+from dash.dependencies import Input, Output
+
+app = dash.Dash(__name__)
+server = app.server
+
+num_click = 0
+
+app.layout = html.Div([
+    html.Button('Click', id = 'click'),
+    html.Div('0', id = 'content')
+        ])
+
+@app.callback(
+    Output('content', 'children'),
+    Input('click', 'n_clicks'))
+def display_hover_data(c):
+    if c:
+        global num_click
+        num_click += 1
+        return num_click
+    else:
+        return 0
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=8080, debug=True)
+		</pre>
+		</div>
+        <div class = "subtitle">Create arm64 Image</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+# create arm64 image on Mac
+# arm64 is for Mac chips
+# podman has no buildx in docker
+podman build -t lchenlangley/click:arm64 .
+		</pre>
+		</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+# check archiecture
+podman inspect Image_ID --format '{{.Architecture}}'
+		</pre>
+		</div>
+		<div class = "subtitle">Push arm64 Image to Registry</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+# push the arm64 image to Docker Hub
+podman login docker.io
+
+podman push lchenlangley/click:arm64
+		</pre>
+		</div>
+		<div class = "subtitle">Create amd64 Image</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+# create amd64 image on Mac
+# amd64 is for x86-64 chips
+
+# create image and push to registry without load the image to local
+podman build --platform linux/amd64 -t lchenlangley/click:amd64 .
+		</pre>
+		</div>
+		<div class = "subtitle">Push amd64 Image to Registry</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+# push the arm64 image to Docker Hub
+podman push lchenlangley/click:amd64
+		</pre>
+		</div>
+        <div class = "subtitle">Deployment</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+# pull image to local on Mac
+podman pull lchenlangley/click:arm64
+
+# podman run -p [docker_host_port]:[container_port] [image_name]
+podman run -p 8080:8080 lchenlangley/click:arm64
+		</pre>
+		</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+# open on web browser
+# host_ip:host_port
+http://localhost:8080
+		</pre>
+		</div>
+		<div class = "subtitle">Reference</div>
+		<div class = "block">
+			<li><a href = "https://docs.podman.io/en/v5.5.2/markdown/podman-build.1.html">Documentation</a></li>
+		</div>
+	</body>
+</html>

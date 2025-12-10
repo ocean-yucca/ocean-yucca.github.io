@@ -15,9 +15,10 @@
 		<div class = "title">
 			Podman Demo
 		</div>
-        <div class = "subtitle">Dockerfile</div>
+        <div class = "subtitle">Create Project</div>
 		<div class = "block">
 		<pre class = "prettyprint linenums">
+# Dockerfile
 FROM node:8
 WORKDIR /app
 COPY package*.json ./
@@ -27,6 +28,34 @@ EXPOSE 3333
 CMD ["node", "app.js"]
         </pre>
         </div>
+        <div class = "block">
+		<pre class = "prettyprint linenums">
+# package.json
+{
+  "name": "node8-app",
+  "version": "1.0.0",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "express": "4.17.1"
+  }
+}
+		</pre>
+		</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+# Dockerfile
+FROM node:8
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
+COPY . .
+EXPOSE 3333
+CMD ["node", "app.js"]
+		</pre>
+		</div>
         <div class = "block">
             <p style = "text-align:center;"><img src = "img/Podman_2.png" width = "30%"></p>
 		</div>
