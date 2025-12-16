@@ -72,6 +72,8 @@ def test_answer():
         </div>
         <div class = "block">
 			<pre class = "prettyprint linenums">
+# pytest --pyargs [package_name], pytest to look for tests inside a Python package
+# test in project folder
 pytest --pyargs p
             </pre>
         </div>
@@ -107,7 +109,7 @@ python -m pytest
 		</div>
 		<div class = "subtitle">Layout 3</div>
 		<div class = "block">
-            <p style = "text-align:center;"><img src = "./img/pytest_2.png" width = "30%"></p>
+            <p style = "text-align:center;"><img src = "./img/pytest_7.png" width = "30%"></p>
         </div>
 		<div class = "block">
 			<pre class = "prettyprint linenums">
@@ -122,10 +124,21 @@ from m import inc
 def test_answer():
     assert inc(3) == 4
 			</pre>
+			<pre class = "prettyprint linenums">
+# pyproject.toml
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.pytest.ini_options]
+testpaths = ["test"]
+python_files = ["test_*.py"]
+			</pre>
 		</div>
 		<div class = "block">
 			<pre class = "prettyprint linenums">
-python -m pytest
+pip install -e .
+pytest
 			</pre>
 		</div>
 		<div class = "subtitle">Layout 4</div>
