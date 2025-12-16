@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+
+<html>
+
+	<head>
+
+		<title>Python</title>
+
+		<link rel="stylesheet" href="../css/atelier-sulphurpool-light.css" type="text/css">
+
+		<script src="../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+
+		<style>
+
+			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+
+			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+
+			div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+			span {color:red; font-weight: bold}
+
+		</style>
+
+	</head>
+
+	<body>
+
+		<div class = "title">
+			Virtual Environment
+		</div>
+
+		<div class = "subtitle">uv</div>
+		<div class = "block">
+			<ul>
+				<li><span>One</span> project with <span>one</span> virtual environment</li>
+				<li>Create a virtual environment with a Python distribution Python downloaded by uv from Astral’s trusted Python distribution sources</li>
+			</ul>
+			<pre class = "prettyprint linenums">
+# create virtual environment
+# uv venv .[venv_name]
+uv venv # default name is .venv
+uv venv .venv
+
+# create virtual environment with specific python version
+# uv venv .[venv_name] --python [version]
+uv venv .venv --python 3.10.19
+
+# activate virtual environment
+# source .[venv_name]/bin/activate
+source .venv/bin/activate
+
+# deactivate
+deactivate
+
+# remove virtual environment
+# rm -rf .[venv_name]
+rm -rf .venv
+			</pre>
+		</div>
+		<div class = "subtitle">poetry</div>
+		<div class = "block">
+			<ul>
+				<li><span>One</span> project with <span>one</span> virtual environment</li>
+			</ul>
+			<pre class = "prettyprint linenums">
+# install python3.11 and python3.13 with pyenv
+
+# create virtual environment if not exist
+# activate virtual environment if exist
+poetry env use python3.11
+
+# list virtual environment
+poetry env list
+
+# change virtual environment
+# create virtual environment if not exist
+# activate virtual environment if exist
+poetry env use python3.13
+
+# check python version
+poetry run python --version
+
+# information of virtual environment
+poetry env info
+
+# no need to deactivate
+
+# remove a virtual environment
+poetry env remove python3.11
+			</pre>
+		</div>
+		<div class = "subtitle">conda</div>
+		<div class = "block">
+			<ul>
+				<li><span>One</span> virtual environment for <span>multiple</span> projects</li>
+				<li>Create a virtual environment with a Conda own Python distribution</li>
+			</ul>
+			<pre class = "prettyprint linenums">
+# create virtual environment with specific python version
+conda create -n myenv python=3.11
+
+# list conda virtual environments
+conda env list
+
+# activate a virtual environment
+# conda activate [venv_name]
+conda activate myenv
+
+# deactivate
+conda deactivate
+
+# remove a virtual environment
+# conda remove -n [venv_name] --all
+conda remove -n myenv --all
+			</pre>
+		</div>
+		<div class = "subtitle">virtualenv</div>
+		<div class = "block">
+			<ul>
+				<li><span>One</span> project with <span>one</span> virtual environment</li>
+				<li>Create a virtual environment with the system Python version or the version specified by pyenv</li>
+			</ul>
+			<pre class = "prettyprint linenums">
+# create virtual environment
+# virtualenv .[venv_name]
+virtualenv .venv # use system python version
+python -m virtualenv .venv # use the python version specified by pyenv
+
+# create virtual environment with a specific python version
+pyenv install 3.13.11
+pyenv local 3.13.11
+python -m virtualenv .venv
+
+# activate virtual environment
+# source .[venv_name]/bin/activate
+source .venv/bin/activate
+
+# deactivate
+deactivate
+
+# remove virtual environment
+# rm -rf .[venv_name]
+rm -rf .venv
+			</pre>
+		</div>
+		<div class = "subtitle">venv</div>
+		<div class = "block">
+			<ul>
+				<li><span>One</span> project with <span>one</span> virtual environment</li>
+				<li>Create a virtual environment with the current running Python version</li>
+			</ul>
+			<pre class = "prettyprint linenums">
+# create virtual environment
+# python -m venv .[venv_name]
+python -m venv .vname
+
+# create virtual environment with specific python version
+pyenv install 3.13.11
+pyenv local 3.13.11
+python -m venv .vname
+
+# activate virtual environment
+# source .[venv_name]/bin/activate
+source .vname/bin/activate
+
+# deactivate
+deactivate
+
+# remove virtual environment
+# rm -rf .[venv_name]
+rm -rf .vname
+			</pre>
+		</div>
+    </body>
+</html>

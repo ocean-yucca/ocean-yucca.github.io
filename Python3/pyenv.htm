@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+
+<html>
+
+	<head>
+
+		<title>Python</title>
+
+		<link rel="stylesheet" href="../css/atelier-sulphurpool-light.css" type="text/css">
+
+		<script src="../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+
+		<style>
+
+			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+
+			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+
+			div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+
+		</style>
+
+	</head>
+
+	<body>
+
+		<div class = "title">
+			pyenv
+		</div>
+
+		<div class = "subtitle">List Python Versions</div>
+		<div class = "block">
+			<pre class = "prettyprint linenums">
+# list available Python versions
+pyenv install --list
+			</pre>
+			<pre class = "prettyprint linenums">
+# list installed versions
+pyenv versions
+			</pre>
+		</div>
+		<div class = "subtitle">Install Python Versions</div>
+		<div class = "block">
+			<pre class = "prettyprint linenums">
+# install python version
+pyenv install 3.11.7
+			</pre>
+		</div>
+		<div class = "subtitle">Global</div>
+		<div class = "block">
+			<pre class = "prettyprint linenums">
+# change python version
+# default python version is system
+# pyenv global select a python version for all directories
+pyenv global 3.11.7
+			</pre>
+		</div>
+		<div class = "subtitle">Local</div>
+		<div class = "block">
+			<pre class = "prettyprint linenums">
+# select a python version for the current directory
+# create .python-version which specify the python version for the current directory
+pyenv local 3.11.7
+			</pre>
+		</div>
+    </body>
+</html>
