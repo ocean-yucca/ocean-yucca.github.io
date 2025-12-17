@@ -16,15 +16,14 @@
 			Source Code
 		</div>
 		<div class = "block">
-			<span>generator</span>
+			<span>src/primepackage/generator.py</span>
 		<pre class = "prettyprint linenums">
-#!/usr/bin/python
-
 """A Python program generating a list of prime numbers and output them into a csv file
 
 """
 
-from primepackage import get_n_prime, write_primes, read_primes
+from primepackage.primeio import write_primes, read_primes
+from primepackage.primemodule import get_n_prime
 
 def main():
     """Generate 100 prime numbers and output it into output.csv file
@@ -51,14 +50,14 @@ if __name__ == '__main__':
 		</pre>
 		</div>
 		<div class = "block">
-			<span>primepackage/__init__.py</span>
+			<span>src/primepackage/__init__.py</span>
 		<pre class = "prettyprint linenums">
 from primepackage.primeio import write_primes, read_primes
 from primepackage.primemodule import is_prime, get_n_prime
 		</pre>
 		</div>
 		<div class = "block">
-			<span>primepackage/primeio.py</span>
+			<span>src/primepackage/primeio.py</span>
 		<pre class = "prettyprint linenums">
 """Function for io operations
 
@@ -119,7 +118,7 @@ def read_primes(file_name):
 		</pre>
 		</div>
 		<div class = "block">
-			<span>primepackage/primemodule.py</span>
+			<span>src/primepackage/primemodule.py</span>
 		<pre class = "prettyprint linenums">
 """Functions for prime numbers
 
@@ -194,5 +193,38 @@ def get_n_prime(num):
         current_num += 1
 		</pre>
 		</div>
+        <div class = "block">
+            <span>test/test_is_prime.py</span>
+        <pre class = "prettyprint linenums">
+import unittest
+from primepackage import is_prime
+ 
+class Test_is_prime(unittest.TestCase):
+ 
+    def setUp(self):
+        # Set up database, parameters before each method is tested ...
+        self.fixture = 10
+ 
+    def tearDown(self):
+        # Tear down database, parameters after each method is tested ...
+        del self.fixture
+ 
+    def test_numbers(self):
+        self.assertEqual(is_prime(2), True)
+        self.assertEqual(is_prime(8), False)
+        self.assertEqual(is_prime(1), False)
+        self.assertEqual(is_prime(83), True)
+        self.assertEqual(is_prime(self.fixture), False)
+ 
+    def test_raises(self):
+        with self.assertRaises(ValueError):
+            is_prime(0)
+            is_prime(3.14)
+            is_prime('Hello')
+ 
+if __name__ == '__main__':
+    unittest.main()
+        </pre>
+    </div>
 	</body>
 </html>
