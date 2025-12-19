@@ -15,6 +15,9 @@
 		<div class = "title">
 			Build
 		</div>
+		<div class = "block">
+		<p style = "text-align:center;"><img src = "img/build_3.png" width = "60%"></p>
+	</div>
 <div class = "subtitle">1. Setup files</div>
 		<div class = "block">
 			<li><a href = "../Unittest_source.htm">Source Code</a></li>
@@ -77,6 +80,7 @@ recursive-include doc/_build/html *
 # Python
 # ================================
 __pycache__/
+*.py[co]
 
 # ================================
 # Virtual environments
@@ -226,7 +230,7 @@ pip uninstall linlangleyprimecosmos
 # uv pip uninstall linlangleyprimecosmos, when use uv venv
 		</pre>
 	</div>
-		<div class = "subtitle">Pypi</div>
+		<div class = "subtitle">PyPI</div>
 		<div class = "block">
 			<li><a href = "https://pypi.org/">Register</a> an account at pypi.org</li>
 			<li>Create a token in <span>Account Setting</span> on pypi.org</li>
@@ -294,201 +298,128 @@ conda install anaconda-client conda-build # install need modules
 		</div>
 		<div class = "block">
 		<pre class = "prettyprint linenums">
-# for pip package
+# test
+pip install -e '.[test]' # editable install and install pytest and pytest-cov
+# uv pip install -e '.[test]', when use uv venv
+pytest
+
 # build
-python setup.py sdist #  build a source file (.tar.gz) in /dist folder
+# add recipe/meta.yaml
+# built package locates in /opt/anaconda3/conda-bld
+conda build recipe/
 
 # deposit
-anaconda upload dist/* # deposite the archive file to Conda repository
+andaconda login
+anaconda upload /opt/anaconda3/conda-bld/noarch/linlangleyprime-0.3-py_0.conda
+
+# run executable script
+primegen
+ 
+# import package
+import primepackage
 
 # install
-pip install -i https://pypi.anaconda.org/linchenva/simple linlangleyprime
+conda install linchenva::linlangleyprime
 
 # uninstall
-pip uninstall linlangleyprime
+conda uninstall linlangleyprime
 		</pre>
 		</div>
 		<div class = "block">
 		<pre class = "prettyprint linenums">
-# for a package existing at PyPI
-# 1. create meta.yaml
-conda skeleton pypi linlangleyprime # create a meta.yaml in /linlangleyprime folder
-
-# 2. build
-conda-build linlangleyprime # create ~/anaconda3/envs/[environment_name]/conda-bld/osx-64/linlangleyprime-0.3-py39_0.tar.bz2
-
-# 3. deposit
-anaconda upload ~/anaconda3/envs/[environment_name]/conda-bld/osx-64/linlangleyprime-0.3-py39_0.tar.bz2
-
-# 4. install
-conda install -c linchenva linlangleyprime
-
-# 5. uninstall
-conda install linlangleyprime
-		</pre>
-		<pre class = "prettyprint linenums">
-# meta.yaml
+# Prime/recipe/meta.yaml
 {% set name = "linlangleyprime" %}
 {% set version = "0.3" %}
 
+# package information
 package:
   name: "{{ name|lower }}"
   version: "{{ version }}"
 
+# source path
 source:
-  url: "https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz"
-  sha256: 5c7c41ba47d6b0226a4d66e3be34642298c64e7c8ea1d9675cefd0a7a6f4d7e0
+  path: ..
 
+# build
 build:
-  number: 0
+  noarch: python
+  number: 0 # build number in name + version + build string + build number
   script: "{{ PYTHON }} -m pip install . -vv"
 
 requirements:
-  host:
-    - certifi ==2020.12.5
+  host: # build/install packages
+    - python
     - pip
+    - certifi
+  run: # dependency packages
     - python
-  run:
-    - certifi ==2020.12.5
-    - python
+    - certifi
+    - dash
 
+# test run while building
 test:
   imports:
     - primepackage
 
 about:
-  home: "http://lin-chen-va.github.io"
+  home: "http://ocean-yucca.github.io"
   license: "GNU General Public (GPL)"
   license_family: LGPL
-  license_file:
-  summary: "Demo for building a Python project"
-  doc_url:
-  dev_url:
+  summary: "Demo for building a Python project with conda build"
 
 extra:
   recipe-maintainers:
     - your-github-id-here
 		</pre>
 		</div>
+		<div class = "subtitle">GCP Artifact Registry</div>
 		<div class = "block">
 		<pre class = "prettyprint linenums">
-# for a package at a git repository
-# 1. create meta.yaml in /linlangleyprime folder
+# test
+pip install -e '.[test]' # editable install and install pytest and pytest-cov
+# uv pip install -e '.[test]', when use uv venv
+pytest
 
-# 2. build
-conda-build linlangleyprime # create ~/anaconda3/envs/[environment_name]/conda-bld/osx-64/linlangleyprime-0.3-py39_0.tar.bz2
+# build
+pip install -e '.[build]' # editable install and install build
+# uv pip install -e '.[build]', when use uv venv
+rm -rf dist # remove dist folder if exist
+python -m build # build .whl file in dist folder
 
-# 3. deposit
-anaconda upload ~/anaconda3/envs/[environment_name]/conda-bld/osx-64/linlangleyprime-0.3-py39_0.tar.bz2
+# publish
+pip install -e '.[publish]' # editable install and install twine
+# uv pip install -e '.[publish]', when use uv venv
+# login GCP
+gcloud auth login
+# create a repo
+gcloud artifacts repositories create my-pypi-repo \
+  --repository-format=python \
+  --location=us-east1 \
+  --description="Private repo"
+# grant IAM permission, roles/artifactregistry.writer
+# upload package to https://[region]-python.pkg.dev/[project_name]/[repo_name]/
+gcloud auth application-default login
+twine upload \
+  --repository-url https://us-east1-python.pkg.dev/projectdevenv/my-pypi-repo/ \
+  -u oauth2accesstoken \
+  -p "$(gcloud auth application-default print-access-token)" \
+  dist/*
 
-# 4. install
-conda install -c linchenva linlangleyprime
+# install
+# grant IAM permission, roles/artifactregistry.reader
+pip install keyring
+pip install keyrings.google-artifactregistry-auth
 
-# 5. uninstall
-conda install linlangleyprime
+pip install --index-url https://us-east1-python.pkg.dev/projectdevenv/my-pypi-repo/simple linlangleyprimecosmos
+
+# install in uv virtual environment
+ACCESS_TOKEN=$(gcloud auth print-access-token)
+
+uv pip install \
+  --index-url https://oauth2accesstoken:$ACCESS_TOKEN@us-east1-python.pkg.dev/projectdevenv/my-pypi-repo/simple \
+  linlangleyprimecosmos
 		</pre>
-		<pre class = "prettyprint linenums">
-# meta.yaml
-{% set name = "linlangleyprime" %}
-{% set version = "0.3" %}
-
-package:
-  name: "{{ name|lower }}"
-  version: "{{ version }}"
-
-source:
-  git_rev: master
-  git_url: https://github.com/lin-chen-Langley/prime
-
-build:
-  number: 0
-  script: "{{ PYTHON }} -m pip install . -vv"
-
-requirements:
-  host:
-    - certifi ==2020.12.5
-    - pip
-    - python
-  run:
-    - certifi ==2020.12.5
-    - python
-
-test:
-  imports:
-    - primepackage
-
-about:
-  home: "http://lin-chen-langley.github.io"
-  license: "GNU General Public (GPL)"
-  license_family: LGPL
-  license_file:
-  summary: "Demo for building a Python project"
-  doc_url:
-  dev_url:
-
-extra:
-  recipe-maintainers:
-    - your-github-id-here
-		</pre>
-		</div>
-		<div class = "subtitle">pyinstaller</div>
-		<div class = "block">
-			<li>App is self-contained</li>
-			<li>Users do not need to have Python installed at all</li>
-			<li>Distribute an application for more than one OS, for example both Windows and Mac OS X, must install PyInstaller on each platform and bundle the app separately on each</li>
-		</div>
-		<div class = "block">
-		<pre class = "prettyprint linenums">
-# hello.py
-import pandas
-
-def f():
-    print('Hello World!')
-
-if __name__ == '__main__':
-    f()
-		</pre>
-		</div>
-		<div class = "block">
-		<pre class = "prettyprint linenums">
-# create one folder app
-pyinstaller hello.py 
-# create /build, log file and working files
-# create /dist, hello executable folder
-# create hello.spec
-
-# deliver /dist/hello folder to user, which contain executable file and dependencies
-		</pre>
-		</div>
-		<div class = "block">
-		<pre class = "prettyprint linenums">
-# implementation
-./hello/hello
-		</pre>
-		</div>
-		<div class = "block">
-		<pre class = "prettyprint linenums">
-# create one file app
-pyinstaller --onefile hello.py
-		</pre>
-		</div>
-		<div class = "block">
-		<pre class = "prettyprint linenums">
-# optimization
-python -OO -m PyInstaller hello.py
-
-python -O -m PyInstaller --onefile hello.py # -OO may not work
-		</pre>
-		</div>
-		<div class = "block">
-		<pre class = "prettyprint linenums">
-# options
--h, help
--v, version
---onedir, create one folder app
---onefile, create one file app
-		</pre>
-		</div>
+	</div>
 		<div class = "subtitle">Reference</div>
 		<div class = "block">
 			<li>layout
@@ -513,12 +444,6 @@ python -O -m PyInstaller --onefile hello.py # -OO may not work
 					<li><a href = "https://setuptools.readthedocs.io/en/latest/">setuptools Documentation</a></li>
 					<li><a href = "https://github.com/pypa/setuptools">setuptools source code</a></li>
 					<li><a href = "https://pythonhosted.org/an_example_pypi_project/setuptools.html">setuptools tutorial</a></li>
-				</ul>
-			</li>
-			<li>pyinstaller
-				<ul>
-					<li><a href = "https://mounirboulwafa.medium.com/creating-a-single-executable-file-exe-from-a-python-program-abda6a41f74f">Creating a Single Executable File (.exe) from a Python Program</a></li>
-					<li><a href = "https://www.pyinstaller.org/">Documentation</a></li>
 				</ul>
 			</li>
 		</div>
