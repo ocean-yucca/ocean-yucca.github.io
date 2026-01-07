@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+
+<html>
+
+	<head>
+
+		<title>Python</title>
+
+		<link rel="stylesheet" href="../css/atelier-sulphurpool-light.css" type="text/css">
+
+		<script src="../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+
+		<style>
+
+			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+
+			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+
+			div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+			span {color:red; font-weight: bold}
+
+		</style>
+
+	</head>
+
+	<body>
+
+		<div class = "title">
+			uv
+		</div>
+
+		<div class = "subtitle">Environments</div>
+		<div class = "block">
+			<li><span>Activated virtual environment</span>
+				<ul>
+					<li>Created explicitly by user</li>
+					<li>Lives at a known path (.venv/)</li>
+					<li>Controlled by shell</li>
+					<li>Can manually installs</li>
+					<li>Used implicitly by python, pip, pytest
+						<ul>
+							<li>python → .venv/bin/python</li>
+							<li>pip → .venv/bin/pip, python -m ensurepip --upgrade</li>
+							<li>PATH is rewritten to prioritize .venv/bin</li>
+						</ul>
+					</li>
+				</ul>
+			</li>
+			<li><span>Resolved environment</span>
+				<ul>
+					<li>Created and controlled by uv</li>
+					<li>Defined by project metadata</li>
+					<li>Shell activation is ignored</li>
+					<li>Used only when run <span>uv run</span> / <span>uv pip</span></li>
+				</ul>
+			</li>
+		</div>
+		<div class = "subtitle">uv venv</div>
+		<div class = "block">
+			<pre class = "prettyprint linenums">
+# create a virtual environment
+uv venv # default name .venv
+
+# create a virtual environment with specific name
+# uv venv [venv_name]
+uv venv .myvenv
+
+# create a virtual environment with specific python distribution
+uv venv --python 3.11
+
+# activate virtual environment
+# source [venv_name]/bin/activate
+source .venv/bin/activate
+
+# deactivate virtual environment
+deactivate
+
+# remove virtual environment
+# rm -rf .[venv_name]
+rm -rf .venv
+			</pre>
+		</div>
+		<div class = "subtitle">uv pip</div>
+		<div class = "block">
+			<ul>
+				<li>Resolves the project environment, reads <span>pyproject.toml</span> and enforces requires-python</li>
+				<li>Selects or installs the correct Python</li>
+				<li>Creates / reuses an isolated environment</li>
+				<li>Runs pip inside that environment</li>
+			</ul>
+			<pre class = "prettyprint linenums">
+# check which pip is used
+pip --version
+
+pip # unreliable, may use pip in base even in activate environment
+
+# python -m ensurepip --upgrade
+python -m pip # reliable for the active interpreter, use the pip in activate environment
+
+uv pip # pip in uv-resolved environment
+			</pre>
+		</div>
+		<div class = "subtitle">uv run</div>
+		<div class = "block">
+			<ul>
+				<li>Resolves the project environment, reads <span>pyproject.toml</span> and enforces requires-python</li>
+				<li>Selects or installs the correct Python</li>
+				<li>Creates / reuses an isolated environment</li>
+				<li>Exposes packages declared in the project dependencies</li>
+				<li>run a command inside the resolved project environment</li>
+			</ul>
+			<pre class = "prettyprint linenums">
+# implement python script
+uv run python script.py # use python in the current virtual environment
+python script.py # in special case, it may use system/conda/pyenv python rather than python in the current virtual environment
+
+# test
+uv run pytest
+			</pre>
+		</div>
+		<div class = "subtitle">uv version</div>
+		<div class = "block">
+			<pre class = "prettyprint linenums">
+# read and display package name and version from pyproject.toml
+uv version
+			</pre>
+		</div>
+    </body>
+</html>
