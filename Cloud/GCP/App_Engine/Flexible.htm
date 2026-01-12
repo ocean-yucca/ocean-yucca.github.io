@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Google Cloud</title>
+		<link rel="stylesheet" href="../../../css/atelier-sulphurpool-light.css" type="text/css">
+		<script src="../../../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+		<style>
+			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+			div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+			span {color: red; font-weight: bold;}
+		</style>
+	</head>
+	<body>
+		<div class = "title">
+			Flexible
+		</div>
+
+		<div class = "subtitle">Process</div>
+        <div class = "block">
+            <ol>
+                <li>Reads app.yaml</li>
+                <li>Confirms env: flex</li>
+                <li>Builds a base Docker image with Dockerfile</li>
+                <li>Push image to Artifact Registry</li>
+                <li>Start containers on VMs with built image</li>
+                <li>Excute entrypoint command</li>
+                <li>App binds to port 8080</li>
+            </ol>
+        </div>
+        <div class = "subtitle">Source Code</div>
+        <div class = "block">
+            <center><img src = "img/AppEngine_3.png" width=30%></center>
+        </div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+# app.py
+import dash
+from dash import html
+from dash.dependencies import Input, Output
+ 
+app = dash.Dash(__name__)
+server = app.server
+ 
+num_click = 0
+ 
+app.layout = html.Div([
+    html.Button('Click', id = 'click'),
+    html.Div('0', id = 'content')
+        ])
+ 
+@app.callback(
+    Output('content', 'children'),
+    Input('click', 'n_clicks'))
+def display_hover_data(c):
+    if c:
+        global num_click
+        num_click += 1
+        return num_click
+    else:
+        return 0
+ 
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=8080, debug=True)
+            </pre>
+        </div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+# app.yaml
+env: flex
+runtime: custom
+
+env_variables:
+  GOOGLE_APPLICATION_NAME: "Deployment_on_App_Engine_Flex"
+            </pre>
+        </div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+# requirements.txt
+dash
+            </pre>
+        </div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+# Dockerfile
+FROM python:3
+WORKDIR /usr/src/app
+COPY . .
+RUN pip install --no-cache-dir -r requirements.txt
+EXPOSE 8080
+CMD ["python", "./app.py"]
+        </pre>
+        </div>
+        <div class = "subtitle">Deployment</div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+# select project
+gcloud auth login
+gcloud config set project PROJECT_ID
+
+# create app engine app
+# only once per project
+gcloud app create
+            </pre>
+        </div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+# deploy app
+gcloud app deploy
+            </pre>
+        </div>
+        <div class = "subtitle">Access</div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+# https://version_id-dot-project_id.ue.r.appspot.com
+https://20260109t142319-dot-projectdevenv.ue.r.appspot.com
+            </pre>
+        </div>
+	</body>
+</html>

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Google Cloud</title>
+		<link rel="stylesheet" href="../../../css/atelier-sulphurpool-light.css" type="text/css">
+		<script src="../../../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+		<style>
+			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+			div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+			span {color: red; font-weight: bold;}
+		</style>
+	</head>
+	<body>
+		<div class = "title">
+			Introduction
+		</div>
+
+		<div class = "block">
+            <center><img src = "img/AppEngine_1.png" width=60%></center>
+        </div>
+        <div class = "block">
+            <ul>
+                <li>Each project represents one app</li>
+                <li>Each service can be web-based application, API service, backend job processor, internal-only service, event-driven service, cron jobs</li>
+                <li>Each version in a service acts like independent apps</li>
+                <li>Default service cannot be removed and at least one version in default service</li>
+                <li>Environments
+                <ul>
+                    <li>Standard, highly managed, sandboxed, fast-scaling runtimes
+                        <ul>
+                            <li>Versions in a service can share traffic</li>
+                        </ul>
+                    </li>
+                    <li>Flexible, Docker-style, more control, slower scaling
+                        <ul>
+                            <li>One active version</li>
+                        </ul>
+                    </li>
+                </ul>
+                </li>
+            </ul>
+        </div>
+        <div class = "subtitle">app.yaml</div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+# Define environment
+runtime: python311 # defines the language, version, and execution environment that runs application code
+
+# Define service name
+service: default # service name
+
+# Define how to shart app
+entrypoint: gunicorn -b :$PORT main:app # the command to start app
+
+# Scaling
+# automatic_scaling, standard default, adds/removes instances automatically
+# basic_scaling, standard only, instances start on demand, shut down after idle timeout
+# manual_scaling, standard only, fixed number of instances, always running
+automatic_scaling: # adds/removes instances automatically
+  min_instances: 0
+  max_instances: 5
+  target_cpu_utilization: 0.6
+
+# Resource Configuration
+# Standard environment
+#   instance_class: F2
+# Flexible Environment 
+#   resources:
+#       cpu: 1
+#       memory_gb: 2
+#       disk_size_gb: 10
+
+# Environment Variables
+env_variables:
+  ENV: "prod"
+  LOG_LEVEL: "info"
+            </pre>
+        </div>
+        <div class = "subtitle">Commands</div>
+        <div class = "block">
+# create app engine app
+gcloud app create
+
+# view app engine
+gcloud app describe
+
+# deploy
+gcloud app deploy # deploy
+gcloud app deploy app.yaml # deploy with specific app.yaml
+gcloud app deploy --version v2 # deploy with explicit version name
+
+# service
+gcloud app services list # list servies
+gcloud app services describe SERVICE_NAME # describe a service
+
+# version
+gcloud app versions list # list versions
+gcloud app versions list --service SERVICE_NAME # list versions in a service
+gcloud app versions describe VERSION --service SERVICE_NAME # describe a version in a service
+        </div>
+	</body>
+</html>
