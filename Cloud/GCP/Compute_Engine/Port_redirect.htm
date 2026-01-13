@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Google Cloud</title>
+		<link rel="stylesheet" href="../../../css/atelier-sulphurpool-light.css" type="text/css">
+		<script src="../../../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+		<style>
+			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+			div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+			span {color: red; font-weight: bold;}
+		</style>
+	</head>
+	<body>
+		<div class = "title">
+			Port Redirect
+		</div>
+
+        <div class = "subtitle">Setup</div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+# install nginx
+sudo apt update
+sudo apt install -y nginx
+
+# create /etc/nginx/sites-available/flask
+server {
+    listen 80;
+    server_name _;
+
+    location / {
+        proxy_pass http://127.0.0.1:8080;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+
+# remove the default Nginx page
+sudo rm /etc/nginx/sites-enabled/default
+
+# redirect 8080 to 80
+sudo ln -s /etc/nginx/sites-available/flask /etc/nginx/sites-enabled/
+
+# test and restart Nginx
+sudo nginx -t
+sudo systemctl reload nginx
+
+# enable HTTP/HTTPs of the instance
+            </pre>
+        </div>
+        <div class = "subtitle">Run App</div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+# run app with port 8080
+            </pre>
+        </div>
+        <div class = "subtitle">Access</div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+http://EXTERNAL_IP
+            </pre>
+        </div>
+	</body>
+</html>

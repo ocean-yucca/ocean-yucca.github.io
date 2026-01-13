@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Google Cloud</title>
+		<link rel="stylesheet" href="../../../css/atelier-sulphurpool-light.css" type="text/css">
+		<script src="../../../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+		<style>
+			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+			div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+			span {color: red; font-weight: bold;}
+		</style>
+	</head>
+	<body>
+		<div class = "title">
+			Web App
+		</div>
+
+        <div class = "subtitle">Setup</div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+sudo apt update
+
+# install python3, pip, and venv
+sudo apt install -y python3 python3-pip python3-venv
+
+# create a virtual environment
+python3 -m venv venv
+
+# activate virtual environment
+source venv/bin/activate
+
+# install dash
+pip install dash
+
+# create a firewall rule
+Name: allow-flask-8080
+Target: All instances in the network
+Source IPv4 ranges: 0.0.0.0/0
+TCP: 8080
+            </pre>
+        </div>
+        <div class = "subtitle">Source Code</div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+# app.py
+import dash
+from dash import html
+from dash.dependencies import Input, Output
+ 
+app = dash.Dash(__name__)
+server = app.server
+ 
+num_click = 0
+ 
+app.layout = html.Div([
+    html.Div('Second version'),
+    html.Button('Click', id = 'click'),
+    html.Div('Click: '+str(num_click), id = 'content')
+        ])
+ 
+@app.callback(
+    Output('content', 'children'),
+    Input('click', 'n_clicks'))
+def display_hover_data(c):
+    if c:
+        global num_click
+        num_click += 1
+        return num_click
+    else:
+        return 0
+ 
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=8080, debug=True)
+            </pre>
+        </div>
+        <div class = "subtitle">Run App</div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+python3 app.py
+            </pre>
+        </div>
+        <div class = "subtitle">Access</div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+http://EXTERNAL_IP:8080
+            </pre>
+        </div>
+	</body>
+</html>

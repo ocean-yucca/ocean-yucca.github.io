@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Google Cloud</title>
+		<link rel="stylesheet" href="../../../css/atelier-sulphurpool-light.css" type="text/css">
+		<script src="../../../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+		<style>
+			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+			div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+			span {color: red; font-weight: bold;}
+		</style>
+	</head>
+	<body>
+		<div class = "title">
+			SSH
+		</div>
+
+        <div class = "subtitle">Setup</div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+# create a firewall rule
+Name: allow-ssh
+Target: All instances in the network
+Source IPv4 ranges: 0.0.0.0/0
+TCP: 22
+            </pre>
+        </div>
+        <div class = "subtitle">Grant Access</div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+# grant a user permission to access an instance
+
+# normal SSH access
+roles/compute.osLogin
+
+# SSH + sudo
+roles/compute.osAdminLogin
+            </pre>
+        </div>
+        <div class = "subtitle">SSH Access</div>
+        <div class = "block">
+            <li><span>No</span> need to create username on instance</li>
+            <pre class = "prettyprint linenums">
+# login
+gcloud auth login
+
+# set project
+gcloud config set project PROJECT_ID
+
+# ssh instance
+gcloud compute ssh VM_NAME --zone ZONE
+            </pre>
+        </div>
+	</body>
+</html>
