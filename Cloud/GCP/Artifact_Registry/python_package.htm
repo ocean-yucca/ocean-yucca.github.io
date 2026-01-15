@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Google Cloud</title>
+		<link rel="stylesheet" href="../../../css/atelier-sulphurpool-light.css" type="text/css">
+		<script src="../../../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+		<style>
+			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+			div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+			span {color: red; font-weight: bold;}
+		</style>
+	</head>
+	<body>
+		<div class = "title">
+			Python Package
+		</div>
+
+		<div class = "subtitle">Create Repo</div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+gcloud auth login
+
+gcloud artifacts repositories create my-pypi-repo \
+  --repository-format=python \
+  --location=us-east1 \
+  --description="Private repo"
+            </pre>
+        </div>
+        <div class = "subtitle">Upload Package to Repo</div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+# grant IAM permission, roles/artifactregistry.writer
+
+# upload package to https://[region]-python.pkg.dev/[project_name]/[repo_name]/
+gcloud auth application-default login
+
+twine upload \
+  --repository-url https://us-east1-python.pkg.dev/projectdevenv/my-pypi-repo/ \
+  -u oauth2accesstoken \
+  -p "$(gcloud auth application-default print-access-token)" \
+  dist/*
+            </pre>
+        </div>
+        <div class = "subtitle">Install Package</div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+# grant IAM permission, roles/artifactregistry.reader
+
+# install authentication tool
+pip install keyring
+pip install keyrings.google-artifactregistry-auth
+ 
+# install package
+pip install --index-url https://us-east1-python.pkg.dev/projectdevenv/my-pypi-repo/simple linlangleyprimecosmos
+            </pre>
+        </div>
+        <div class = "subtitle">Reference</div>
+        <div class = "block">
+            <li><a href = "../../../Python3/Build/setup.htm">Build Python Package</a></li>
+        </div>
+	</body>
+</html>

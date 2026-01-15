@@ -13,8 +13,11 @@
 	</head>
 	<body>
 		<div class = "title">
-			Introduction
+			Artifact Registry
 		</div>
+        <div class = "block">
+            <center><img src = "img/ar_3.png" width=80%></center>
+        </div>
 
 		<div class = "subtitle">Create Project</div>
         <div class = "block">
@@ -79,64 +82,50 @@ gcloud auth set project [PROJECT_ID]
 gcloud auth configure-docker
             </pre>
         </div>
-        <div class = "subtitle">Option 1. Docker Build</div>
-        <div class = "block">
-            <li>Available on local computer, not on Cloud Shell by default</li>
-            <center><img src = "img/cloud_run_1.png" width=60%></center>
-        </div>
+        <div class = "subtitle">Create Repo</div>
         <div class = "block">
             <pre class = "prettyprint linenums">
-# docker build -t gcr.io/[project_id]/[image_name] .
-docker build -t gcr.io/$GOOGLE_CLOUD_PROJECT/dash_app .
-
-# docker push gcr.io/[project_id]/[image_name]
-docker push gcr.io/$GOOGLE_CLOUD_PROJECT/dash_app
-
-# deploy
-gcloud run deploy myapp \
-  --image=gcr.io/$GOOGLE_CLOUD_PROJECT/dash_app \
-  --region=us-east1 \
-  --allow-unauthenticated
+gcloud artifacts repositories create app-repo \                                                          
+  --repository-format=docker \
+  --location=us-central1 \
+  --description="Docker repo for my images"
             </pre>
         </div>
-        <div class = "subtitle">Option 2. Auto Deployment</div>
-        <div class = "block">
-            <center><img src = "img/cloud_run_2.png" width=60%></center>
-        </div>
+        <div class = "subtitle">Deposite Code to Cloud Storage</div>
         <div class = "block">
             <pre class = "prettyprint linenums">
-# build and push with Cloud Build
-# gcloud builds submit --tag gcr.io/[project_id]/[image_name]
-gcloud builds submit --tag gcr.io/spheric-gasket-476418-h5/dash_app
-
-# deploy
-gcloud run deploy myapp \
-  --image=gcr.io/$GOOGLE_CLOUD_PROJECT/dash_app \
-  --region=us-east1 \
-  --allow-unauthenticated
-            </pre>
-        </div>
-        <div class = "subtitle">Option 3. Manual Deployment</div>
-        <div class = "block">
-            <center><img src = "img/cloud_run_3.png" width=80%></center>
-        </div>
-        <div class = "block">
-            <pre class = "prettyprint linenums">
-# compress source code
+# compress source code in the project folder
 tar -cvf myapp.tar .
-
+ 
+# build a bucket on Cloud Storage
 # copy compressed source code to Cloud Storage
 # gsutil cp myapp.tar gs://[bucket_name]/[compressed_file_name]
-gsutil cp myapp.tar gs://app-operations-bucket/myapp.tar
-
-# build and push with Cloud Build
-# gcloud builds submit --gcs-source-staging-dir [path_on_cloud_storage] --tag gcr.io/[project_id]/[image_name]
-gcloud builds submit --gcs-source-staging-dir gs://app-operations-bucket/myapp.tar --tag gcr.io/spheric-gasket
--476418-h5/dash_app
-
+gsutil cp myapp.tar gs://gcp-app-operations/myapp.tar
+            </pre>
+        </div>
+        <div class = "subtitle">Build Image and Push Image to Artifact Registry</div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+# gcloud builds submit --gcs-source-staging-dir [path_on_cloud_storage] --tag [region]-docker.pkg.dev/[project_id]/[repo_name]/[image_name]
+gcloud builds submit --gcs-source-staging-dir gs://gcp-app-operations/myapp.tar --tag us-central1-docker.pkg.dev/projectdevenv/app-repo/dash-app
+            </pre>
+        </div>
+        <div class = "subtitle">View Images on Artifact Registry</div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+# list repos
+gcloud artifacts repositories list --location=us-central1
+ 
+# list images in a specific repo
+gcloud artifacts docker images list us-central1-docker.pkg.dev/projectdevenv/app-repo
+            </pre>
+        </div>
+        <div class = "subtitle">Deploy Image on Cloud Run</div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
 # deploy
 gcloud run deploy myapp \
-  --image=gcr.io/$GOOGLE_CLOUD_PROJECT/dash_app \
+  --image=us-central1-docker.pkg.dev/projectdevenv/app-repo/dash-app \
   --region=us-east1 \
   --allow-unauthenticated
             </pre>
