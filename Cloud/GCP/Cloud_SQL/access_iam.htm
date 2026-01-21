@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Google Cloud</title>
+		<link rel="stylesheet" href="../../../css/atelier-sulphurpool-light.css" type="text/css">
+		<script src="../../../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+		<style>
+			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+			div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+			span {color: red; font-weight: bold;}
+		</style>
+	</head>
+	<body>
+		<div class = "title">
+			IAM Authentication
+		</div>
+
+        <div class = "subtitle">Cloud SQL Auth Proxy</div>
+        <div class = "block">
+            <li>Local/Mac</li>
+            <pre class = "prettyprint linenums">
+# 1. Enable Cloud SQL Admin API in APIs & Services
+
+# 2. Use Application Default Credentials (ADC) to use Cloud SQL Auth Proxy
+
+gcloud auth application-default login
+
+# 3. Download cloud-sql-proxy
+curl -o cloud-sql-proxy https://storage.googleapis.com/cloud-sql-connectors/cloud-sql-proxy/v2.11.0/cloud-sql-proxy.darwin.amd64
+chmod +x cloud-sql-proxy
+
+# 4. Connect Cloud SQL instance
+./cloud-sql-proxy PROJECT_ID:REGION:INSTANCE_NAME --auto-iam-authn
+
+# 5. Login Instance with IAM
+# Such as, the username of gcpoperationdev@gmail.com is gcpoperationdev
+mysql -h 127.0.0.1 -P 3306 -u gcpoperationdev --enable-cleartext-plugin
+            </pre>
+        </div>
+        <div class = "block">
+            <li>Cloud Shell</li>
+            <pre class = "prettyprint linenums">
+# 1. Enable Cloud SQL Admin API in APIs & Services
+
+# 2. Use Application Default Credentials (ADC) to use Cloud SQL Auth Proxy
+
+gcloud auth application-default login
+
+# 3. Connect Cloud SQL instance
+cloud-sql-proxy PROJECT_ID:REGION:INSTANCE_NAME --auto-iam-authn
+
+# 4. Login Instance with IAM
+# Such as, the username of gcpoperationdev@gmail.com is gcpoperationdev
+mysql -h 127.0.0.1 -P 3306 -u gcpoperationdev --enable-cleartext-plugin
+            </pre>
+        </div>
+        <div class = "block">
+            <li>Compute Engine</li>
+            <pre class = "prettyprint linenums">
+# 0. Grant IAM permission
+# Compute Engine
+roles/compute.osAdminLogin
+Compute Instance Admin v1
+
+# Service Account
+Service Account User
+
+# 1. Enable Cloud SQL Admin API in APIs & Services
+
+# 2. Use Application Default Credentials (ADC) to use Cloud SQL Auth Proxy
+
+gcloud auth application-default login
+
+# 3. Download cloud-sql-proxy
+curl -o cloud-sql-proxy https://storage.googleapis.com/cloud-sql-connectors/cloud-sql-proxy/v2.11.0/cloud-sql-proxy.linux.amd64
+chmod +x cloud-sql-proxy
+
+# 4. Connect Cloud SQL instance
+./cloud-sql-proxy PROJECT_ID:REGION:INSTANCE_NAME --auto-iam-authn
+
+# 5. Install mysql
+sudo apt update
+sudo apt install -y default-mysql-client
+
+# 5. Login Instance with IAM
+# Such as, the username of gcpoperationdev@gmail.com is gcpoperationdev
+mysql -h 127.0.0.1 -P 3306 -u gcpoperationdev --enable-cleartext-plugin
+            </pre>
+        </div>
+	</body>
+</html>

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Google Cloud</title>
+		<link rel="stylesheet" href="../../../css/atelier-sulphurpool-light.css" type="text/css">
+		<script src="../../../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+		<style>
+			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+			div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+			span {color: red; font-weight: bold;}
+		</style>
+	</head>
+	<body>
+		<div class = "title">
+			Introduction
+		</div>
+
+        <div class = "block">
+            <center><img src = "img/cloud_sql_1.png" width=60%></center>
+        </div>
+        <div class = "block">
+            <ul>
+                <li>Each instance can be MySQL, PostgreSQL, and Microsoft SQL Server</li>
+            </ul>
+        </div>
+        <div class = "subtitle">MySQL</div>
+        <div class = "block">
+            <li>Cloud SQL Studio
+                <ul>
+                    <li>Run SQL queries
+                        <ul>
+                            <li>Create table</li>
+                            <pre class = "prettyprint linenums">
+# create table to host California Housing data
+CREATE TABLE california_housing (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+
+    longitude DECIMAL(9,6) NOT NULL,
+    latitude DECIMAL(9,6) NOT NULL,
+
+    housing_median_age INT NOT NULL,
+    total_rooms INT NOT NULL,
+    total_bedrooms INT,
+    population INT NOT NULL,
+    households INT NOT NULL,
+
+    median_income DECIMAL(6,2) NOT NULL,
+    median_house_value INT NOT NULL,
+
+    ocean_proximity VARCHAR(50),
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+                            </pre>
+                        </ul>
+                    </li>
+                    <li>Browse databases & tables
+                        <ul>
+                            <li>Show Databases/Tables</li>
+                            <pre class = "prettyprint linenums">
+show databases;
+show tables;
+                            </pre>
+                            <li>Show User Grants</li>
+<pre class = "prettyprint linenums">
+show grants;
+</pre>
+                        </ul>
+                    </li>
+                </ul>
+            </li>
+            <li>Built-in Authentication
+                <ul>
+                    <li>Access with username and pwd</li>
+                    <li>Create user
+                        <ul>
+                            <li>Create a user with pwd</li>
+                            <li>In Cloud SQL Studio, login and grant the user the permission to specific databases or specific tables</li>
+                            <li>By default, the user has the admin permission for all databases</li>
+                        </ul>
+                    </li>
+                    
+                </ul>
+            </li>
+            <li>IAM Authentication
+                <ul>
+                    <li>Access with Google IAM</li>
+                    <li>Create User
+                        <ul>
+                            <li>Grant IAM permission to a principal in APIs & Services
+                                <ul>
+                                    <li>Add principal, such as gcpoperationdev@gmail.com</li>
+                                    <li>roles/viewer</li>
+                                    <li>roles/cloudsql.client</li>
+                                    <li>roles/cloudsql.studioUser</li>
+                                    <li>roles/serviceusage.serviceUsageConsumer</li>
+                                </ul>
+                            </li>
+                            <li>Add the principal account with IAM Authentication on Cloud SQL</li>
+                            <li>Grant permission on Cloud SQL Studio
+                                <ul>
+                                    <li>Login a user with grant permission using username and pwd</li>
+                                    <pre class = "prettyprint linenums">
+# GRANT permissions ON database_name.* To 'username'@'%';
+# the username of gcpoperationdev@gmail.com is gcpoerationdev
+grant select on housing_dataset.*  to 'gcpoperationdev'@'%';
+flush privileges;
+show grants for 'gcpoperationdev'@'%';
+</pre>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                    <li>Access Database
+                        <ul>
+                            <li>Login with the principal account on Google Console</li>
+                            <li>Cloud SQL Studio
+                                <ul>
+                                    <li>Login with IAM</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </li>
+        </div>
+	</body>
+</html>
