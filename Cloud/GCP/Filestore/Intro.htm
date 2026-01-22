@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Google Cloud</title>
+		<link rel="stylesheet" href="../../../css/atelier-sulphurpool-light.css" type="text/css">
+		<script src="../../../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+		<style>
+			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+			div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+			span {color: red; font-weight: bold;}
+		</style>
+	</head>
+	<body>
+		<div class = "title">
+			Introduction
+		</div>
+
+        <div class = "block">
+            <center><img src = "img/filestore_1.png" width=30%></center>
+        </div>
+        <div class = "block">
+            <li>Shared, POSIX-compliant file storage (like a Linux filesystem) for VMs and GKE</li>
+            <li>Has the tree structure for files & folders</li>
+        </div>
+        <div class = "subtitle">Setup</div>
+        <div class = "block">
+            <li>Enable Cloud Filestore API</li>
+            <li>Create Instance</li>
+        </div>
+        <div class = "subtitle">Mount to VM</div>
+        <div class = "block">
+<pre class = "prettyprint linenums">
+# install package
+sudo apt update
+sudo apt install -y nfs-common
+
+# create mount folder
+sudo mkdir -p /mnt/filestore
+
+# mount instance
+sudo mount -o nolock instance_ip:/file_share_name /mnt/filestore
+
+# change ownership
+sudo chown -R $USER:$USER /mnt/filestore
+
+# create a link
+ln -s /mnt/filestore ~/filestore
+</pre>
+        </div>
+	</body>
+</html>
