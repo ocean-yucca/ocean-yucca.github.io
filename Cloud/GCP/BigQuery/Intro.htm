@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Google Cloud</title>
+		<link rel="stylesheet" href="../../../css/atelier-sulphurpool-light.css" type="text/css">
+		<script src="../../../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+		<style>
+			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+			div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+			span {color: red; font-weight: bold;}
+		</style>
+	</head>
+	<body>
+		<div class = "title">
+			Introduction
+		</div>
+
+        <div class = "block">
+            <center><img src = "img/bigquery_2.png" width=50%></center>
+        </div>
+        <div class = "subtitle">Load Data</div>
+        <div class = "block">
+            <center><img src = "img/bigquery_1.png" width=60%></center>
+        </div>
+        <div class = "block">
+            <ul>
+                <li>Internal table
+                    <ul>
+                        <li>Data is stored inside BigQuery</li>
+                        <li>BigQuery fully manages storage, layout, and optimizatio</li>
+                    </ul>
+                </li>
+                <li>External table
+                    <ul>
+                        <li>Data stays in source</li>
+                        <li>BigQuery stores metadata only</li>
+                        <li>Queries read files in place</li>
+                    </ul>
+                </li>
+                <li>BigLake table
+                    <ul>
+                        <li>Data stays in source</li>
+                        <li>Uses a SA connection</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+         <div class = "block">
+            <ul>
+                <li>Batch load
+                    <ul>
+                        <li>Load files from source into BigQuery</li>
+                        <li>One-time or scheduled</li>
+                        <li>Data table is internal/native table</li>
+                    </ul>
+                </li>
+                <li>Data Transfer
+                    <ul>
+                        <li>Copies data from source into BigQuery</li>
+                        <li>Scheduled refresh</li>
+                        <li>Data table is internal/native table</li>
+                    </ul>
+                </li>
+                <li>Streaming
+                    <ul>
+                        <li>Data is available within seconds</li>
+                        <li>Data table is internal/native table</li>
+                    </ul>
+                </li>
+                <li>Federated
+                    <ul>
+                        <li>Query data in place</li>
+                        <li>No copy into BigQuery</li>
+                        <li>Data table is external table or BigLake table</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+        <div class = "subtitle">Access Data</div>
+        <div class = "block">
+            <center><img src = "img/bigquery_3.png" width=60%></center>
+        </div>
+        <div class = "block">
+            <ul>
+                <li>Query</li>
+            <pre class = "prettyprint linenums">
+select *
+from `project_id.dataset_id.table_id`;
+            </pre>
+            <li>BigQuery Studio Notebook
+                <ul>
+                    <li>Similar to Jupyter notebook</li>
+                </ul>
+            </li>
+            <li>Spark Notebook
+                <ul>
+                    <li>Support Spark</li>
+                </ul>
+            </li>
+            <li>Data Canvas
+                <ul>
+                    <li>Interactive, exploratory workspace</li>
+                </ul>
+            </li>
+            <li>Data Preparation
+                <ul>
+                    <li>Process of turning raw data into clean, structured, analysis- or ML-ready tables using SQL</li>
+                </ul>
+            </li>
+            <li>Pipelines
+                <ul>
+                    <li>Task orchestration UI</li>
+                </ul>
+            </li>
+            <li>Dataform
+                <ul>
+                    <li>SQL modeling and transformation framework</li>
+                </ul>
+            </li>
+            <li>ML Model
+                <ul>
+                    <li>Uses BigQuery's SQL-based syntax to train, test, and predict</li>
+                </ul>
+            </li>
+        </ul>
+        </div>
+	</body>
+</html>
