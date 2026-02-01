@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Google Cloud</title>
+		<link rel="stylesheet" href="../../../css/atelier-sulphurpool-light.css" type="text/css">
+		<script src="../../../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+		<style>
+			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+			div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+			span {color: red; font-weight: bold;}
+		</style>
+	</head>
+	<body>
+		<div class = "title">
+			Introduction
+		</div>
+
+        <div class = "subtitle">Workflow</div>
+        <div class = "block">
+            <center><img src = "img/terraform_1.png" width=50%></center>
+        </div>
+        <div class = "subtitle">Syntax</div>
+        <div class = "block">
+        	<pre class = "prettyprint linenums">
+# Variable syntax
+variable "variable_name" {
+  description = "varaible description"
+  type        = string # variable type
+  default = "default_value"
+}
+        	</pre>
+        </div>
+        <div class = "block">
+        	<pre class = "prettyprint linenums">
+# Provider syntax
+provider "provider" { # google, aws, azurerm
+  project = "project_id"
+  region  = "region_name"
+}
+        	</pre>
+        </div>
+        <div class = "block">
+        	<pre class = "prettyprint linenums">
+# Resource syntax
+resource "RESOURCE_TYPE" "name_for_terraform" {
+  name                    = "name_for_GCP"
+  # RESOURCE properties
+}
+        	</pre>
+        </div>
+        <div class = "block">
+        	<pre class = "prettyprint linenums">
+# Output syntax
+output "output_label" {
+  description = "label name"
+  value       = resource.property
+}
+        	</pre>
+        </div>
+        <div class = "block">
+        	<pre class = "prettyprint linenums">
+# Module syntax
+# module in Terraform is a folder
+# define blueprint in a module
+# use the blueprint defined in the module
+module "name_for_terraform" {
+  source           = "./mymodule" # module name
+  instance_name    = "vm-1" # vm name on GCP
+  instance_zone    = "us-central1-a"
+  instance_network = google_compute_network.mynetwork.self_link
+}
+        	</pre>
+        </div>
+        <div class = "subtitle">Comman Files</div>
+        <div class = "block">
+            <ul>
+                <li><span>provider.tf</span>, configures the cloud provider</li>
+                <li><span>variables.tf</span>, declares variables, not assign values</li>
+                <li><span>terraform,tfvars</span>, set up values for varabiles</li>
+                <li><span>module folder</span>, define resuable blueprint</li>
+
+                <li><span>main.tf</span>, define resources</li>
+
+                <li><span>outputs.tf</span>, define what terraform output will show</li>
+            </ul>
+        </div>
+        <div class = "subtitle">State</div>
+        <div class = "block">
+            <center><img src = "img/terraform_4.png" width=60%></center>
+        </div>
+        <div class = "block">
+            <ul>
+                <li>.tf file -&gt; real infrastructure -&gr; backend state, one-way</li>
+                <li>A shared backend state lets multiple developers safely manage the same infrastructure without stepping on each other
+                    <ul>
+                        <li>Everyone sees the same current infrastructure</li>
+                        <li>State lock, when multiple developers run terraform apply at the same time, only one apply can run at once</li>
+                        <li>Consistent drift detection, someone changes infrastructure manually, another developer runs Terraform later will detect the changes</li>
+                        <li>Support CI/CD pipelines</li>
+                        <li>Role-based access control, allow some developers plan and others apply<
+                    </ul>
+                </li>
+            </ul>
+        </div>
+        <div class = "subtitle">Import Existing Infrastructure to Terraform</div>
+        <div class = "block">
+            <center><img src = "img/terraform_5.png" width=40%></center>
+        </div>
+	</body>
+</html>

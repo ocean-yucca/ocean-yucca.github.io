@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Google Cloud</title>
+		<link rel="stylesheet" href="../../../css/atelier-sulphurpool-light.css" type="text/css">
+		<script src="../../../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+		<style>
+			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+			div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+			span {color: red; font-weight: bold;}
+		</style>
+	</head>
+	<body>
+		<div class = "title">
+			Terraform Sample
+		</div>
+
+        <div class = "subtitle">Layout</div>
+        <div class = "block">
+            <center><img src = "img/terraform_3.png" width=30%></center>
+        </div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+# variables.tf
+variable "project_id" {
+  description = "GCP project ID"
+  type        = string
+}
+
+variable "region" {
+  description = "Default GCP region"
+  type        = string
+  default     = "us-central1"
+}
+            </pre>
+        </div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+# terraform.tfvars
+project_id = "storagedev-485602"
+region = "us-east1"
+            </pre>
+        </div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+# provider.tf
+# define needed terraform version
+terraform {
+  required_version = ">= 1.5.0"
+}
+
+# configure provider
+provider "google" {
+        project = "${var.project_id}" # var.project_id
+        region  = "${var.region}" # var.region
+}
+            </pre>
+        </div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+# blueprint.tf
+# define a blueprint for deploying vm
+resource "google_compute_instance" "vm_instance" {
+  name         = "${var.instance_name}" # var.instance_name
+  zone         = "${var.instance_zone}" # var.instance_zone
+  machine_type = "${var.instance_type}" # var.instance_type
+  boot_disk {
+    initialize_params {
+      image = "debian-cloud/debian-11"
+      }
+  }
+  network_interface {
+    network = "${var.instance_network}" # var.instance_network
+    access_config {
+      # Allocate a one-to-one NAT IP to the instance
+    }
+  }
+}
+            </pre>
+        </div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+# modulevariables.tf
+# define variables in the blueprint.tf
+variable "instance_name" {}
+
+variable "instance_zone" {}
+
+variable "instance_type" {
+  default = "e2-micro"
+  }
+
+variable "instance_network" {}
+            </pre>
+        </div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+# main.tf
+# Create the mynetwork network
+resource "google_compute_network" "mynetwork" {
+        name = "mynetwork"
+
+        # RESOURCE properties go here
+        auto_create_subnetworks = "true"
+}
+
+# Add a firewall rule to allow HTTP, SSH, RDP and ICMP traffic on mynetwork
+resource "google_compute_firewall" "mynetwork-allow-http-ssh-rdp-icmp" {
+        name = "mynetwork-allow-http-ssh-rdp-icmp"
+        # RESOURCE properties go here
+        network = google_compute_network.mynetwork.self_link
+        allow {
+                protocol = "tcp"
+                ports    = ["22", "80", "3389"]
+        }
+        allow {
+                protocol = "icmp"
+        }
+        source_ranges = ["0.0.0.0/0"]
+}
+
+# Create the mynet-vm-1 instance
+module "mynet-vm-1" {
+  source           = "./mymodule"
+  instance_name    = "mynet-vm-1"
+  instance_zone    = "us-east1-b"
+  instance_network = google_compute_network.mynetwork.self_link
+}
+
+# Create the mynet-vm-2" instance
+module "mynet-vm-2" {
+  source           = "./mymodule"
+  instance_name    = "mynet-vm-2"
+  instance_zone    = "us-east1-c"
+  instance_network = google_compute_network.mynetwork.self_link
+}
+            </pre>
+        </div>
+        <div class = "subtitle">Commands</div>
+        <div class = "block">
+            <li>Deploy resources</li>
+            <pre class = "prettyprint linenums">
+# initialize project
+terraform init
+
+# create plan
+terraform plan
+
+# execute plan
+terraform apply
+            </pre>
+        </div>
+        <div class = "block">
+            <li>Display resources</li>
+            <pre class = "prettyprint linenums">
+# inspect infrastructure
+terraform show
+
+# display selected values
+terraform output
+            </pre>
+        </div>
+        <div class = "block">
+            <li>Change resources</li>
+            <pre class = "prettyprint linenums">
+# change tf files
+
+# change changes
+terraform plan
+
+# make changes
+terraform apply
+            </pre>
+        </div>
+        <div class = "block">
+            <li>Delete resources</li>
+            <pre class = "prettyprint linenums">
+terraform detroy
+            </pre>
+        </div>
+	</body>
+</html>

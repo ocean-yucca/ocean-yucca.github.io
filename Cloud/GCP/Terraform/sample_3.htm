@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Google Cloud</title>
+		<link rel="stylesheet" href="../../../css/atelier-sulphurpool-light.css" type="text/css">
+		<script src="../../../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+		<style>
+			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+			div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+			span {color: red; font-weight: bold;}
+		</style>
+	</head>
+	<body>
+		<div class = "title">
+			Terraform Sample
+		</div>
+
+        <div class = "subtitle">Layout</div>
+        <div class = "block">
+            <center><img src = "img/terraform_6.png" width=30%></center>
+        </div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+# variables.tf
+variable "project_id" {
+  description = "Google Cloud Project ID"
+  type        = string
+  default     = "qwiklabs-gcp-01-04c0ad614214"
+}
+
+variable "region" {
+  description = "Default GCP region"
+  type        = string
+  default     = "us-west4"
+}
+
+variable "zone" {
+  description = "Default GCP zone"
+  type        = string
+  default     = "us-west4-b"
+}
+            </pre>
+        </div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+# main.tf
+terraform {
+  required_version = ">= 1.5.0"
+
+  required_providers {
+    google = {
+      source  = "hashicorp/google"
+      version = "~> 5.0"
+    }
+  }
+
+  backend "gcs" {
+    bucket  = "tf-bucket-768227"
+    prefix  = "terraform/state"
+  }
+}
+
+provider "google" {
+  project = var.project_id
+  region  = var.region
+  zone    = var.zone
+}
+
+module "instances" {
+  source     = "./modules/instances"
+  project_id = var.project_id
+  region     = var.region
+  zone       = var.zone
+}
+
+module "storage" {
+  source     = "./modules/storage"
+  project_id = var.project_id
+  region     = var.region
+  zone       = var.zone
+}
+
+module "network" {
+  source  = "terraform-google-modules/network/google"
+  version = "10.0.0"
+
+  project_id   = var.project_id
+  network_name = "tf-vpc-832951"
+  routing_mode = "GLOBAL"
+
+  subnets = [
+    {
+      subnet_name   = "subnet-01"
+      subnet_ip     = "10.10.10.0/24"
+      subnet_region = "us-west4"
+    },
+    {
+      subnet_name   = "subnet-02"
+      subnet_ip     = "10.10.20.0/24"
+      subnet_region = "us-west4"
+    }
+  ]
+}
+
+resource "google_compute_firewall" "tf_firewall" {
+  name    = "tf-firewall"
+  network = "tf-vpc-832951"
+
+  direction = "INGRESS"
+
+  allow {
+    protocol = "tcp"
+    ports    = ["80"]
+  }
+
+  source_ranges = ["0.0.0.0/0"]
+}
+            </pre>
+        </div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+# modules/instances/variables.tf
+variable "project_id" {
+  description = "Google Cloud Project ID"
+  type        = string
+  default     = "qwiklabs-gcp-01-04c0ad614214"
+}
+
+variable "region" {
+  description = "Default GCP region"
+  type        = string
+  default     = "us-west4"
+}
+
+variable "zone" {
+  description = "Default GCP zone"
+  type        = string
+  default     = "us-west4-b"
+}
+            </pre>
+        </div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+# modules/instances/instance.tf
+###################################
+# tf-instance-1 (UPDATED)
+###################################
+resource "google_compute_instance" "tf_instance_1" {
+  name         = "tf-instance-1"
+  zone         = var.zone
+  machine_type = "e2-standard-2"
+
+  boot_disk {
+    initialize_params {
+      image = "debian-11-bullseye-v20260114"
+    }
+  }
+
+  network_interface {
+    network    = "tf-vpc-832951"
+    subnetwork = "subnet-01"
+  }
+
+  metadata_startup_script = <<-EOT
+        #!/bin/bash
+    EOT
+
+  allow_stopping_for_update = true
+}
+
+###################################
+# tf-instance-2 (UPDATED)
+###################################
+resource "google_compute_instance" "tf_instance_2" {
+  name         = "tf-instance-2"
+  zone         = var.zone
+  machine_type = "e2-standard-2"
+
+  boot_disk {
+    initialize_params {
+      image = "debian-11-bullseye-v20260114"
+    }
+  }
+
+  network_interface {
+    network    = "tf-vpc-832951"
+    subnetwork = "subnet-02"
+  }
+
+  metadata_startup_script = <<-EOT
+        #!/bin/bash
+    EOT
+
+  allow_stopping_for_update = true
+}
+            </pre>
+        </div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+# modules/instances/outputs.tf
+output "instance_1_name" {
+  value = google_compute_instance.tf_instance_1.name
+}
+
+output "instance_2_name" {
+  value = google_compute_instance.tf_instance_2.name
+}
+            </pre>
+        </div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+# modules/storage/variables.tf
+variable "project_id" {
+  description = "Google Cloud Project ID"
+  type        = string
+  default     = "qwiklabs-gcp-01-04c0ad614214"
+}
+
+variable "region" {
+  description = "Default GCP region"
+  type        = string
+  default     = "us-west4"
+}
+
+variable "zone" {
+  description = "Default GCP zone"
+  type        = string
+  default     = "us-west4-b"
+}
+            </pre>
+        </div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+# modules/storage/storage.tf
+resource "google_storage_bucket" "tf_state_bucket" {
+  name                        = "tf-bucket-768227"
+  location                    = "US"
+  force_destroy               = true
+  uniform_bucket_level_access = true
+}
+            </pre>
+        </div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+# modules/storage/outputs.tf
+output "bucket_name" {
+  value = google_storage_bucket.tf_state_bucket.name
+}
+            </pre>
+        </div>
+        <div class = "subtitle">Commands</div>
+        <div class = "block">
+            <li>Deploy resources</li>
+            <pre class = "prettyprint linenums">
+# initialize project
+terraform init
+
+# create plan
+terraform plan
+
+# execute plan
+terraform apply
+            </pre>
+        </div>
+        <div class = "block">
+            <li>Display resources</li>
+            <pre class = "prettyprint linenums">
+# inspect infrastructure
+terraform show
+
+# display selected values
+terraform output
+            </pre>
+        </div>
+        <div class = "block">
+            <li>Change resources</li>
+            <pre class = "prettyprint linenums">
+# change tf files
+
+# change changes
+terraform plan
+
+# make changes
+terraform apply
+            </pre>
+        </div>
+        <div class = "block">
+            <li>Delete resources</li>
+            <pre class = "prettyprint linenums">
+terraform detroy
+            </pre>
+        </div>
+	</body>
+</html>
