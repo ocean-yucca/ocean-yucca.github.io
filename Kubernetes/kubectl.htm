@@ -34,6 +34,10 @@ kubectl get deployment
 kubectl get deploy
 kubectl get deployment [deploymentName] -o yaml # get configuration
 
+# get replicasets
+kubectl get replicasets
+kubectl get replicaset
+
 # get pods, services, deployments, statefulsets, replicasets
 kubectl get all
 
@@ -45,6 +49,13 @@ kubectl get configmap
 
 # get namespace
 kubectl get namespaces
+
+# get multiple objects
+kubectl get deployment,service,pod
+kubectl get deploy,svc,po
+
+# get multiple objects in a specific namespace
+kubectl get deploy,svc,po -n [namespace]
         </pre>
         </div>
         <div class = "subtitle">create</div>
@@ -53,7 +64,7 @@ kubectl get namespaces
 # create pod and replicaset
 # kubectl create deployment [Name] --image=image
 # deployment -&gt; replicaset -&gt; pod -&gt; container
-kubectl create deployment redis-deploy --image=redis:alpine # by default, pull images from docker.io
+kubectl create deployment redis-deploy --image=redis:alpine # create a deployment with name redis-deploy, automatically create replicaset and pod
 
 # create component from files
 # kubectl create -f [fileName]
@@ -62,24 +73,44 @@ kubectl create -f k8s/redis-deployment.yaml
 kubectl create -f k8s
         </pre>
         </div>
+        <div class = "subtitle">scale</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+# kubectl scale deployment [deploymentName] --replicas=[num]
+kubectl scale deployment webapp-deployment --replicas=3
+		</pre>
+	</div>
         <div class = "subtitle">edit</div>
 		<div class = "block">
 		<pre class = "prettyprint linenums">
 # edit deployment
 # create an automatically generated compose file, edit, and save
-# termiante the old pod and create a new pod using the editted deployment
+# On save + exit, Kubernetes updates the Deployment immediately, a new ReplicaSet may be created, Pods may be restarted or replaced
+# kubectl edit deployment [deploymentName]
 kubectl edit deployment redis-deploy
         </pre>
         </div>
         <div class = "subtitle">logs</div>
 		<div class = "block">
 		<pre class = "prettyprint linenums">
+# display stdout/stderr output in containers
+
+# one container in pod
 kubectl logs [podName]
+
+# multiple containers in pod
+kubectl logs [podName] -c [containerName]
         </pre>
         </div>
         <div class = "subtitle">describe</div>
 		<div class = "block">
 		<pre class = "prettyprint linenums">
+# describe deployment
+kubectl describe deployment [deploymentName]
+
+# describe replicaset
+kubectl describe replicaset [replicasetName]
+
 # describe pod
 kubectl describe pod [podName]
 
@@ -109,7 +140,12 @@ kubectl delete -f k8s
 		<div class = "block">
 		<pre class = "prettyprint linenums">
 # access container
+
+# one container in pod
 kubectl exec -it [podName] -- sh
+
+# multiple containers in pod
+kubectl exec -it [podName] -c [containerName] -- sh
         </pre>
         </div>
         <div class = "subtitle">apply</div>
@@ -126,11 +162,12 @@ kubectl apply -f k8s
         <div class = "subtitle">port-forward</div>
 		<div class = "block">
 		<pre class = "prettyprint linenums">
+# map service port to public access
 # kubectl port-forward svc/[serviceName] [accessPort]:[servicePort]
 kubectl port-forward svc/perceptor-service 8080:8082
         </pre>
         </div>
-        <div class = "subtitle"></div>
+        <div class = "subtitle">api-resources</div>
 		<div class = "block">
 		<pre class = "prettyprint linenums">
 kubectl api-resources --namespaced=true # list namespaced resources

@@ -109,7 +109,20 @@
                             <li>Or remote, outside of K8s cluster</li>
                         </ul>
                     </li>
-                    <li><span>Deployment &amp; StatefulSet</span></li>
+                    <li><span>Deployment</span>
+                        <ul>
+                            <li>Pod blueprint</li>
+                            <li>A Kubernetes object that manages how Pods are created, updated, scaled, and replaced</li>
+                            <li>Deployments assume Pods are interchangeable</li>
+                        </ul>
+                    </li>
+                    <li><span>StatefulSet</span>
+                        <ul>
+                            <li>A Kubernetes workload that manages Pods with stable identities, stable storage, and ordered startup/shutdown</li>
+                            <li>When run a stateful application, each Pod uses its own mounted volume to store its data. It makes persistence possible and reliable by guaranteeing stable Pod–volume relationships</li>
+                            <li>Run database in a StatefulSet with multiple replicas, Kubernetes does NOT sync data between replicas and you must configure PostgreSQL replication yoursel</li>
+                        </ul>
+                    </li>
                     <li>DaemonSet</li>
         </div>
         <div class = "subtitle">Reference</div>
