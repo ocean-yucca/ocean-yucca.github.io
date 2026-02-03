@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Google Cloud</title>
+		<link rel="stylesheet" href="../../../css/atelier-sulphurpool-light.css" type="text/css">
+		<script src="../../../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+		<style>
+			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+			div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+			span {color: red; font-weight: bold;}
+		</style>
+	</head>
+	<body>
+		<div class = "title">
+			Hello World
+		</div>
+
+		<div class = "subtitle">Create project</div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+# app.py
+import dash
+import dash_html_components as html
+ 
+app = dash.Dash(__name__)
+ 
+def main():
+    app.layout = html.H1(children="Hello World!",
+            style={"font-size": "18px", "color": "red", "font-weight": "bold", "border-style": "ridge"})
+ 
+if __name__ == "__main__":
+    main()
+    app.run_server(debug=True, host='0.0.0.0', port=8080) # turn on Dash tools
+            </pre>
+            <pre class = "prettyprint linenums">
+# requirements.txt
+dash
+            </pre>
+            <pre class = "prettyprint linenums">
+# Dockerfile
+FROM python:3.7-alpine
+WORKDIR /code
+ENV FLASK_APP=app.py
+ENV FLASK_RUN_HOST=0.0.0.0
+RUN apk add --no-cache gcc musl-dev linux-headers
+RUN apk add libc-dev
+RUN apk add --update alpine-sdk
+COPY requirements.txt requirements.txt
+RUN pip install -r requirements.txt
+EXPOSE 8080
+COPY . .
+CMD ["python", "app.py"]
+            </pre>
+        </div>
+        <div class = "subtitle">Build Image</div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+gcloud builds submit --tag gcr.io/[projectName]/hello:t1
+            </pre>
+        </div>
+        <div class = "subtitle">Deployment</div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+# app-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webapp-deployment
+  labels:
+    app: webapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: webapp # let deployment know which pod for this deployment
+  template: # configuration for pods
+    metadata:
+      labels:
+        app: webapp # each pod has a unique name, but pods can share the same label
+    spec:
+      containers: # containers in a pod, usually add one container per pod
+      - name: webapp
+        image: gcr.io/[projectName]/hello:t1
+        ports:
+        - containerPort: 8080
+            </pre>
+            <pre class = "prettyprint linenums">
+# app-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: webapp-service # service name accessed by app
+spec:
+  type: LoadBalancer
+  selector:
+    app: webapp # match the pod labels
+  ports:
+    - protocol: TCP
+      port: 8081 # service port
+      targetPort: 8080 # pod port
+            </pre>
+        </div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+# get cluster credentials
+gcloud container clusters get-credentials [clusterName] --region [regionName]
+
+# create deployment and service
+kubectl create -f app-deployment.yaml
+kubectl create -f app-service.yaml
+            </pre>
+        </div>
+        <div class = "subtitle">Access Application</div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+# get the external ip of webapp-service
+kubectl get svc
+
+# access
+external_ip:8081
+            </pre>
+        </div>
+        <div class = "subtitle">Delete Application</div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+kubectl delete -f app-development.yaml
+kubectl delete -f app-service.yaml
+            </pre>
+        </div>
+	</body>
+</html>
