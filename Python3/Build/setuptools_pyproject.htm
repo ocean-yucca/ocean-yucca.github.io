@@ -18,14 +18,14 @@
 		<div class = "block">
 		<p style = "text-align:center;"><img src = "img/build_3.png" width = "60%"></p>
 	</div>
-<div class = "subtitle">1. Setup files</div>
+<div class = "subtitle">Build files</div>
 		<div class = "block">
 			<li><a href = "../Unittest_source.htm">Source Code</a></li>
 		<pre class = "prettyprint linenums">
 # get source code 
-git@github.com:ocean-yucca/build_setup.git
+git@github.com:ocean-yucca/build_pyproject_setuptools.git
 		</pre>
-			<p style = "text-align:center;"><img src = "img/Build_2.png" width = "40%"></p>
+			<p style = "text-align:center;"><img src = "img/Build_4.png" width = "40%"></p>
 		</div>
 		<div class = "block">
 			<span>README.md</span>, recommend writing README.md file with <a href = "../Python/Markdown/Pieces.htm">Markdown</a> syntax</li>
@@ -60,17 +60,12 @@ SOFTWARE.
 		</pre>
 		</div>
 		<div class = "block">
-			<span>requirements.txt</span>
-		<pre class = "prettyprint linenums">
-pip freeze &gt; requirements.txt
-		</pre>
-		</div>
-		<div class = "block">
 			<li><a href = "https://setuptools.pypa.io/en/latest/userguide/miscellaneous.html">include files in source distributions</a></li>
 			<span>MANIFEST.in</span>, add other files that will be included in the archive file
 		<pre class = "prettyprint linenums">
-include README.md LICENSE requirements.txt
-recursive-include doc/_build/html *
+include README.md
+include LICENSE
+recursive-include data/ *.csv
 		</pre>
 		</div>
 		<div class = "block">
@@ -101,72 +96,95 @@ dist/
 		</pre>
 	</div>
 		<div class = "block">
-			<li><a href = "https://packaging.python.org/guides/distributing-packages-using-setuptools/">setup() args</a></li>
+			<span>pyproject.toml</span>
 		<pre class = "prettyprint linenums">
-import setuptools
-from pathlib import Path
+##################### Defines how the project should be built ###################
+# pip install .
+[build-system]
+requires = ["setuptools>=61.0", "wheel"] # install packages for building
+build-backend = "setuptools.build_meta"
 
-def read_requirements(filename="requirements.txt"):
-    return [
-        line.strip()
-        for line in Path(filename).read_text().splitlines()
-        if line.strip() and not line.startswith("#")
-    ]
+# Project Metadata
+[project]
+name = "linlangleyprimecosmos" # name used for pip install/uninstall
+version = "0.1.0"
+description = "A simple project with one dependency"
+authors = [
+    { name = "Fname Lname", email = "fname.lname@example.com" }
+]
 
-setuptools.setup(
-    # project information
-    name='linlangleyprimecosmos', # project name, a unique name for PyPI, used for pip install/uninstall
-    version='0.5',
-    license='Creative Commons Attribution-Noncommercial-Share Alike license',
-    description='Demo for building a Python project',
-    long_description=open('README.md').read(),
-    long_description_content_type="text/markdown",
-    author='Fname Lname',
-    author_email='fname.lnamen@domain',
-    url='http://url',
-    project_urls = {
-        'PyPI': 'https://pypi.org/manage/project/repo_name/releases/',
-        'Conda': 'https://anaconda.org/username/repo_name'
-        },
+requires-python = ">=3.9" # define Python version
 
-    # python versions
-    python_requires=">=3.9",
+dependencies = [ # replace requirements.txt
+    "requests>=2.0",
+    "numpy>=1.24",
+    "pandas>=2.0,<3.0",
+]
 
-    # package
-    package_dir={'':'src'}, # location to find the packages
-    packages=setuptools.find_packages(where="src"),
-    # packages=['primepackage', ], # specify packages will be installed, used for import
+[project.scripts]
+primegen = "primepackage.generator:main"
 
-    # executable script
-    entry_points={
-        "console_scripts": [
-            "primegen = primepackage.generator:main",
-        ]
-    },
+############################## define extras ###########################
+[project.optional-dependencies]
 
-    # dependencies
-    install_requires=read_requirements(),
+# pip install .[test]
+test = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "black>=23.0",
+    "isort>=5.12",
+    "mypy>=1.0",
+    "pre-commit>=3.0"
+]
 
-    # test, build, publish
-    extras_require = {
-        "test": ["pytest", "pytest-cov"], # install pytest and pytest-cov
-        "build": ["build"], # install build
-        "publish": ["twine"] # install twine
-        },
+# pip install .[build]
+build = [
+    "build>=1.0",
+    "twine>=4.0"
+]
 
-    # standardized metadata tags
-    classifiers=[ # list of classifiers at https://pypi.org/pypi?%3Aaction=list_classifiers
-      'Development Status :: 4 - Beta',
-      'Environment :: X11 Applications :: GTK',
-      'Intended Audience :: End Users/Desktop',
-      'Intended Audience :: Developers',
-      'License :: OSI Approved :: GNU General Public License (GPL)',
-      'Operating System :: POSIX :: Linux',
-      'Programming Language :: Python',
-      'Topic :: Desktop Environment',
-      'Topic :: Text Processing :: Fonts'
-      ],
-)
+# pip install .[docs], install with docs tools
+docs = [
+    "sphinx>=7.0",           # documentation generator
+    "furo>=2023.8.19"        # Sphinx theme
+]
+
+# Provides metadata links
+[project.urls]
+Homepage = "https://example.com"
+Documentation = "https://example.com/docs"
+Repository = "https://github.com/username/my-expanded-project"
+Issues = "https://github.com/username/my-expanded-project/issues"
+Changelog = "https://example.com/changelog"
+
+######################### Tool configuration specification #######################
+# define package location
+[tool.setuptools]
+package-dir = {"" = "src"}
+include-package-data = true # include data
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+my_package = ["data/*.json"] # define data location for wheel
+
+# [tool.&lt;tool-name&gt;], tool-specific configuration
+# code formatter
+[tool.black]
+line-length = 88
+target-version = ["py39"]
+skip-string-normalization = true
+
+# import sort
+[tool.isort]
+profile = "black"
+line_length = 88
+
+# pytest
+[tool.pytest.ini_options]
+testpaths = ["test"]
+addopts = "-ra -q"
 		</pre>
 		</div>
 		<div class = "subtitle">Local</div>
@@ -195,8 +213,7 @@ pip uninstall linlangleyprimecosmos
 # push the code to GitHub
 
 # user install
-pip install git+https://github.com/ocean-yucca/build_setup.git
-# uv pip install git+https://github.com/ocean-yucca/build_setup.git, when use uv venv
+pip install git+https://github.com/ocean-yucca/build_pyproject_setuptools.git
 
 # run executable script
 primegen
@@ -216,8 +233,7 @@ pip uninstall linlangleyprimecosmos
 # push the code to GitLab
 
 # user install
-pip install git+https://gitlab.com/lin.chen2/linlangleyprimecosmos.git
-# uv pip install git+https://gitlab.com/lin.chen2/linlangleyprimecosmos.git, when use uv venv
+pip install git+https://gitlab.com/lin.chen2/build_pyproject_setuptools.git
 
 # run executable script
 primegen
@@ -227,7 +243,6 @@ import primepackage
 
 # uninstall
 pip uninstall linlangleyprimecosmos
-# uv pip uninstall linlangleyprimecosmos, when use uv venv
 		</pre>
 	</div>
 		<div class = "subtitle">PyPI</div>
@@ -236,24 +251,20 @@ pip uninstall linlangleyprimecosmos
 			<li>Create a token in <span>Account Setting</span> on pypi.org</li>
 		<pre class = "prettyprint linenums">
 # test
-pip install -e '.[test]' # editable install and install pytest and pytest-cov
-# uv pip install -e '.[test]', when use uv venv
+pip install -e '.[test]'
 pytest
 
 # build
-pip install -e '.[build]' # editable install and install build
-# uv pip install -e '.[build]', when use uv venv
+pip install -e '.[build]'
 rm -rf dist # remove dist folder if exist
 python -m build # build .whl file in dist folder
 
 # publish
 pip install -e '.[publish]' # editable install and install twine
-# uv pip install -e '.[publish]', when use uv venv
-twine upload dist/*
+twine upload dist/* # use token to authenticate
 
 # user install
 pip install linlangleyprimecosmos
-# uv pip install linlangleyprimecosmos, when use uv venv
 
 # run executable script
 primegen
@@ -263,32 +274,8 @@ import primepackage
 
 # uninstall
 pip uninstall linlangleyprimecosmos
-# uv pip uninstall linlangleyprimecosmos, when use uv venv
 		</pre>
 		</div>
-		<div class = "subtitle">TestPyPI</div>
-		<div class = "block">
-			<li><a href = "https://test.pypi.org/">Register</a> an account at test.pypi.org</li>
-			<li>Create a token in <span>Account Setting</span> on testpypi.org</li>
-		<pre class = "prettyprint linenums">
-# publish
-twine upload --repository testpypi dist/*
-
-# user install
-pip install -i https://test.pypi.org/simple/ linlangleyprimecosmos
-# uv pip install -i https://test.pypi.org/simple/ linlangleyprimecosmos, when use uv venv
-
-# run executable script
-primegen
-
-# import package
-import primepackage
-
-# uninstall
-pip uninstall linlangleyprimecosmos
-# uv pip uninstall linlangleyprimecosmos, when use uv venv
-		</pre>
-	</div>
 		<div class = "subtitle">conda</div>
 		<div class = "block">
 			<li><a href = "https://anaconda.org/">Create Anaconda Account</a></li>
@@ -300,7 +287,6 @@ conda install anaconda-client conda-build # install need modules
 		<pre class = "prettyprint linenums">
 # test
 pip install -e '.[test]' # editable install and install pytest and pytest-cov
-# uv pip install -e '.[test]', when use uv venv
 pytest
 
 # build
@@ -377,25 +363,28 @@ extra:
 		<pre class = "prettyprint linenums">
 # test
 pip install -e '.[test]' # editable install and install pytest and pytest-cov
-# uv pip install -e '.[test]', when use uv venv
 pytest
 
 # build
 pip install -e '.[build]' # editable install and install build
-# uv pip install -e '.[build]', when use uv venv
 rm -rf dist # remove dist folder if exist
 python -m build # build .whl file in dist folder
 
 # publish
 pip install -e '.[publish]' # editable install and install twine
-# uv pip install -e '.[publish]', when use uv venv
+</pre>
+</div>
+<div class = "block">
+		<pre class = "prettyprint linenums">
 # login GCP
 gcloud auth login
+
 # create a repo
 gcloud artifacts repositories create my-pypi-repo \
   --repository-format=python \
   --location=us-east1 \
   --description="Private repo"
+
 # grant IAM permission, roles/artifactregistry.writer
 # upload package to https://[region]-python.pkg.dev/[project_name]/[repo_name]/
 gcloud auth application-default login
@@ -423,32 +412,5 @@ uv pip install \
   linlangleyprimecosmos
 		</pre>
 	</div>
-		<div class = "subtitle">Reference</div>
-		<div class = "block">
-			<li>layout
-				<ul>
-					<li><a href = "https://www.python.org/dev/peps/pep-0631/">Dependency Specification</a></li>
-					<li><a href = "https://packaging.python.org/guides/distributing-packages-using-setuptools/">Packaging and Distributing Projects</a></li>
-					<li><a href = "https://packaging.python.org/tutorials/packaging-projects/">PyPI tutorial for Python 3</a></li>
-				</ul>
-			</li>
-			<li>conda
-				<ul>
-					<li><a href = "https://docs.anaconda.com/anaconda-repository/2.23/user/using/">Anaconda Repository</a></li>
-					<li><a href = "https://docs.conda.io/projects/conda-build/en/latest/user-guide/tutorials/index.html">Conda Build</a></li>
-				</ul>
-			</li>
-			<li>setuptools
-				<ul>
-					<li><a href = "https://packaging.python.org/en/latest/guides/distributing-packages-using-setuptools/">Python Packaging User Guide</a></li>
-					<li><a href = "https://docs.python.org/3/distutils/builtdist.html">Built Distributions</a></li>
-					<li><a href = "https://the-hitchhikers-guide-to-packaging.readthedocs.io/en/latest/quickstart.html#lay-out-your-project">The Hitchhiker's Guide</a></li>
-					<li><a href = "https://wiki.python.org/moin/Distutils/Tutorial">Introduction to distutils</a></li>
-					<li><a href = "https://setuptools.readthedocs.io/en/latest/">setuptools Documentation</a></li>
-					<li><a href = "https://github.com/pypa/setuptools">setuptools source code</a></li>
-					<li><a href = "https://pythonhosted.org/an_example_pypi_project/setuptools.html">setuptools tutorial</a></li>
-				</ul>
-			</li>
-		</div>
 	</body>
 </html>
