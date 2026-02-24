@@ -28,7 +28,19 @@
                 <li>Internal table
                     <ul>
                         <li>Data is stored inside BigQuery</li>
-                        <li>BigQuery fully manages storage, layout, and optimizatio</li>
+                        <li>BigQuery fully manages storage, layout, and optimization</li>
+                        <li>Sources
+                            <ul>
+                                <li>Load files from local</li>
+                                <pre class = "prettyprint linenums">
+Native table
+                                </pre>
+                                <li>Load files from Google Cloud Storage</li>
+                                <pre class = "prettyprint linenums">
+Native table
+                                </pre>
+                            </ul>
+                        </li>
                     </ul>
                 </li>
                 <li>External table
@@ -36,6 +48,14 @@
                         <li>Data stays in source</li>
                         <li>BigQuery stores metadata only</li>
                         <li>Queries read files in place</li>
+                        <li>Sources
+                            <ul>
+                        <li>Load files from Google Cloud Storage</li>
+                                <pre class = "prettyprint linenums">
+External table
+                                </pre>
+                            </ul>
+                        </li>
                     </ul>
                 </li>
                 <li>BigLake table
@@ -83,11 +103,26 @@
         </div>
         <div class = "block">
             <ul>
-                <li>Query</li>
+                <li>Studio
+                    <ul>
             <pre class = "prettyprint linenums">
+# select
 select *
 from `project_id.dataset_id.table_id`;
+
+select *
+from project_id.dataset_id.table_id;
+
+select *
+from dataset_id.table_id;
             </pre>
+            <pre class = "prettyprint linenums">
+# delete
+DELETE FROM mydataset.housing_gcs_native
+where median_house_value < 200000;
+            </pre>
+        </ul>
+            </li>
             <li>BigQuery Studio Notebook
                 <ul>
                     <li>Similar to Jupyter notebook</li>

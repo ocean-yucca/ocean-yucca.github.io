@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Google Cloud</title>
+		<link rel="stylesheet" href="../../../css/atelier-sulphurpool-light.css" type="text/css">
+		<script src="../../../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+		<style>
+			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+			div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+			span {color: red; font-weight: bold;}
+		</style>
+	</head>
+	<body>
+		<div class = "title">
+			BigQuery Studio Notebook
+		</div>
+
+        <div class = "subtitle">Access Data</div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+# query data with SQL
+# save as a bigframes.dataframe.DataFrame
+select *
+from mydataset.housing_gcs_native
+where ocean_proximity = 'ISLAND';
+            </pre>
+        </div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+# query data with bigquery in Python
+from google.cloud import bigquery
+
+client = bigquery.Client()
+
+query = """
+SELECT *
+FROM mydataset.housing_gcs_native
+"""
+
+df = client.query(query).to_dataframe(create_bqstorage_client=True) # Pandas DataFrame
+            </pre>
+        </div>
+            <div class = "block">
+            <pre class = "prettyprint linenums">
+# query data with bigframes.pandas in Python
+import bigframes.pandas as bpd
+
+df = bpd.read_gbq("SELECT * FROM mydataset.housing_gcs_native") # bigframes.dataframe.DataFrame
+            </pre>
+        </div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+# load data from local directory which is the temporary space of the notebook
+import pandas as pd
+df = pd.read_csv("/home/housing.csv") # Pandas DataFrame
+            </pre>
+        </div>
+        <div class = "block">
+            <center><img src = "img/bigquery_4.png" width=40%></center>
+        </div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+import pandas as pd
+import bigframes.pandas as bpd
+
+pd_df = bf_df.to_pandas() # bigframes DataFrame to pandas DataFrame
+bf_df = bpd.read_pandas(pd_df) # pandas DataFrame to bigframes DataFrame
+            </pre>
+        </div>
+        <div class = "subtitle">Plot</div>
+        <div class = "block">
+            <center><img src = "img/bigquery_5.png" width=50%></center>
+        </div>
+        <div class = "subtitle">Packages</div>
+        <div class = "block">
+            <ul>
+                <li>The packages installed in a notebook is <span>temporary</span></li>
+            </ul>
+        </div>
+        <div class = "subtitle">Commands</div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+# Linux commands
+%%sh
+ls
+
+!ls
+
+ls
+
+# Python script
+%%python
+print('Hello World!')
+
+# HTML
+%%html
+&lt;h3&gt;Hello&lt;/h3&gt;
+
+# measure execution time
+%%timeit
+sum(range(1000000))
+
+# Writes the entire cell content to a file
+%%writefile my_script.py
+print("Hello world")
+            </pre>
+        </div>
+        <div class = "subtitle">Colab-style parameter cell annotation</div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+# string
+text_value = "hello"  # @param {type:"string"}
+
+# integer
+num = 10  # @param {type:"integer"}
+
+# float
+lr = 0.01  # @param {type:"number"}
+
+# boolean
+flag = True  # @param {type:"boolean"}
+
+# dropdown
+optimizer = "adam"  # @param ["adam", "sgd", "rmsprop"]
+
+# slider
+batch_size = 32  # @param {type:"slider", min:1, max:128, step:1}
+            </pre>
+        </div>
+        <div class = "subtitle">Version History</div>
+        <div class = "block">
+            <ul>
+                <li>Restoring a old version will create a new version, and does not remove any old versions</li>
+            </ul>
+        </div>
+        <div class = "subtitle">Schedule</div>
+        <div class = "block">
+            <ul>
+                <li>Repeatly run a notebook</li>
+                <li>Save the notebook to a bucket in Cloud Storage</li>
+            </ul>
+        </div>
+	</body>
+</html>

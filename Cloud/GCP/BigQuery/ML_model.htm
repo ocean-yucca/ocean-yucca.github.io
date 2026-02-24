@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Google Cloud</title>
+		<link rel="stylesheet" href="../../../css/atelier-sulphurpool-light.css" type="text/css">
+		<script src="../../../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+		<style>
+			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+			div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+			span {color: red; font-weight: bold;}
+		</style>
+	</head>
+	<body>
+		<div class = "title">
+			ML Model
+		</div>
+
+        <div class = "subtitle">Train Model</div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+CREATE OR REPLACE MODEL `storagedev-485602.mydataset.house_price_model`
+OPTIONS(
+  model_type='linear_reg',
+  input_label_cols=['median_house_value'],
+  data_split_method='AUTO_SPLIT'
+) AS
+SELECT
+  longitude,
+  latitude,
+  housing_median_age,
+  total_rooms,
+  total_bedrooms,
+  population,
+  households,
+  median_income,
+  ocean_proximity,
+  median_house_value
+FROM `storagedev-485602.mydataset.california_housing`
+WHERE median_house_value IS NOT NULL;
+            </pre>
+        </div>
+        <div class = "subtitle">Evaluation Model</div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+SELECT *
+FROM ML.EVALUATE(
+  MODEL `storagedev-485602.mydataset.house_price_model`
+);
+            </pre>
+        </div>
+        <div class = "subtitle">Use Model</div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+SELECT
+  predicted_median_house_value,
+  median_income,
+  total_rooms
+FROM ML.PREDICT(
+  MODEL `storagedev-485602.mydataset.house_price_model`,
+  (
+    SELECT *
+    FROM `storagedev-485602.mydataset.california_housing`
+    LIMIT 10
+  )
+);
+            </pre>
+        </div>
+	</body>
+</html>
