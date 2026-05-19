@@ -18,13 +18,19 @@
 			Ollama
 		</div>
 
-		<div class = "subtitle">Interactive Chat</div>
+		<div class = "subtitle">Local run</div>
 		<div class = "block">
 		<pre class = "prettyprint linenums">
 # load model to .llama/models and start a server
 ollama run phi3
 
 # /?, help
+
+# display the process of Ollama server
+ps aux | grep ollama
+
+# displary the port of Ollama server
+lsof -i -P -n | grep ollama # by default, 11434
         </pre>
         </div>
 		<div class = "subtitle">Commands</div>
@@ -49,33 +55,193 @@ ollama cp phi3 my_model
 ollama show phi3
         </pre>
         </div>
-		<div class = "subtitle">Ollama Server</div>
-		<div class = "block">
-		<pre class = "prettyprint linenums">
-# display the process of Ollama server
-ps aux | grep ollama
-
-# displary the port of Ollama server
-lsof -i -P -n | grep ollama # by default, 11434
-        </pre>
-        </div>
-		<div class = "subtitle">API</div>
-		<div class = "block">
-		<pre class = "prettyprint linenums">
-        </pre>
-        </div>
 		<div class = "subtitle">Python API</div>
 		<div class = "block">
+		<pre class = "prettyprint linenums">
+import ollama
+
+# install model
+ollama.pull('phi3')
+
+# delete model
+ollama.delete('phi3')
+
+# list models
+ollama.list()
+
+# show model information
+ollama.show('gemma3')
+
+# create model with customized system instruction and parameters
+ollama.create(
+    model="ds-tutor",
+    from_="llama3.2",
+    system="You are a helpful data science tutor. Explain concepts clearly and give Python examples when useful.Keep answers concise.",
+    parameters={
+        "temperature": 0.3,
+        "num_ctx": 8192
+    }
+)
+
+# create a copy of model
+ollama.copy('phi3', 'my_model')
+
+# push a model to Ollama
+ollama.copy('phi3', 'user_name/model_name') # create a copy with user_name/model_name
+# ollama signin # login in the command line
+# create a model with the name of model_name
+ollama.push('user_name/my_model')
+		</pre>
+	</div>
+	<div class = "block">
 		<pre class = "prettyprint linenums">
 from ollama import Client
 client = Client(host='http://localhost:11434')
 
-# Generate a response (single turn interaction)
+# one-turn interaction
 client.generate(model='my_model', prompt='What is the capital of France?') # The capital of France is Paris
+</pre>
+		<pre class = "prettyprint linenums">
+# Multi-Turn Interaction
+messages = [
+    {"role": "system", "content": "You are a helpful tutor."},
 
-# Chat with a model (Multi-Turn Interaction)
+    {"role": "user", "content": "What is the capital of France?"},
+    {"role": "assistant", "content": "The capital of France is Paris."},
+
+    {"role": "user", "content": "What country is it in?"},
+    {"role": "assistant", "content": "Paris is in France."},
+
+    {"role": "user", "content": "What language do people speak there?"}
+]
+
+response = client.chat(
+    model="my_model",
+    messages=messages
+)
+</pre>
+		<pre class = "prettyprint linenums">
+# roles
+# system, instructions for how the assistant should behave
+# user, the human’s message/question
+# assistant, the model’s previous answer
+# tool, result from an external tool/function
+messages = []
+
+# round 1
+messages.append({
+    "role": "user",
+    "content": "What is the capital of France?"
+})
+
+response = client.chat(
+    model="my_model",
+    messages=messages
+)
+
+messages.append({
+    "role": "assistant",
+    "content": response["message"]["content"]
+})
+
+# round 2
+messages.append({
+    "role": "user",
+    "content": "What country is it in?"
+})
+
+response = client.chat(
+    model="my_model",
+    messages=messages
+)
+
+messages.append({
+    "role": "assistant",
+    "content": response["message"]["content"]
+})
         </pre>
         </div>
+        <div class = "block">
+		<pre class = "prettyprint linenums">
+response = ollama.chat(model='phi3', messages=[
+  {
+    'role': 'user',
+    'content': 'Why is the sky blue?',
+  },
+])
+
+response = ollama.generate(model='phi3', prompt = 'Why is the sky blue?')
+		</pre>
+	</div>
+	<div class = "block">
+		<pre class = "prettyprint linenums">
+# streaming
+stream = ollama.chat(
+    model='phi3',
+    messages=[{'role': 'user', 'content': 'Why is the sky blue?'}],
+    stream=True,
+)
+
+for chunk in stream:
+  print(chunk['message']['content'], end='', flush=True)
+		</pre>
+	</div>
+	<div class = "block">
+		<pre class = "prettyprint linenums">
+# cloud model
+# ollama does not download the full model weights to local when use cloud model
+
+response = ollama.chat(
+    model='gpt-oss:120b-cloud',
+    messages=[{'role': 'user', 'content': 'Hello!'}],
+)
+print(response.message.content)
+		</pre>
+	</div>
+	<div class = "block">
+		<pre class = "prettyprint linenums">
+# embedding
+response = ollama.embed(
+    model="qwen3-embedding",
+    input=[
+        "Paris is the capital of France.",
+        "Python is a programming language."
+    ]
+)
+
+vectors = response["embeddings"]
+		</pre>
+	</div>
+	<div class = "subtitle">Notebooks</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+# start marimo
+uvx marimo edit --sandbox notebook.py
+		</pre>
+		<pre class = "prettyprint linenums">
+import ollama
+import marimo as mo
+
+messages = []
+		</pre>
+		<pre class = "prettyprint linenums">
+prompt = mo.ui.text_area(label="Prompt")
+
+prompt
+		</pre>
+		<pre class = "prettyprint linenums">
+user_input = prompt.value
+
+messages.append({"role": "user", "content": user_input})
+
+response = ollama.chat(model="phi3", messages=messages)
+
+messages.append({"role": "assistant", "content": response["message"]["content"]})
+		</pre>
+		<pre class = "prettyprint linenums">
+print(response['message']['content'])
+		</pre>
+	</div>
 		<div class = "subtitle">Web-based GUI</div>
 		<div class = "block">
 		<pre class = "prettyprint linenums">
