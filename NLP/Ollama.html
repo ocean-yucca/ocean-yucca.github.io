@@ -245,8 +245,20 @@ print(response['message']['content'])
 		<div class = "subtitle">Web-based GUI</div>
 		<div class = "block">
 		<pre class = "prettyprint linenums">
+docker run -d \
+  -p 3000:8080 \
+  --add-host=host.docker.internal:host-gateway \
+  -v open-webui:/app/backend/data \
+  --name open-webui \
+  --restart always \
+  ghcr.io/open-webui/open-webui:main
         </pre>
         </div>
+        	<div class = "block">
+		<pre class = "prettyprint linenums">
+http://localhost:3000
+		</pre>
+	</div>
 		<div class = "subtitle">Reference</div>
         <div class = "block">
             <li><a href = "https://github.com/ollama/ollama-python">ollama-python</a></li>
