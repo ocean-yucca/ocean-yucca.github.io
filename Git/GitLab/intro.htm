@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>GitLab</title>
+		<link rel="stylesheet" href="../../css/atelier-sulphurpool-light.css" type="text/css">
+		<script src="../../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+		<style>
+			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+			div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+			span {color: red; font-weight: bold;}
+		</style>
+	</head>
+	<body>
+		<div class = "title">
+			Introduction
+		</div>
+        <div class = "subtitle">Access</div>
+		<div class = "block">
+			<li><span>Project token</span>
+			<ul>
+				<li>Project -&gt; Settings -&gt; Access tokens</li>
+				<li>role: developer or above</li>
+				<li>scope: read_repository, write_repository</li>
+			</ul>
+		</li>
+		<pre class = "prettyprint linenums">
+# clone
+# git clone https_url
+usrname: project_[project_id]_bot
+pwd: project_token
+		</pre>
+		</div>
+		<div class = "block">
+			<li><span>Personal token</span>
+			<ul>
+				<li>Profile -&gt; Access -&gt; Personal access tokens</li>
+				<li>scope: read_repository + write_repository</li>
+			</ul>
+		</li>
+		<pre class = "prettyprint linenums">
+# git clone https_url
+git clone https://gitlab.com/lin.chen2/cyber1.git
+usrname: gitlab_usrname
+pwd: personal_token
+		</pre>
+		</div>
+		<div class = "block">
+			<li><span><a href = "ssh.htm">SSH</a></span></li>
+		<pre class = "prettyprint linenums">
+# git clone ssh_url
+		</pre>
+		</div>
+		<div class = "subtitle">Roles</div>
+		<div class = "block">
+			<li><span>Guest</span>, no code access, view and comment on issues and epics</li>
+					<li><span>Planner</span>, view code only, create and manage issues, epics, milestone, and iterations</li>
+					<li><span>Reportor</span>, view code only, create issues and generate report</li>
+					<li><span>Security Manager</span>, view and manage security features</li>
+					<li><span>Deverloper</span>, push code to non-protected branches, create merge requests and run pipeline</li>
+					<li><span>Maintainer</span>, push code, manage branches, merge request, cannot delete project</li>
+					<li><span>Owner</span>, full control</li>
+		</div>
+        <div class = "subtitle">Plan</div>
+		<div class = "block">
+			<ol>
+					<li>Create Labels in Manager, such as To-Do, Doing, Review, Done, etc.</li>
+					<li>Create a milestone in Milestones</li>
+					<li>Create Work items, specify label, such as To-Do, specify milestone, add start date and due date, add time tracking</li>
+					<li>Create lists on Issue boards with created labels</li>
+					<li>Create a group wiki</li>
+				</ol>
+        </div>
+        <div class = "subtitle">Code</div>
+		<div class = "block">
+				<ul>
+					<li><span>Snippet</span>, small shareable piece of code or text</li>
+				</ul>
+        </div>
+	</body>
+</html>
