@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Python</title>
+		<link rel="stylesheet" href="../../css/atelier-sulphurpool-light.css" type="text/css">
+		<script src="../../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+		<style>
+			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+			div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+			span {color: red;}
+		</style>
+	</head>
+	<body>
+		<div class = "title">
+			Jobs
+		</div>
+		<div class = "subtitle">Job Workflow</div>
+		<div class = "block">
+			<p style = "text-align:center;"><img src = "img/pipeline_5.png" width = "50%"></p>
+			<ul>
+			<li>Stage names can be arbitrary</li>
+			<li>GitLab run stages in order</li>
+			<li>The job in stage_1 runs first, then the jobs in stage_2 run, and finally the jobs in stage_3 run</li>
+		</ul>
+		</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+# .gitlab-ci.yml
+default:
+  image: alpine:latest
+
+stages:
+  - stage_1
+  - stage_2
+  - stage_3
+
+job_1:
+  stage: stage_1
+  script:
+    - echo "Running job_1 in stage_1"
+
+job_2:
+  stage: stage_2
+  script:
+    - echo "Running job_2 in stage_2"
+
+job_3:
+  stage: stage_2
+  script:
+    - echo "Running job_3 in stage_2"
+
+job_4:
+  stage: stage_3
+  script:
+    - echo "Running job_4 in stage_3"
+
+job_5:
+  stage: stage_3
+  script:
+    - echo "Running job_5 in stage_3"
+
+job_6:
+  stage: stage_3
+  script:
+    - echo "Running job_6 in stage_3"
+		</pre>
+	</div>
+		<div class = "subtitle">Script Jobs</div>
+		<div class = "block">
+			<p style = "text-align:center;"><img src = "img/pipeline_1.png" width = "40%"></p>
+		</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+# .gitlab-ci.yml
+image: alpine:latest # define a default image for jobs
+
+stages: # define stages and order
+  - build
+  - test
+  - deploy
+  
+job_1:
+  stage: build
+  tags:
+    - saas-linux-small-amd64 # select runner with specific tag to run the job
+  script:
+    - echo "Hello, $GITLAB_USER_LOGIN!" > output_1.txt # generate output file
+  artifacts:
+    paths:
+      - output_1.txt # define the output file path
+
+job_2:
+  stage: test
+  tags:
+    - gitlab-org-docker
+  script:
+    - mkdir results # create a output folder
+    - echo "Test in job 2" > results/output_2.txt
+  artifacts:
+    paths:
+      - results # define output folder path which is relative to the project directory
+    expire_in: 1 day # setup expiration days
+
+job_3:
+  stage: test
+  script:
+    - echo "Test in job 3"
+    - sleep 20
+  needs:
+    - job_1 # implement job_3 when job_1 finish
+
+job_4:
+  stage: deploy
+  script:
+    - echo "Deploy job"
+		</pre>
+		</div><div class = "subtitle">Workflow</div>
+		<div class = "block">
+			<p style = "text-align:center;"><img src = "img/pipeline_2.png" width = "70%"></p>
+		</div>
+		<div class = "block">
+			<ol>
+				<li>You push code to GitLab (e.g., commit to main branch)</li>
+				<li>GitLab CI/CD
+				<ul>
+					<li>Parses .gitlab-ci.yml</li>
+					<li>Triggers a pipeline</li>
+					<li>Assigns a job to a Docker-based runner
+					</li>
+				</ul>
+			</li>
+			<li>Runner pulls the image specified in image: (e.g., python:3.10)</li>
+			<li>Runner creates a container from that image</li>
+			<li>Runner injects the project source code into the container's working directory
+				<ul>
+					<li>Default is /builds/[username or group_name]/[project_name]</li>
+				</ul>
+			</li>
+			<li>The runner runs the job’s script: commands inside the container in working directory</li>
+			</ol>
+		</div>
+		<div class = "subtitle">CI/CD Pipeline Engine</div>
+		<div class = "block">
+			<ul>
+			<li>Parsing .gitlab-ci.yml when you push a commit</li>
+			<li>Building the pipeline graph: which jobs to run, what stages and dependencies exist</li>
+			<li>Scheduling jobs in the correct order</li>
+			<li>Assigning jobs to available runners based on tags, availability, and rules</li>
+			<li>The .gitlab-ci.yml file itself is not "executed" on your runner</li>
+		</ul>
+		</div>
+		<div class = "subtitle">Runner</div>
+		<div class = "block">
+			<ul>
+			<li>What a runner is?
+				<ul>
+					<li>GitLab Runner is the program that actually executes the jobs</li>
+					<li><span>Runner</span> is on a sever which execute jobs</li>
+					<li>Each <span>job</span> run its own container</li>
+					<li><span>Server</span> can be company server, cloud VM, K8s cluster, personal computer or GitLab-hosted runner</li>
+				</ul>
+			</li>
+			<li>Executor modes
+				<ul>
+					<li>shell
+						<ul>
+							<li>Runs jobs directly in the local shell</li>
+							<li>Jobs can share files</li>
+						</ul>
+					</li>
+					<li>docker
+						<ul>
+							<li><span>Default</span> executor of shared runners on GitLab.com</li>
+							<li>Launches a container for each job</li>
+							<li>Each job runs in its own isolated Docker container for security, reproducibility, and separation of concerns</li>
+							<li>Nothing is shared between job containers by default</li>
+						</ul>
+					</li>
+					<li>virtualbox</li>
+					<li>ssh</li>
+					<li>kubernetes</li>
+				</ul>
+			</li>
+			<li>Tags
+				<ul>
+					<li><span>Tag on a runner</span>, this runner is available for jobs that require these capabilities</li>
+					<li><span>Tag on a job</span>, this job requires a runner with these tags/capabilities</li>
+					<li>Settings -&gt; CI/CD -&gt; Runners</li>
+					<li>When a job has multiple tags, GitLab looks for a runner that matches all of those tags</li>
+				</ul>
+			</li>
+		</ul>
+		</div>
+		<div class = "subtitle">Share Files between Jobs</div>
+		<div class = "block">
+			<ul>
+				<li><span>artifacts</span>, share files between jobs in a single pipeline</li>
+			</ul>
+		</div>
+		<div class = "block">
+			<p style = "text-align:center;"><img src = "img/pipeline_6.png" width = "35%"></p>
+		</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+default:
+  image: alpine:latest
+
+stages:
+  - stage_build
+  - stage_test
+
+job_create_file:
+  stage: stage_build
+  script:
+    - echo "Hello from create_file job" > output.txt
+  artifacts:
+    paths:
+      - output.txt
+
+job_use_file:
+  stage: stage_test
+  dependencies:
+    - job_create_file
+  script:
+    - cat output.txt > output2.txt
+  artifacts:
+    paths:
+      - output2.txt
+		</pre>
+	</div>
+		<div class = "block">
+			<ul>
+				<li><span>cache</span>, Share files between jobs in the same pipeline</li>
+			</ul>
+		</div>
+		<div class = "block">
+			<p style = "text-align:center;"><img src = "img/pipeline_7.png" width = "30%"></p>
+		</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+stages:
+  - build
+  - test
+ 
+create_file:
+  stage: build
+  script:
+    - mkdir -p shared
+    - echo "Hello to a cache!" > shared/message.txt
+  cache:
+    key: shared-cache
+    paths:
+      - shared
+    policy: push
+ 
+use_file:
+  stage: test
+  cache:
+    key: shared-cache
+    paths:
+      - shared
+    policy: pull
+  script:
+    - echo "Job in the same pipeline reads file from cache:"
+    - cat shared/message.txt
+		</pre>
+	</div>
+	<div class = "block">
+		<ul>
+				<li><span>cache</span>, share files across pipelines</li>
+			</ul>
+		</div>
+		<div class = "block">
+			<p style = "text-align:center;"><img src = "img/pipeline_8.png" width = "15%"></p>
+		</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+stages:
+  - restore
+
+restore_cached_file:
+  stage: restore
+  cache:
+    key: shared-cache
+    paths:
+      - shared
+    policy: pull
+  script:
+    - echo "Checking cache from previous pipeline..."
+    - |
+      if [ -f shared/message.txt ]; then
+        echo "Found cached file:"
+        cat shared/message.txt
+      else
+        echo "No cached file found. This may be the first pipeline."
+      fi
+		</pre>
+	</div>
+	</body>
+</html>

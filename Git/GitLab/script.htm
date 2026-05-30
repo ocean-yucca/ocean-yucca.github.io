@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Python</title>
+		<link rel="stylesheet" href="../../css/atelier-sulphurpool-light.css" type="text/css">
+		<script src="../../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+		<style>
+			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+			div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+			span {color: red;}
+		</style>
+	</head>
+	<body>
+		<div class = "title">
+			Script
+		</div>
+		</div><div class = "subtitle">Workflow</div>
+		<div class = "block">
+			<p style = "text-align:center;"><img src = "img/pipeline_3.png" width = "70%"></p>
+		</div>
+		<div class = "block">
+			<ol>
+				<li>You push code to GitLab (e.g., commit to main branch)</li>
+				<li>GitLab CI/CD
+				<ul>
+					<li>Parses .gitlab-ci.yml</li>
+					<li>Triggers a pipeline</li>
+					<li>Assigns a job to a Docker-based runner
+					</li>
+				</ul>
+			</li>
+			<li>Runner pulls the image specified in image: (e.g., python:3.11), and creates a container from that image</li>
+			<li>Runner injects the project source code into the container's working directory
+				<ul>
+					<li>Default is /builds/[username or group_name]/[project_name]</li>
+				</ul>
+			</li>
+			<li>The runner runs the job’s script: commands inside the container in working directory</li>
+			</ol>
+		</div>
+		<div class = "subtitle">Script Job</div>
+		<div class = "block">
+			<p style = "text-align:center;"><img src = "img/pipeline_4.png" width = "60%"></p>
+		</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+# .gitlab-ci.yml
+stages:
+  - run
+
+job_1:
+  stage: run
+  image: python:3.11
+  script:
+    - python s.py
+  artifacts:
+    paths:
+      - output.txt
+    expire_in: 1 week
+		</pre>
+	</div>
+	<div class = "block">
+		<pre class = "prettyprint linenums">
+# s.py
+from pathlib import Path
+
+input_path = Path("input.txt")
+output_path = Path("output.txt")
+
+# Read input file
+text = input_path.read_text()
+
+# Create output content
+result = text.upper()
+
+# Write output file
+output_path.write_text(result)
+
+print("Created output.txt successfully")
+		</pre>
+	</div>
+	<div class = "block">
+		<pre class = "prettyprint linenums">
+# input.txt
+hello gitlab ci
+this is a test file
+		</pre>
+	</div>
+</html>
