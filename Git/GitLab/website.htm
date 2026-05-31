@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Python</title>
+		<link rel="stylesheet" href="../../css/atelier-sulphurpool-light.css" type="text/css">
+		<script src="../../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+		<style>
+			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+			div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+			span {color: red;}
+		</style>
+	</head>
+	<body>
+		<div class = "title">
+			Website
+		</div>
+	</div><div class = "subtitle">Project Website</div>
+		<div class = "block">
+			<p style = "text-align:center;"><img src = "img/pipeline_11.png" width = "30%"></p>
+		</div>
+	<div class = "block">
+		<pre class = "prettyprint linenums">
+# .gitlab-ci.yml
+stages:
+  - deploy
+
+pages:
+  image: alpine:latest
+  stage: deploy
+  script:
+    - echo "Publishing static site"
+  artifacts:
+    paths:
+      - public # copy public folder in the repo to the public folder in artifacts
+  rules:
+    - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH # Run this job only if the current branch name is main
+		</pre>
+	</div>
+	</div>
+	<div class = "block">
+		<pre class = "prettyprint linenums">
+# Create a project repo
+
+# Make the repo public
+
+# Make Pages accessible
+# Settings → General → Visibility, project features, permissions → Pages or Pages access control → Everyone
+
+# Push the code to the repo
+
+# https://[namespace].gitlab.io/[project-name]/
+# GitLab generates a short to hide the namespace
+https://lin.chen2.gitlab.io/cyber9
+		</pre>
+	</div>
+	<div class = "subtitle">Account Website</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+# Create a project repo called [account].gitlab.io
+# lin.chen2.gitlab.io
+
+# Make the repo public
+
+# Make Pages accessible
+# Settings → General → Visibility, project features, permissions → Pages or Pages access control → Everyone
+
+# Push the code to the repo
+
+# https://[namespace].gitlab.io
+https://lin.chen2.gitlab.io
+	</div>
+	<div class = "subtitle">Reference</div>
+		<div class = "block">
+			<ul>
+				<li><a href = "https://docs.gitlab.com/ci/variables/">GitLab CI/CD Variables</a></li>
+			</ul>
+		</div>
+</html>
