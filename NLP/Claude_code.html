@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+
+<html>
+
+	<head>
+        <title>Python</title>
+        <link rel="stylesheet" href="../css/atelier-sulphurpool-light.css" type="text/css">
+        <script src="../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+        <style>
+            div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+            div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+            div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+        </style>
+    </head>
+
+	<body>
+		<div class = "title">
+			Claude Code
+		</div>
+
+		<div class = "subtitle">Installation</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+# install claude code
+curl -fsSL https://claude.ai/install.sh | bash
+source ~/.zshrc
+
+# verify installation
+claude --version
+        </pre>
+    </div>
+        <div class = "subtitle">Workflow</div>
+        <div class = "block">
+        <pre class = "prettyprint linenums">
+# Clone a project from GitLab with personal token
+
+# Start claude code in the project folder
+claude
+
+# Use claude code to update code
+
+# Let claude code push code to GitLab
+# Be able to read from repo, push to repo, create merge request, merge branch
+        </pre>
+    </div>
+    <div class = "subtitle">Ollama</div>
+        <div class = "block">
+        <pre class = "prettyprint linenums">
+# start ollama
+ollama serve
+
+# set environment variables
+export ANTHROPIC_BASE_URL="http://localhost:11434"
+export ANTHROPIC_AUTH_TOKEN="ollama"
+export ANTHROPIC_MODEL="gemma4:latest"
+
+# start claude code
+claude
+        </pre>
+    </div>
+    <div class = "subtitle">Commands</div>
+        <div class = "block">
+        <pre class = "prettyprint linenums">
+/help          Show help and available commands
+/model         Switch or inspect the current Claude model
+/clear         Clear the current conversation/context
+/compact       Summarize/compact the current context to save tokens
+/context       Show context usage
+/init          Generate or update project instructions, usually CLAUDE.md
+/permissions   Manage what Claude Code is allowed to do
+/config        View or change Claude Code settings
+/doctor        Diagnose Claude Code setup issues
+/cost          Show usage/cost information
+/status        Show current session/account/project status
+/login         Sign in to Claude
+/logout        Sign out
+/bug           Report a bug
+/review        Ask Claude to review code/changes
+/memory        Manage memory/context files
+/agents        Manage or use subagents, if supported in your version
+/mcp           Manage MCP server connections, if configured
+        </pre>
+    </div>
+</html>
