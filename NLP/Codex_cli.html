@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+
+<html>
+
+	<head>
+        <title>Python</title>
+        <link rel="stylesheet" href="../css/atelier-sulphurpool-light.css" type="text/css">
+        <script src="../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+        <style>
+            div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+            div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+            div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+        </style>
+    </head>
+
+	<body>
+		<div class = "title">
+			Codex CLI
+		</div>
+
+		<div class = "subtitle">Installation</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+# Install npm
+brew install node
+
+# Install codex
+npm install -g @openai/codex
+
+# Start codex
+codex
+        </pre>
+    </div>
+        <div class = "subtitle">Workflow</div>
+        <div class = "block">
+        <pre class = "prettyprint linenums">
+# Clone a project from GitLab with personal token
+
+# Start codex in the project folder
+codex
+
+# Use codex to update code
+
+# Let codex push code to GitLab
+# Be able to read from repo, push to repo, create merge request, merge branch
+        </pre>
+    </div>
+    <div class = "subtitle">GitLab MCP</div>
+    <div class = "block">
+        <a href = "https://docs.gitlab.com/user/gitlab_duo/model_context_protocol/mcp_server/">GitLab MCP Server</a>
+            <p style = "text-align:center;"><img src = "img/Codex_1.png" width = "80%"></p>
+    </div>
+    <div class = "subtitle">Skills</div>
+    <div class = "block">
+        <ul>
+            <li>Define task-specific abilities Codex can use</li>
+        </ul>
+            <p style = "text-align:center;"><img src = "img/Codex_2.png" width = "60%"></p>
+        </div>
+        <div class = "block">
+            <ul>
+                <li>1. Manully create skills</li>
+                <li>2. Use built-in $skill-creator</li>
+            </ul>
+        <pre class = "prettyprint linenums">
+# SKILL.md
+---
+name: todays-top-news
+description: Use this skill when the user asks to explore today's top news, summarize major current events, compare headlines across sources, or produce a daily news briefing.
+---
+
+# Today's Top News Skill
+
+Use this skill to explore and summarize today's top news in a careful, source-grounded way.
+
+## Goal
+
+Produce a concise but useful daily news briefing that identifies the most important stories, explains why they matter, and separates confirmed facts from early/uncertain reporting.
+
+## Default output format
+
+Unless the user asks for something else, structure the answer as:
+
+1. **Top stories**
+   - 5 to 8 major stories
+   - Each story should include:
+     - headline-style title
+     - 2 to 4 sentence summary
+     - why it matters
+     - source links/citations when available
+
+2. **What changed since yesterday**
+   - Highlight new developments, not just background.
+
+3. **Markets / economy**
+   - Include only if relevant or if major market-moving news exists.
+
+4. **Tech / AI**
+   - Include OpenAI, AI, chips, cybersecurity, software, data, or major tech business news when relevant.
+
+5. **Geopolitics / policy**
+   - Include major international, U.S. policy, election, war, or legal developments.
+
+6. **Watch next**
+   - List 3 to 5 things likely to develop later today or this week.
+
+## Source rules
+
+- Always use current sources for today's news.
+- Prefer primary or highly reputable sources:
+  - AP
+  - Reuters
+  - BBC
+  - NPR
+  - Financial Times
+  - Wall Street Journal
+  - New York Times
+  - Washington Post
+  - official government/company sources
+  - official court filings or press releases
+- Use multiple sources for major or fast-moving stories.
+- Avoid relying only on social media posts.
+- Clearly label unconfirmed or developing information.
+
+## Recency rules
+
+- Treat “today” using the user's local date and timezone when known.
+- Prioritize stories published or materially updated today.
+- If a story began earlier but has a new development today, explain the new development first.
+- Do not present old background as if it is new.
+
+## Verification checklist
+
+Before finalizing:
+
+- Check whether the event happened today, was reported today, or was merely re-reported today.
+- Compare at least two sources for major breaking stories.
+- Look for official statements when the story involves government, companies, courts, public safety, markets, or war.
+- Avoid overconfident language when facts are incomplete.
+- Include exact dates for clarity.
+
+## User preference handling
+
+If the user asks for a specific region or topic, prioritize that scope.
+
+Examples:
+- “today's top AI news” → focus on AI and tech.
+- “top market news” → focus on stocks, rates, earnings, macro, deals.
+- “top news in China” → focus on China and regional sources.
+- “quick version” → 3 to 5 bullets only.
+- “deep version” → include more context, background, and implications.
+
+## Suggested prompt to use this skill
+
+The user may say:
+
+- `Use $todays-top-news to brief me on today's top news.`
+- `Use $todays-top-news for top AI and market news today.`
+- `Use $todays-top-news and focus on U.S., China, markets, and AI.`
+
+## Tone
+
+Be concise, neutral, and factual.
+Do not sensationalize.
+Do not bury the lead.
+        </pre>
+    </div>
+    <div class = "block">
+        <pre class = "prettyprint linenums">
+# openai.yaml
+# define OpenAI/Codex-specific extras
+interface:
+  display_name: "Today Top News"
+  short_description: "Search Today's News"
+  default_prompt: "Use $todays-top-news to brief me on today's top news."
+        </pre>
+    </div>
+    <div class = "block">
+        <pre class = "prettyprint linenums">
+# use skills
+Use $todays-top-news to brief me on today's top news.
+        </pre>
+    </div>
+    <div class = "subtitle">Permissions</div>
+        <div class = "block">
+            <ul>
+                <li>What is Codex allowed to do?</li>
+            </ul>
+    </div>
+    <div class = "subtitle">AGENTS.md</div>
+        <div class = "block">
+            <ul>
+                <li>How should Codex work in this repo?</li>
+            </ul>
+        <pre class = "prettyprint linenums">
+# create AGENTS.md
+/init 
+
+# or manually create AGENTS.md
+
+# place AGENTS.md to project folder
+        </pre>
+    </div>
+    <div class = "block">
+        <pre class = "prettyprint linenums">
+# AGENTS.md
+
+## Rules
+- Do not change generated files.
+- Ask before adding new dependencies.
+- Keep changes small and focused.
+- Do not run destructive git commands.
+- Follow existing code style.
+
+## Commands
+- Run tests with: `pytest`
+- Run lint with: `ruff check .`
+- Start app with: `npm run dev`
+
+## Before finishing
+- Run relevant tests.
+- Explain what files changed.
+- Mention anything not tested.
+        </pre>
+    </div>
+    <div class = "subtitle">Sandbox</div>
+        <div class = "block">
+            <ul>
+                <li>What files/system access does Codex have?</li>
+            </ul>
+    </div>
+    <div class = "subtitle">Ollama</div>
+        <div class = "block">
+        <pre class = "prettyprint linenums">
+# start ollama
+ollama serve
+
+# pick model
+codex --oss -m gemma4:latest
+        </pre>
+    </div>
+    <div class = "subtitle">Commands</div>
+        <div class = "block">
+        <pre class = "prettyprint linenums">
+/model, choose/switch the active model
+/skills, browse and use installed skills
+/status, show model, approval mode, context/token usage, etc.
+/mcp, show configured MCP tools/servers
+/init, create an AGENTS.md file for project instructions
+/permissions, change what Codex can do without asking
+/mention, attach a file/folder into the conversation
+/review, review your working tree
+/clear, clear terminal and start fresh chat
+/exit, exit codex
+        </pre>
+    </div>
+</html>
