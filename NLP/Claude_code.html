@@ -160,6 +160,66 @@ Do not bury the lead.
 Use $todays-top-news to brief me on today's top news.
         </pre>
     </div>
+    <div class = "subtitle">Tools</div>
+    <div class = "block">
+        <ul>
+            <li>Define tool to allow Antropic model to use</li>
+        </ul>
+            <p style = "text-align:center;"><img src = "img/Claude_2.png" width = "40%"></p>
+        </div>
+    <div class = "block">
+        <pre class = "prettyprint linenums">
+# tools/server.py
+from mcp.server.fastmcp import FastMCP
+
+mcp = FastMCP("Local Tools")
+
+
+@mcp.tool()
+def add(a: int, b: int) -> int:
+    """Add two integers and return the result."""
+    return a + b
+
+def get_words(text):
+    return text.split()
+
+@mcp.tool()
+def count_words(text: str) -> dict:
+    """Count words and characters in a text string."""
+    words = get_words(text)
+    return {
+        "words": len(words),
+        "characters": len(text),
+    }
+
+
+if __name__ == "__main__":
+    mcp.run()
+        </pre>
+    </div>
+    <div class = "block">
+        <pre class = "prettyprint linenums">
+# add tool to claude code
+# claude map add [tool_name] --scope project -- [command]
+# --scope project, save MCP server configuration at the project level, .mcp.json
+claude mcp add local-tools --scope project -- python tools/server.py
+        </pre>
+    </div>
+    <div class = "block">
+        <pre class = "prettyprint linenums">
+# start claude code
+# claude code includes the prototype of functions in context
+claude
+        </pre>
+    </div>
+    <div class = "block">
+        <pre class = "prettyprint linenums">
+# test tool
+Use my local tool to add 185 and 37.
+
+count "let's take a break"
+        </pre>
+    </div>
     <div class = "subtitle">Permissions</div>
         <div class = "block">
             <ul>
