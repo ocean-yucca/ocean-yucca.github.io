@@ -10,6 +10,7 @@
             div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
             div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
             div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+            span {color:red; font-weight: bold}
         </style>
     </head>
 
@@ -230,10 +231,11 @@ count "let's take a break"
     <div class = "subtitle">CLAUDE.md</div>
         <div class = "block">
             <ul>
-                <li>How should Codex work in this repo?</li>
+                <li>How should Claude Code work in this repo?</li>
             </ul>
         <pre class = "prettyprint linenums">
-# place CLAUDE.md to project folder
+# project memory, place CLAUDE.md to project folder
+# user memory, place CLAUDE.md to ~/.claude/ folder
         </pre>
     </div>
     <div class = "block">
@@ -257,6 +259,117 @@ count "let's take a break"
 - Explain what files changed.
 - Mention anything not tested.
         </pre>
+    </div>
+    <div class = "subtitle">Subagent</div>
+    <div class = "block">
+            <p style = "text-align:center;"><img src = "img/Claude_3.png" width = "30%"></p>
+        </div>
+        <div class = "block">
+        <pre class = "prettyprint linenums">
+# start create subagent
+/agents
+
+# Create new agent in .claude/agents/subagent_name.md
+
+# Use subagent
+# delegation message
+Use the [subagent-name] subagent to [specific task].
+Context: [important background].
+Rules: [can/cannot edit, commands allowed].
+Return: [specific output format].
+        </pre>
+    </div>
+    <div class = "block">
+        <pre class = "prettyprint linenums">
+# flow
+Main agent context:
+- user request
+- conversation history
+- files it has read
+- current plan
+- constraints
+
+Main agent delegates:
+"Use the backend-debugger subagent. Here is the task/context/rules..."
+
+Subagent context:
+- its own system prompt
+- the delegated task/context
+- project files it reads
+- maybe CLAUDE.md / repo instructions
+
+Subagent returns:
+- final summary/results to main agent
+        </pre>
+    </div>
+    <div class = "subtitle">Plugin</div>
+    <div class = "block">
+            <p style = "text-align:center;"><img src = "img/Claude_4.png" width = "60%"></p>
+        </div>
+    <div class = "block">
+        <pre class = "prettyprint linenums">
+# plugin.json
+{
+  "name": "my-dev-tools",
+  "version": "0.1.0",
+  "description": "Custom Claude Code tools for reviews, debugging, and project workflows",
+  "author": {
+    "name": "Lin Chen"
+  }
+}
+        </pre>
+    </div>
+    <div class = "block">
+        <pre class = "prettyprint linenums">
+# code-reviewer.md
+---
+name: code-reviewer
+description: Reviews code diffs for bugs, regressions, missing tests, and maintainability issues.
+tools: Read, Grep, Glob, Bash
+---
+
+You are a careful code reviewer.
+
+Rules:
+- Do not edit files.
+- Focus on correctness, tests, security, and maintainability.
+- Cite file paths and line numbers when possible.
+- Return only actionable findings.
+        </pre>
+    </div>
+    <div class = "block">
+        <pre class = "prettyprint linenums">
+# security-review/SKILL.md
+---
+name: security-review
+description: Review code for common security issues.
+---
+
+When asked to review code security:
+
+1. Check authentication and authorization.
+2. Check input validation.
+3. Check secrets handling.
+4. Check logging of sensitive data.
+5. Check SQL/command injection risks.
+6. Return findings by severity.
+        </pre>
+    </div>
+    <div class = "block">
+        <pre class = "prettyprint linenums">
+# use plugin in the current project
+claude --plugin-dir my_plugin
+        </pre>
+    </div>
+    <div class = "subtitle">Mode</div>
+        <div class = "block">
+            <ul>
+                <li>Shift + Tab to change mode</li>
+                <li><span>? for shortcuts</span>, ask before modification</li>
+                <li><span>accept edits on</span>, automatically create and modify files</li>
+                <li><span>plan mode on</span>, only discuss without modication</li>
+                <li><span>auto mode on</span>, act with fewer approvals</li>
+            </ul>
     </div>
     <div class = "subtitle">Ollama</div>
         <div class = "block">
@@ -296,10 +409,15 @@ unset ANTHROPIC_MODEL
 /logout        Sign out
 /exit          Exit
 /bug           Report a bug
+/resume        Resume the content of the previous session
 /review        Ask Claude to review code/changes
 /memory        Manage memory/context files
 /agents        Manage or use subagents, if supported in your version
 /mcp           Manage MCP server connections, if configured
+ESC+ESC        History selection
+!              Bash model
+ctrl+o         Current conversation context
+@              Reference files or folders in local project
         </pre>
     </div>
 </html>
