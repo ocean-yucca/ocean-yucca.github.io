@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+
+<html>
+
+	<head>
+        <title>Python</title>
+        <link rel="stylesheet" href="../css/atelier-sulphurpool-light.css" type="text/css">
+        <script src="../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+        <style>
+            div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+            div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+            div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+        </style>
+    </head>
+
+	<body>
+		<div class = "title">
+			Pi
+		</div>
+
+		<div class = "subtitle">Installation</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+# Install npm
+brew install node
+
+# Install pi
+npm install -g --ignore-scripts @earendil-works/pi-coding-agent
+        </pre>
+        <pre class = "prettyprint linenums">
+# start ollama
+ollama serve
+
+# pull model
+ollama pull gemma4
+        </pre>
+        <pre class = "prettyprint linenums">
+# ~/.pi/agent/models.json
+{
+  "providers": {
+    "ollama": {
+      "baseUrl": "http://localhost:11434/v1",
+      "api": "openai-completions",
+      "apiKey": "ollama",
+      "compat": {
+        "supportsReasoningEffort": false,
+        "supportsUsageInStreaming": false
+      },
+      "models": [
+        {
+          "id": "gemma4:latest",
+          "name": "Gemma 4 12B Local",
+          "reasoning": false,
+          "input": ["text"],
+          "contextWindow": 131072,
+          "maxTokens": 16384
+        }
+      ]
+    }
+  }
+}
+
+        </pre>
+        <pre class = "prettyprint linenums">
+# start pi
+pi
+        </pre>
+    </div>
+        <div class = "subtitle">Workflow</div>
+        <div class = "block">
+        <pre class = "prettyprint linenums">
+# Clone a project from GitLab with personal token
+
+# Start pi in the project folder
+
+# Use pi to update code
+
+# Let pi push code to GitLab
+# Be able to read from repo, push to repo, create merge request, merge branch
+        </pre>
+    </div>
+    <div class = "subtitle">AGENTS.md</div>
+        <div class = "block">
+            <ul>
+                <li>How should pi work in this repo?</li>
+            </ul>
+        <pre class = "prettyprint linenums">
+~/.pi/agent/AGENTS.md     ← global instructions
+
+AGENTS.md                 ← project instructions
+</pre>
+        <pre class = "prettyprint linenums">
+# Project Instructions
+
+## Project
+This is a Python payment-investigation application.
+
+## Development
+- Use Python 3.12.
+- Follow existing code patterns.
+- Do not add new dependencies without approval.
+- Run `pytest` after changing code.
+
+## Git Workflow
+- Never commit directly to main.
+- Create a feature branch before making changes.
+- Review `git diff` before committing.
+- Push only the feature branch.
+- Create a GitLab merge request after pushing.
+- Never merge without explicit user approval.
+
+## Safety
+- Never print secrets or access tokens.
+- Never modify production data.
+- Never run database migrations without approval.
+        </pre>
+    </div>
+    <div class = "subtitle">Skills</div>
+    <div class = "block">
+        <ul>
+            <li>Define task-specific abilities pi can use</li>
+        </ul>
+        </div>
+        <div class = "block">
+        <pre class = "prettyprint linenums">
+# ~/.pi/agent/skills/git-workflow/SKILL.md ← global skill
+# or
+# project/.pi/skills/git-workflow/SKILL.md ← project skill
+# SKILL.md
+---
+name: git-workflow
+description: Handles Git repository workflows including checking status, creating branches, committing changes, and pushing branches. Use when working with Git repositories.
+---
+
+# Git Workflow
+
+Use the `bash` tool for all Git commands.
+
+## Before making changes
+
+Run:
+
+```bash
+git status
+git branch --show-current
+git remote -v
+        </pre>
+    </div>
+    <div class = "block">
+        <pre class = "prettyprint linenums">
+# use skills
+/skill:git-workflow create a branch, commit my changes, and push it
+        </pre>
+    </div>
+    <div class = "subtitle">Register Command</div>
+    <div class = "block">
+        <pre class = "prettyprint linenums">
+# ~/.pi/extensions/list-tools.ts
+import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
+
+export default function (pi: ExtensionAPI) {
+  pi.registerCommand("list-tools", {
+    description: "List all tools registered with Pi",
+
+    handler: async (_args, ctx) => {
+      const tools = pi.getAllTools();
+
+      const text = tools
+        .map((tool) => `${tool.name} — ${tool.description}`)
+        .join("\n");
+
+      ctx.ui.notify(text, "info");
+    },
+  });
+}
+    </pre>
+    </div>
+        <div class = "block">
+        <pre class = "prettyprint linenums">
+# use command in pi by user
+/list-tools
+        </pre>
+    </div>
+    <div class = "subtitle">Register Tool</div>
+    <div class = "block">
+        <pre class = "prettyprint linenums">
+# ~/.pi/extensions/my-tool.ts
+import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
+import { Type } from "typebox";
+
+export default function (pi: ExtensionAPI) {
+  pi.registerTool({
+    name: "hello_tool",
+    label: "Hello Tool",
+    description: "Say hello to a person",
+
+    parameters: Type.Object({
+      name: Type.String({
+        description: "The name of the person to greet",
+      }),
+    }),
+
+    async execute(toolCallId, params, onUpdate, ctx, signal) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Hello, ${params.name}!`,
+          },
+        ],
+        details: {},
+      };
+    },
+  });
+}
+        </pre>
+    </div>
+    <div class = "block">
+        <pre class = "prettyprint linenums">
+# use tool by LLM in pi
+Use hello_tool to greet Lin.
+        </pre>
+    </div>
+    <div class = "subtitle">Subagent</div>
+    <div class = "block">
+        <pre class = "prettyprint linenums">
+# ~/.pi/extensions/subagent/index.ts
+# runs and orchestrates sub-agents
+import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
+import { Type } from "typebox";
+import { spawn } from "node:child_process";
+import { findAgent, type AgentScope } from "./agents";
+
+function runCommand(
+  command: string,
+  args: string[],
+  cwd: string,
+  input: string
+): Promise<{ code: number | null; stdout: string; stderr: string }> {
+  return new Promise((resolve) => {
+    const child = spawn(command, args, {
+      cwd,
+      stdio: ["pipe", "pipe", "pipe"],
+    });
+
+    let stdout = "";
+    let stderr = "";
+
+    child.stdout.on("data", (chunk) => {
+      stdout += chunk.toString();
+    });
+
+    child.stderr.on("data", (chunk) => {
+      stderr += chunk.toString();
+    });
+
+    child.on("close", (code) => {
+      resolve({ code, stdout, stderr });
+    });
+
+    child.stdin.write(input);
+    child.stdin.end();
+  });
+}
+
+export default function (pi: ExtensionAPI) {
+  pi.registerTool({
+    name: "subagent",
+    label: "Subagent",
+    description:
+      "Delegate one task to a specialized sub-agent with isolated context. This minimal version supports single mode only.",
+
+    parameters: Type.Object({
+      agent: Type.String({
+        description: "Name of the agent to use, for example reviewer",
+      }),
+
+      task: Type.String({
+        description: "Task for the sub-agent to complete",
+      }),
+
+      agentScope: Type.Optional(
+        Type.Union([
+          Type.Literal("user"),
+          Type.Literal("project"),
+          Type.Literal("both"),
+        ])
+      ),
+    }),
+
+    async execute(_toolCallId, params) {
+      const cwd = process.cwd();
+      const scope = (params.agentScope ?? "project") as AgentScope;
+
+      const agent = await findAgent(params.agent, scope, cwd);
+
+      if (!agent) {
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Sub-agent not found: ${params.agent}. Checked scope: ${scope}.`,
+            },
+          ],
+          details: {
+            agent: params.agent,
+            scope,
+          },
+        };
+      }
+
+      const allowedTools =
+        agent.tools && agent.tools.length > 0
+          ? ["--tools", agent.tools.join(",")]
+          : [];
+
+      const modelArgs = agent.model ? ["--model", agent.model] : [];
+
+      const prompt = `
+${agent.prompt}
+
+# Task
+
+${params.task}
+
+# Output format
+
+Return only your final findings. Do not modify files unless your agent instructions explicitly allow it.
+`.trim();
+
+      const result = await runCommand(
+        "pi",
+        [
+          "--mode",
+          "json",
+          "-p",
+          "--no-session",
+          ...allowedTools,
+          ...modelArgs,
+        ],
+        cwd,
+        prompt
+      );
+
+      if (result.code !== 0) {
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Sub-agent failed.\n\nSTDERR:\n${result.stderr}\n\nSTDOUT:\n${result.stdout}`,
+            },
+          ],
+          details: {
+            exitCode: result.code,
+            stderr: result.stderr,
+          },
+        };
+      }
+
+      return {
+        content: [
+          {
+            type: "text",
+            text: result.stdout.trim(),
+          },
+        ],
+        details: {
+          agent: agent.name,
+          scope,
+          filePath: agent.filePath,
+        },
+      };
+    },
+  });
+
+  pi.registerCommand("list-agents", {
+    description: "List available sub-agents",
+
+    handler: async (_args, ctx) => {
+      const cwd = process.cwd();
+      const agents = await import("./agents").then((module) =>
+        module.loadAgents("both", cwd)
+      );
+
+      if (agents.length === 0) {
+        ctx.ui.notify("No sub-agents found.", "info");
+        return;
+      }
+
+      const text = agents
+        .map(
+          (agent) =>
+            `${agent.name} — ${agent.description}\n  file: ${agent.filePath}`
+        )
+        .join("\n\n");
+
+      ctx.ui.notify(text, "info");
+    },
+  });
+}
+        </pre>
+    </div>
+    <div class = "block">
+        <pre class = "prettyprint linenums">
+# ~/.pi/extensions/subagent/agents.ts
+# finds and loads agent definitions
+import { existsSync } from "node:fs";
+import { readdir, readFile } from "node:fs/promises";
+import path from "node:path";
+
+export type AgentScope = "user" | "project" | "both";
+
+export type AgentDefinition = {
+  name: string;
+  description: string;
+  tools?: string[];
+  model?: string;
+  prompt: string;
+  filePath: string;
+};
+
+function parseFrontmatter(content: string): {
+  metadata: Record&lt;string, string&gt;;
+  body: string;
+} {
+  if (!content.startsWith("---")) {
+    return {
+      metadata: {},
+      body: content.trim(),
+    };
+  }
+
+  const end = content.indexOf("\n---", 3);
+
+  if (end === -1) {
+    return {
+      metadata: {},
+      body: content.trim(),
+    };
+  }
+
+  const rawMetadata = content.slice(3, end).trim();
+  const body = content.slice(end + 4).trim();
+
+  const metadata: Record&lt;string, string&gt; = {};
+
+  for (const line of rawMetadata.split("\n")) {
+    const index = line.indexOf(":");
+
+    if (index === -1) continue;
+
+    const key = line.slice(0, index).trim();
+    const value = line.slice(index + 1).trim();
+
+    metadata[key] = value;
+  }
+
+  return { metadata, body };
+}
+
+function parseList(value?: string): string[] | undefined {
+  if (!value) return undefined;
+
+  return value
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+async function loadAgentsFromDirectory(
+  directory: string
+): Promise&lt;AgentDefinition[]&gt; {
+  if (!existsSync(directory)) {
+    return [];
+  }
+
+  const files = await readdir(directory);
+  const markdownFiles = files.filter((file) => file.endsWith(".md"));
+
+  const agents: AgentDefinition[] = [];
+
+  for (const file of markdownFiles) {
+    const filePath = path.join(directory, file);
+    const content = await readFile(filePath, "utf8");
+    const { metadata, body } = parseFrontmatter(content);
+
+    if (!metadata.name || !metadata.description) {
+      continue;
+    }
+
+    agents.push({
+      name: metadata.name,
+      description: metadata.description,
+      tools: parseList(metadata.tools),
+      model: metadata.model,
+      prompt: body,
+      filePath,
+    });
+  }
+
+  return agents;
+}
+
+export async function loadAgents(
+  scope: AgentScope,
+  projectRoot: string
+): Promise&lt;AgentDefinition[]&gt; {
+  const userAgentsDir = path.join(
+    process.env.HOME ?? "",
+    ".pi",
+    "agent",
+    "agents"
+  );
+
+  const projectAgentsDir = path.join(projectRoot, ".pi", "agents");
+
+  const agents: AgentDefinition[] = [];
+
+  if (scope === "user" || scope === "both") {
+    agents.push(...(await loadAgentsFromDirectory(userAgentsDir)));
+  }
+
+  if (scope === "project" || scope === "both") {
+    agents.push(...(await loadAgentsFromDirectory(projectAgentsDir)));
+  }
+
+  return agents;
+}
+
+export async function findAgent(
+  name: string,
+  scope: AgentScope,
+  projectRoot: string
+): Promise&lt;AgentDefinition | undefined&gt; {
+  const agents = await loadAgents(scope, projectRoot);
+
+  return agents.find((agent) => agent.name === name);
+}
+        </pre>
+    </div>
+    <div class = "block">
+        <pre class = "prettyprint linenums">
+# ~/.pi/agents/reviewer.md
+# define subagent
+---
+name: reviewer
+description: Reviews code for bugs, risks, edge cases, and maintainability issues.
+tools: read,grep,find,ls
+---
+
+You are a careful code reviewer.
+
+You review code without modifying files.
+
+Focus on:
+
+1. Correctness bugs
+2. Security risks
+3. Edge cases
+4. Broken assumptions
+5. Maintainability issues
+6. Missing or weak tests
+
+Rules:
+
+- Do not edit files.
+- Do not write files.
+- Do not run destructive commands.
+- Use only read-only investigation.
+- Be specific and cite file paths when possible.
+
+Return your review in this format:
+
+## Critical Issues
+
+List any serious correctness or security problems.
+
+## Important Issues
+
+List bugs, edge cases, or risky assumptions.
+
+## Suggestions
+
+List maintainability or testing improvements.
+
+## Summary
+
+Give a short final recommendation.
+        </pre>
+    </div>
+    <div class = "block">
+        <pre class = "prettyprint linenums">
+# list tools
+/list-tools # subagent is a tool
+
+# list agents
+/list-agents
+
+# use sub agent
+Use the subagent tool with agent reviewer, agentScope project, and task: Review this repository for obvious bugs and risky code.
+        </pre>
+    </div>
+    <div class = "subtitle">Commands</div>
+    <div class = "block">
+        <pre class = "prettyprint linenums">
+/settings      Change settings
+/model         Switch or inspect the current model
+/resume        Open a previous session
+/name          Give the current session a name
+/session       Show current session information
+/reload        Reload extension, skills, prompts, keybindings, and context files
+/compact       Summarize/compact the current context to save tokens
+/tree          Jump back to an earlier point in the conversation
+/hotkeys       Show keyboard shortcuts
+/quit          Quit pi
+!              Bash command
+        </pre>
+    </div>
+    <div class = "subtitle">Reference</div>
+        <div class = "block">
+            <ul>
+            <li><a href = "https://pi.dev/docs/latest">Pi Documentation</a></li>
+        </ul>
+    </div>
+</html>
