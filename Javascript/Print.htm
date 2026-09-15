@@ -18,17 +18,30 @@
 
 		<div class = "subtitle">innerHTML</div>
 		<div class = "block">
+			<li>Reads/writes HTML</li>
 		<pre class = "prettyprint linenums">
 &lt;div id = "demo"&gt;&lt;/div&gt;
 
 &lt;script&gt;
-	document.getElementById("demo").innerHTML = "Hello Javascript";
+	document.getElementById("demo").innerHTML = '&lt;b style="color:red"&gt;Hello Javascript&lt;/b&gt;';
 &lt;/script&gt;
 		</pre>
 		</div>
 
+		<div class = "subtitle">textContent</div>
+		<div class = "block">
+			<li>Reads/writes plain text</li>
+		<pre class = "prettyprint linenums">
+&lt;div id = "demo2"&gt;&lt;/div&gt;
+    &lt;script&gt;
+	    document.getElementById("demo2").textContent = "Hello World!";
+    &lt;/script&gt;
+		</pre>
+	</div>
+
 		<div class = "subtitle">document.write</div>
 		<div class = "block">
+			<li>Write text, HTML, a variable, or a calculated value</li>
 			<li>Using document.write() after an HTML document is loaded, will <span>delete</span> all existing HTML</li>
 		<pre class = "prettyprint linenums">
 &lt;script&gt;
@@ -39,6 +52,7 @@
 
 		<div class = "subtitle">window.alert</div>
 		<div class = "block">
+			<li>Shows a simple popup message</li>
 		<pre class = "prettyprint linenums">
 &lt;script&gt;
 	window.alert(5 + 6);
@@ -48,12 +62,29 @@
 
 		<div class = "subtitle">console.log</div>
 		<div class = "block">
+			<li>Prints information to the browser's developer console</li>
 		<pre class = "prettyprint linenums">
 &lt;script&gt;
-	console.log("Hello World!")
+	console.log("Hello World!");
+	console.log('%s', 'hello');   // string
+	console.log('%d', 123);       // integer
+	console.log('%f', 3.14); // float
 &lt;/script&gt;
 		</pre>
 		</div>
+
+		<div class = "subtitle">console.table</div>
+		<div class = "block">
+			<li>Displays object/array data as a table</li>
+		<pre class = "prettyprint linenums">
+const cars = [
+  { brand: "Toyota", year: 2025 },
+  { brand: "Honda", year: 2024 }
+];
+
+console.table(cars);
+		</pre>
+	</div>
 
 		<div class = "subtitle">Print Object</div>
 		<div class = "block">

@@ -68,6 +68,54 @@ pd_df = bf_df.to_pandas() # bigframes DataFrame to pandas DataFrame
 bf_df = bpd.read_pandas(pd_df) # pandas DataFrame to bigframes DataFrame
             </pre>
         </div>
+        <div class = "subtitle">Write Data</div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+# write a DataFrame to a new BigQuery
+from google.cloud import bigquery
+
+client = bigquery.Client()
+
+table_id = "project_id.dataset_name.table_name"
+
+job = client.load_table_from_dataframe(
+    df,
+    table_id
+)
+
+job.result()  # wait for the load to finish
+
+print(f"Loaded {len(df)} rows into {table_id}")
+            </pre>
+        </div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+# replace the current table or overwrite the current table
+from google.cloud import bigquery
+
+client = bigquery.Client()
+
+table_id = "project_id.dataset_name.table_name"
+
+# overwrite
+job_config = bigquery.LoadJobConfig(
+    write_disposition="WRITE_TRUNCATE"
+)
+
+# append
+/* job_config = bigquery.LoadJobConfig(
+    write_disposition="WRITE_APPEND"
+) */
+
+job = client.load_table_from_dataframe(
+    df,
+    table_id,
+    job_config=job_config
+)
+
+job.result()
+            </pre>
+        </div>
         <div class = "subtitle">Plot</div>
         <div class = "block">
             <center><img src = "img/bigquery_5.png" width=50%></center>
@@ -108,9 +156,13 @@ print("Hello world")
         </div>
         <div class = "subtitle">Colab-style parameter cell annotation</div>
         <div class = "block">
+            <ul>
+                <li>A special comment you put next to a Python variable so the notebook renders that variable as an editable form field</li>
+            </ul>
             <pre class = "prettyprint linenums">
 # string
 text_value = "hello"  # @param {type:"string"}
+print(text_value)
 
 # integer
 num = 10  # @param {type:"integer"}

@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+
+<html>
+
+	<head>
+        <title>Claude Code CLI</title>
+        <link rel="stylesheet" href="../../css/atelier-sulphurpool-light.css" type="text/css">
+        <script src="../../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+        <style>
+            div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+            div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+            div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+            span {color:red; font-weight: bold}
+        </style>
+    </head>
+
+	<body>
+		<div class = "title">
+			Command
+		</div>
+    <div class = "subtitle">claude</div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+# start a claude session
+claude
+
+# query without enter interactive session
+claude -p "query"
+
+# process piped content
+cat readme.md | claude -p "explain"
+
+# list previous sessions
+# session history is stored in ~/.claude/projects/[project]/[session-id].jsonl
+claude --resume # command line
+/resume # within claude session
+
+# resume a specific session
+claude -r "[session-id]"
+
+# continue most recent conversation in current directory
+claude -c
+
+# sign in Anthropic account
+claude auth login
+
+# log out from Anthropic account
+claude auth logout
+
+# manage plugin
+claude plugin
+
+# background session
+claude agents # list the running sessions in background, use ↑ and ↓ to select session, and use → to select and ← to unselect session
+claude attach [session-id] # open a session running in background
+claude logs [session-id] # show recent output
+claude stop [session-id] # stop session running in background
+            </pre>
+        </div>
+        <div class = "subtitle">Shell Mode</div>
+        <div class = "block">
+            <ul>
+                <li>Runs that command directly in your shell and shows the output</li>
+            </ul>
+            <pre class = "prettyprint linenums">
+# ls
+!ls -al
+
+# pwd
+!pwd
+            </pre>
+        </div>
+        <div class = "subtitle">Claude Command</div>
+        <div class = "block">
+            <ul>
+                <li>Use built-in Claude Code commands, bundled skills shipped by Claude Code, user-defined skills</li>
+            </ul>
+            <pre class = "prettyprint linenums">
+# detaches current session and lets it keep running in the background
+/background
+/background run the full test suite and fix any remaining failures
+
+# split a large task into many independent pieces and executed in parallel
+# Claude Code creates a plan and have user to approve
+/batch
+
+# ask a side question that shouldn’t add to the conversation history
+/btw
+
+# move the current session to a new working directory
+/cd [path]
+
+# clears the current conversation context and starts a fresh conversation in the same CLI session
+/clear
+
+# inspect a PR for bugs/problems and produce review findings
+/code-review
+
+# changes the visual color of the current session
+/color red
+
+# compresses the current conversation history into a shorter summary so you can keep working in the same session with more free context space
+/compact
+
+# shows what is currently occupying the model’s context window
+/context
+ 51.3k/1m tokens (5%)
+     ⛶ ⛶ ⛶ ⛶ ⛶
+     ⛶ ⛶ ⛶ ⛶ ⛶   Estimated usage by category
+     ⛶ ⛶ ⛶ ⛶ ⛶   ⛁ System prompt: 8.8k tokens (0.9%)
+     ⛶ ⛶ ⛶ ⛶ ⛶   ⛁ System tools: 21.6k tokens (2.2%)
+     ⛶ ⛶ ⛶ ⛶ ⛶   ⛁ Skills: 2.9k tokens (0.3%)
+     ⛶ ⛶ ⛶ ⛶ ⛶   ⛁ Messages: 17.9k tokens (1.8%)
+     ⛶ ⛶ ⛶ ⛝ ⛝   ⛶ Free space: 915.7k (91.6%)
+/context all # more details
+
+# copy Claude's last response to clipboar
+/copy
+
+# health-check Claude Code setup
+/doctor
+
+# shows the difference between the original file content and the current modified content
+# needs .git directory
+/diff
+
+# exit session
+/exit
+
+# create CLAUDE.md for the project
+/init
+
+# create a web-based usage insight according to past sessions
+/insights
+
+# help
+/help
+
+# login Anthropic account
+/login
+
+# logout Anthropic account
+/logout
+
+# revise CLAUDE.md
+/memory
+
+# select which model to use
+/model
+
+# controls how many resources should spend on a task
+# high, more reasoning, more tool calls, more checking, and more tokens
+# low, faster and cheaper
+/effort
+
+# switch to plan mode
+/plan
+
+# list previous sessions
+/resume
+
+# restore the code and/or conversation to a previous point
+/rewind
+
+# gives the current session a custom name instead of using session id
+/rename
+
+# creates and manages cloud “Routines” that run automatically at a future time or on a recurring schedule
+# needs code to be pushed to GitHub or GitLab
+/schedule
+
+# reviews the code recently changed and then improves it
+# needs .git directory
+/simplify
+
+# view and manage available skills
+/skills
+
+# report installed skills
+/skill-doctor
+
+# shows Claude Code's status/settings information such as version, model, account, and connectivity
+/status
+
+# stop a session running in the background
+/stop
+
+# lists background work associated with the current Claude Code session, can be bash commands, subagents, and workflows, not sessions running in the background
+/tasks
+
+# changes the overall visual theme of the terminal UI
+/theme
+
+# shows current usage against your plan limits
+/usage
+            </pre>
+        </div>
+        <div class = "subtitle">File Path</div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+            </pre>
+        </div>
+        <div class = "subtitle">Shortcut</div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+            </pre>
+        </div>
+
+    <div class = "subtitle">Commands</div>
+        <div class = "block">
+            <li><span>? for shortcuts</span>, ask before modification</li>
+        <pre class = "prettyprint linenums">
+/help          Show help and available commands
+/model         Switch or inspect the current Claude model
+/clear         Clear the current conversation/context
+/compact       Summarize/compact the current context to save tokens
+/context       Show context usage
+/init          Generate or update project instructions, usually CLAUDE.md
+/permissions   Manage what Claude Code is allowed to do
+/config        View or change Claude Code settings
+/doctor        Diagnose Claude Code setup issues
+/cost          Show usage/cost information
+/status        Show current session/account/project status
+/login         Sign in to Claude
+/logout        Sign out
+/exit          Exit
+/bug           Report a bug
+/resume        Resume the content of the previous session
+/review        Ask Claude to review code/changes
+/memory        Manage memory/context files
+/agents        Manage or use subagents, if supported in your version
+/mcp           Manage MCP server connections, if configured
+ESC+ESC        History selection
+!              Bash model
+ctrl+o         Current conversation context
+@              Reference files or folders in local project
+        </pre>
+    </div>
+    <div class = "subtitle">Reference</div>
+        <div class = "block">
+            <li><a href = "https://code.claude.com/docs/en/commands">Claude Code Command Docs</a></li>
+            <li><a href = "https://code.claude.com/docs/en/cli-reference">Claude Code CLI Reference</a></li>
+        </div>
+    </body>
+</html>

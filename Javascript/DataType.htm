@@ -18,63 +18,114 @@
 
 		<div class = "subtitle"></div>
 		<div class = "block">
-			<li>Data types that can contain values, string, number, boolean, object, function</li>
+			<li>Javascript has eight main data types, string, number, bigint, boolean, undefined, null, symbol, object</li>
 			<li>Six types of objects, Object, Date, Array, String, Number, Boolean</li>
-			<li>Data types that cannot contain values, null, undefined</li>
 		</div>
 		<div class = "subtitle">typeof and instanceof</div>
 		<div class = "block">
 		<pre class = "prettyprint linenums">
-var a = 10; // Number
-document.write(typeof(a)+"&lt;br&gt;");
-document.write((a instanceof Number)+"&lt;br&gt;");
+// number
+        var a = 10;
+document.write(typeof(a)+"&lt;br&gt;"); // number
+document.write((a instanceof Number)+"&lt;br&gt;"); // false
 
-var b = "Hello World!"; // String
-document.write(typeof(b)+"&lt;br&gt;");
-document.write((b instanceof String)+"&lt;br&gt;");
+// Number
+        let n = new Number(10);
+document.write(typeof(n)+"&lt;br&gt;"); // object
+document.write((n instanceof Number)+"&lt;br&gt;"); // true
 
-// returns "object" for objects, arrays, and null
-var x = {firstName: 'Lin', lastName: 'Chen'}; # Object
-document.write(typeof(x)+"&lt;br&gt;");
-document.write((x instanceof Object)+"&lt;br&gt;");
+// string
+        var b = "Hello World!";
+document.write(typeof(b)+"&lt;br&gt;"); // string
+document.write((b instanceof String)+"&lt;br&gt;"); // false
 
-var y = true; // Boolean
+// String
+        let s = new String('Hello World!')
+document.write(typeof(s)+"&lt;br&gt;"); // object
+document.write((s instanceof String)+"&lt;br&gt;"); // true
+
+// bigInt
+var bi = 12345678901234567890n;
+document.write(typeof(bi)+"&lt;br&gt;"); // bigint
+
+// object
+var x = {firstName: 'Lin', lastName: 'Chen'};
+document.write(typeof(x)+"&lt;br&gt;"); // object
+document.write((x instanceof Object)+"&lt;br&gt;"); // true
+
+// boolean
+var y = true;
 document.write(typeof(y)+"&lt;br&gt;");
 document.write((y instanceof Boolean)+"&lt;br&gt;");
 
-function f(){} // Function
-document.write(typeof(f)+"&lt;br&gt;");
-document.write(f instanceof Function);
+// Boolean
+var y2 = new Boolean(true);
+document.write(typeof(y2)+"&lt;br&gt;"); // object
+document.write((y2 instanceof Boolean)+"&lt;br&gt;"); // true
+
+// undefined
+var u;
+document.write(typeof(u)+"&lt;br&gt;"); // undefined
+document.write(typeof(u) == 'undefined'); // true
+
+// null
+var a = null;
+document.write(typeof(a)+"&lt;br&gt;"); // object
+
+// symbol
+id = Symbol("id")
+document.write(typeof(id)+"&lt;br&gt;"); // symbol
+
+// function
+function f(){}
+document.write(typeof(f)+"&lt;br&gt;"); // function
+document.write((f instanceof Function)+"&lt;br&gt;"); // true
+
+// Date
+const d1 = new Date();
+document.write(typeof(d1)+"&lt;br&gt;"); // object
+document.write((d1 instanceof Date)+"&lt;br&gt;"); // true
+
+// Array
+const fruits = ["apple", "banana", "orange"];
+document.write(typeof(fruits)+"&lt;br&gt;"); // object
+document.write(fruits instanceof Array); // true
 		</pre>
 		</div>
 
 		<div class = "subtitle">undefined</div>
 		<div class = "block">
+			<li>Variable is declared, but not assign value</li>
 		<pre class = "prettyprint linenums">
 var a;
 
-document.write(typeof(a)+"&lt;br&gt;");
-document.write(typeof(a) == 'undefined');
+document.write(typeof(a)+"&lt;br&gt;"); // undefined
+document.write(typeof(a) == 'undefined'); // true
 		</pre>
 		</div>
 
-		<div class = "subtitle">Empty Values</div>
+		<div class = "subtitle">null</div>
 		<div class = "block">
-		<pre class = "prettyprint linenums">
-var a = ""; // String
-document.write(typeof(a));
-		</pre>
-		</div>
-
-		<div class = "subtitle">Null</div>
-		<div class = "block">
+			<li>Intentionally set to no value</li>
 		<pre class = "prettyprint linenums">
 var a = null;
-document.write(typeof(a)); // Object
+document.write(typeof(a)); // object
 		</pre>
 		</div>
 
 		<div class = "subtitle">Object</div>
+		<div class = "block">
+			<li><span>Built-in methods</span></li>
+		<pre class = "prettyprint linenums">
+var a = {name: 'Lin', age: 46};
+
+console.log(Object.keys(a));
+console.log(Object.values(a));
+console.log(Object.values(a).length);
+
+console.log(Object.hasOwn(a, "name")); // true
+		</pre>
+	</div>
 		<div class = "block">
 			<li>access propertities</li>
 		<pre class = "prettyprint linenums">

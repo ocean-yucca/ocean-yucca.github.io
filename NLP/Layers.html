@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+
+<html>
+
+	<head>
+        <title>AI</title>
+        <link rel="stylesheet" href="../css/atelier-sulphurpool-light.css" type="text/css">
+        <script src="../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+        <style>
+            div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+            div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+            div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+            span {color:red; font-weight:bold}
+        </style>
+    </head>
+
+	<body>
+		<div class = "title">
+			Layers of AI System Engineering
+		</div>
+
+		<div class = "subtitle">Layers</div>
+        <div class = "block">
+            <p style = "text-align:center;"><img src = "./img/AI_1.png" width=50% /></p>
+        </div>
+        <div class = "subtitle">Foundation Model</div>
+        <div class = "block">
+            <ul>
+                <li>What
+                    <ul>
+                        <li>Trained models</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+        <div class = "subtitle">Prompt Engineering</div>
+        <div class = "block">
+            <ul>
+                <li>What
+                    <ul>
+                        <li>Design and refine of the instructions sent to an LLM</li>
+                    </ul>
+                </li>
+                <li>How
+                    <ul>
+                        <li>Persona</li>
+                        <li>Clear task</li>
+                        <li>Explicit constraints</li>
+                        <li>Specify output</li>
+                        <li>Zero-shot/few-shot examples</li>
+                        <li>Decomposition</li>
+                        <li>Structured sections</li>
+                        <li>Positive instructions</li>
+                        <li>Grounding instructions</li>
+                        <li>Tool-use instructions</li>
+                        <li>Uncertainty handling</li>
+                        <li>Verification prompts</li>
+                        <li>Define success criteria</li>
+                        <li>Prompt templates</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+        <div class = "subtitle">Context Engineering</div>
+        <div class = "block">
+            <ul>
+                <li>What
+                    <ul>
+                        <li>Define what should the model know and have available right now?</li>
+                        <li>Context can contain system instructions, user request, history, retrieved documents, structured data, memory, tool definitons, too results, skills, task state, examples, output schema</li>
+                        <li>Grounding, determines which of those to give the model based on specific, external, relevant evidence</li>
+                        <li>Limited context window</li>
+                        <li>Too much context can reduce quality</li>
+                        <li>Cost and latency</li>
+                    </ul>
+                </li>
+                <li>How
+                    <ul>
+                        <li>Write context outside the immediate context so it can be reused</li>
+                        <li>Select only the context relevant to the current step</li>
+                        <li>Retrieve context with ranking and filtering, RAG</li>
+                        <li>Compress context</li>
+                        <li>Trim context</li>
+                        <li>Each subagent uses its own context</li>
+                        <li>Use state outside the LLM context, keep large raw data and send summary to LLM</li>
+                        <li>Result transformation, instead of sending large queried data to LLM, select sample data from large data and send it to LLM</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+        <div class = "subtitle">Harness Engineering</div>
+        <div class = "block">
+            <ul>
+                <li>What
+                    <ul>
+                        <li>Designing environments, tools, constraints and feedback that allow coding agents to <span>work reliably</span></li>
+                        <li><a href = "https://openai.com/index/harness-engineering/">Harness engineering: leveraging Codex in an agent-first world, Feb 11, 2026</a>
+                            <ul>
+                                <li>Design environments, specify intent, and build feedback loops that allow Codex agents to do reliable work</li>
+                                <li>Define repository structure, CI configuration, formatting rules, package manager setup, and application framework—was generated by Codex CLI using GPT‑5</li>
+                                <li>Work depth-first: breaking down larger goals into smaller building blocks (design, code, review, test, etc), prompting the agent to construct those blocks, and using them to unlock more complex tasks</li>
+                                <li>Humans interact with the system almost entirely through prompts: an engineer describes a task, runs the agent, and allows it to open a pull request</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+                <li>How
+                    <ul>
+                        <li>Coding Agents
+                            <ul>
+                                <li>Define agent behavior instructions in Agents.md or Claude.md</li>
+                                <li>Implement hard capabilities and restrictions with real tools</li>
+                                <li>Define reusable procedures in Skills</li>
+                            </ul>
+                        </li>
+                        <li>Application
+                            <ul>
+                                <li>Store instructions in md files and use them as system prompt</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+    </div>
+    <div class = "subtitle">Loop Engineering</div>
+        <div class = "block">
+            <p style = "text-align:center;"><img src = "./img/AI_2.png" width=40% /></p>
+        </div>
+        <div class = "block">
+            <ul>
+                <li>What
+                    <ul>
+                        <li>Design the repeated execution cycle that lets an AI agent keep working toward a goal instead of requiring the user to manually prompt it after every step</li>
+                        <li>Agents iteratively act, observe, adjust, and continue until a user-defined goal is complete</li>
+                    </ul>
+                </li>
+                <li>How
+                    <ul>
+                        <li>OpenAI Agents SDK, Claude Agent SDK</li>
+                        <li>Codex, Claude Code</li>
+                        <li>LangChain, LangGraph</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+        <div class = "subtitle">Graph Engineering</div>
+        <div class = "block">
+            <ul>
+                <li>What
+                    <ul>
+                        <li>design the workflow structure connecting agents, tools, functions, humans, and loops in an AI system</li>
+                    </ul>
+                </li>
+                <li>How
+                    <ul>
+                        <li><li>OpenAI Agents SDK, Claude Agent SDK</li>
+                        <li>LangGraph</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+        <div class = "subtitle">Ontology Engineering</div>
+        <div class = "block">
+            <ul>
+                <li>What
+                    <ul>
+                        <li>Define what things exist in this domain, what do they mean, how are they related, and what rules/constraints apply to them?</li>
+                        <li>Valuable when your AI has to operate across a complex domain with stable concepts and many relationships</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+</html>

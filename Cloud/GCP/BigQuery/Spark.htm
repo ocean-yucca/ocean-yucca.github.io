@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Google Cloud</title>
+		<link rel="stylesheet" href="../../../css/atelier-sulphurpool-light.css" type="text/css">
+		<script src="../../../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+		<style>
+			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+			div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+			span {color: red; font-weight: bold;}
+		</style>
+	</head>
+	<body>
+		<div class = "title">
+			Spark
+		</div>
+
+        <div class = "subtitle">Workflow</div>
+        <div class = "block">
+            <center><img src = "img/Spark_2.png" width=50%></center>
+        </div>
+        <div class = "subtitle">Build Spark Session</div>
+        <div class = "block">
+            <center><img src = "img/Spark_1.png" width=20%></center>
+        </div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+from google.cloud.dataproc_spark_connect import DataprocSparkSession
+
+spark = DataprocSparkSession.builder.getOrCreate() # google.cloud.dataproc_spark_connect.session.DataprocSparkSession
+            </pre>
+        </div>
+        <div class = "subtitle">Read Spark DataFrame</div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+df = spark.read.format('bigquery') \
+  .option('table', 'housing.housing1') \
+  .load() # pyspark.sql.connect.dataframe.DataFrame
+
+df.printSchema()
+            </pre>
+        </div>
+        <div class = "subtitle">Read Pandas on Spark DataFrame</div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+spark.conf.set("spark.sql.ansi.enabled", "false")
+
+df2 = spark.read.format("bigquery") \
+    .option("table", "housing.housing1") \
+    .load()
+    
+# convert Spark DataFrame to Pandas on Spark DataFrame
+psdf = df2.pandas_api() # pyspark.pandas.frame.DataFrame
+
+psdf[:2]
+            </pre>
+        </div>
+        <div class = "subtitle">Data Types</div>
+            <div class = "block">
+            <pre class = "prettyprint linenums">
+# Spark DataFrame to Pandas DataFrame
+df_panda = df.toPandas() # pandas.core.frame.DataFrame
+            </pre>
+            <pre class = "prettyprint linenums">
+# Pandas DataFrame to Spark DataFrame
+df_spark = spark.createDataFrame(df_panda) # pyspark.sql.connect.dataframe.DataFrame
+            </pre>
+            <pre class = "prettyprint linenums">
+# Pandas on Spark DataFrame to Pandas DataFrame
+psdf_pandas = psdf.to_pandas() # pandas.core.frame.DataFrame
+            </pre>
+            <pre class = "prettyprint linenums">
+# Pandas on Spark DataFrame to Spark DataFrame
+spark_df = psdf.to_spark() # pyspark.sql.connect.dataframe.DataFrame
+            </pre>
+        </div>
+        <div class = "subtitle">Write to BigQuery</div>
+            <div class = "block">
+            <pre class = "prettyprint linenums">
+# write Spark DataFrame to BigQuery
+spark_df.write \
+    .format("bigquery") \
+    .option("table", "project_id.dataset_name.table_name") \
+    .mode("overwrite") \
+    .save()
+            </pre>
+            <pre class = "prettyprint linenums">
+# write Pandas DataFrame to BigQuery
+import pandas_gbq
+
+pandas_gbq.to_gbq(
+    df_panda,
+    "housing.housing4",
+    if_exists="replace"
+)
+            </pre>
+        </div>
+	</body>
+</html>

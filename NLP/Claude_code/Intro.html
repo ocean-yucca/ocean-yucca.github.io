@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+
+<html>
+
+	<head>
+        <title>Claude Code CLI</title>
+        <link rel="stylesheet" href="../../css/atelier-sulphurpool-light.css" type="text/css">
+        <script src="../../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+        <style>
+            div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+            div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+            div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+            span {color:red; font-weight: bold}
+        </style>
+    </head>
+
+	<body>
+		<div class = "title">
+			Introduction
+		</div>
+
+		<div class = "subtitle">Installation</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+# install claude code
+curl -fsSL https://claude.ai/install.sh | bash
+source ~/.zshrc
+
+# verify installation
+claude --version
+        </pre>
+    </div>
+        <div class = "subtitle">Workflow</div>
+        <div class = "block">
+            <p style = "text-align:center;"><img src = "img/Claude_5.png" width = "30%"></p>
+        </div>
+    <div class = "subtitle">Layout</div>
+        <div class = "block">
+            <ul>
+                <li><span>User scope</span>, configuration for all projects on the computer</li>
+            </ul>
+            <p style = "text-align:center;"><img src = "img/Claude_6.png" width = "50%"></p>
+        </div>
+        <div class = "block">
+            <ul>
+                <li><span>Project scope</span>, configuration for the current project for all users</li>
+            </ul>
+            <p style = "text-align:center;"><img src = "img/Claude_7.png" width = "60%"></p>
+        </div>
+    <div class = "subtitle">Mode</div>
+        <div class = "block">
+            <ul>
+                <li>Shift + Tab to change mode</li>
+                <li><span>Manual mode (default)</span>, prompts for approval before each tool call not already allowed by settings</li>
+                <li><span>Auto accept edits</span>, automatically accepts file edits (Read/Edit/Write) without prompting, but still asks for other risky actions like Bash commands</li>
+                <li><span>Plan mode</span>, read-only; used to research and draft a plan before any edits/actions are taken</li>
+            </ul>
+    </div>
+    <div class = "subtitle">Reference</div>
+        <div class = "block">
+            <li><a href = "https://code.claude.com/docs/en/cli-reference">Claude Code CLI Reference</a></li>
+        </div>
+    </body>
+</html>
