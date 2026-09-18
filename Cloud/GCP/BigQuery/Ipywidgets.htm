@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Google Cloud</title>
+		<link rel="stylesheet" href="../../../css/atelier-sulphurpool-light.css" type="text/css">
+		<script src="../../../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+		<style>
+			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+			div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+			span {color: red; font-weight: bold;}
+		</style>
+	</head>
+	<body>
+		<div class = "title">
+			Ipywidgets
+		</div>
+
+        <div class = "subtitle">Load Data</div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+from google.cloud import bigquery
+import pandas as pd
+
+client = bigquery.Client()
+
+query = f"""
+SELECT
+    longitude,
+    latitude,
+    housing_median_age,
+    total_rooms,
+    total_bedrooms,
+    population,
+    households,
+    median_income,
+    ocean_proximity,
+    median_house_value
+FROM `{client.project}.housing.housing2`
+WHERE median_house_value IS NOT NULL
+"""
+
+df = client.query(query).to_dataframe()
+            </pre>
+        </div>
+        <div class = "subtitle">Layout</div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+import ipywidgets as widgets
+from IPython.display import display, clear_output
+import matplotlib.pyplot as plt
+
+# define widgets
+ocean_filter = widgets.Dropdown(
+    options=["All"] + sorted(df["ocean_proximity"].dropna().unique().tolist()),
+    value="All",
+    description="Ocean:",
+    style={"description_width": "initial"}
+)
+
+income_filter = widgets.FloatRangeSlider(
+    value=[
+        float(df["median_income"].min()),
+        float(df["median_income"].max())
+    ],
+    min=float(df["median_income"].min()),
+    max=float(df["median_income"].max()),
+    step=0.1,
+    description="Income:",
+    continuous_update=False,
+    style={"description_width": "initial"},
+    layout=widgets.Layout(width="500px")
+)
+
+age_filter = widgets.IntRangeSlider(
+    value=[
+        int(df["housing_median_age"].min()),
+        int(df["housing_median_age"].max())
+    ],
+    min=int(df["housing_median_age"].min()),
+    max=int(df["housing_median_age"].max()),
+    step=1,
+    description="House Age:",
+    continuous_update=False,
+    style={"description_width": "initial"},
+    layout=widgets.Layout(width="500px")
+)
+
+# define output
+output = widgets.Output()
+
+def update_dashboard(change=None):
+
+    filtered = df.copy()
+
+    # Ocean proximity filter
+    if ocean_filter.value != "All":
+        filtered = filtered[
+            filtered["ocean_proximity"] == ocean_filter.value
+        ]
+
+    # Income filter
+    filtered = filtered[
+        filtered["median_income"].between(
+            income_filter.value[0],
+            income_filter.value[1]
+        )
+    ]
+
+    # Housing age filter
+    filtered = filtered[
+        filtered["housing_median_age"].between(
+            age_filter.value[0],
+            age_filter.value[1]
+        )
+    ]
+
+    with output:
+        clear_output(wait=True)
+
+        if len(filtered) == 0:
+            print("No rows match the current filters.")
+            return
+
+        # -------------------------
+        # KPI section
+        # -------------------------
+
+        avg_price = filtered["median_house_value"].mean()
+        avg_income = filtered["median_income"].mean()
+        avg_age = filtered["housing_median_age"].mean()
+
+        kpis = widgets.HTML(
+            value=f"""
+            &lt;div style="
+                display:flex;
+                gap:40px;
+                padding:15px;
+                border:1px solid #ddd;
+                border-radius:10px;
+                margin-bottom:20px;
+            "&gt;
+                &lt;div&gt;
+                    &lt;b&gt;Homes&lt;/b&gt;&lt;br&gt;
+                    &lt;span style="font-size:24px"&gt;{len(filtered):,}&lt;/span&gt;
+                &lt;/div&gt;
+
+                &lt;div&gt;
+                    &lt;b&gt;Average House Value&lt;/b&gt;&lt;br&gt;
+                    &lt;span style="font-size:24px"&gt;${avg_price:,.0f}&lt;/span&gt;
+                &lt;/div&gt;
+
+                &lt;div&gt;
+                    &lt;b&gt;Average Income&lt;/b&gt;&lt;br&gt;
+                    &lt;span style="font-size:24px"&gt;{avg_income:.2f}&lt;/span&gt;
+                &lt;/div&gt;
+
+                &lt;div&gt;
+                    &lt;b&gt;Average House Age&lt;/b&gt;&lt;br&gt;
+                    &lt;span style="font-size:24px"&gt;{avg_age:.1f}&lt;/span&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+            """
+        )
+
+        display(kpis)
+
+        # -------------------------
+        # Three charts in ONE ROW
+        # -------------------------
+
+        fig, axes = plt.subplots(
+            1,
+            3,
+            figsize=(18, 5),
+            constrained_layout=True
+        )
+
+        # Chart 1: Income vs House Value
+        axes[0].scatter(
+            filtered["median_income"],
+            filtered["median_house_value"],
+            alpha=0.3
+        )
+
+        axes[0].set_xlabel("Median Income")
+        axes[0].set_ylabel("Median House Value ($)")
+        axes[0].set_title("Income vs House Value")
+
+
+        # Chart 2: House Value Distribution
+        axes[1].hist(
+            filtered["median_house_value"],
+            bins=30
+        )
+
+        axes[1].set_xlabel("Median House Value ($)")
+        axes[1].set_ylabel("Number of Districts")
+        axes[1].set_title("House Value Distribution")
+
+
+        # Chart 3: Geographic Distribution
+        scatter = axes[2].scatter(
+            filtered["longitude"],
+            filtered["latitude"],
+            c=filtered["median_house_value"],
+            alpha=0.5
+        )
+
+        axes[2].set_xlabel("Longitude")
+        axes[2].set_ylabel("Latitude")
+        axes[2].set_title("California Housing Prices")
+
+        fig.colorbar(
+            scatter,
+            ax=axes[2],
+            label="Median House Value ($)"
+        )
+
+        plt.show()
+            </pre>
+        </div>
+        <div class = "subtitle">Event</div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+ocean_filter.observe(update_dashboard, names="value")
+income_filter.observe(update_dashboard, names="value")
+age_filter.observe(update_dashboard, names="value")
+            </pre>
+        </div>
+        <div class = "subtitle">Dashboard</div>
+            <div class = "block">
+            <pre class = "prettyprint linenums">
+controls = widgets.VBox([
+    widgets.HTML("&lt;h2&gt;California Housing Dashboard&lt;/h2&gt;"),
+    ocean_filter,
+    income_filter,
+    age_filter
+])
+
+display(controls)
+display(output)
+
+update_dashboard()
+            </pre>
+        </div>
+	</body>
+</html>

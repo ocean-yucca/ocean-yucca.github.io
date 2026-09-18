@@ -16,10 +16,17 @@
 			ML Model
 		</div>
 
+        <div class = "subtitle">Workflow</div>
+        <div class = "block">
+            <center><img src = "img/Model_1.png" width=60%></center>
+        </div>
         <div class = "subtitle">Train Model</div>
         <div class = "block">
+          <ul>
+            <li>Implment training in a BigQuery query
+          </ul>
             <pre class = "prettyprint linenums">
-CREATE OR REPLACE MODEL `storagedev-485602.mydataset.house_price_model`
+CREATE OR REPLACE MODEL `project_id.dataset_name.model_name`
 OPTIONS(
   model_type='linear_reg',
   input_label_cols=['median_house_value'],
@@ -36,20 +43,23 @@ SELECT
   median_income,
   ocean_proximity,
   median_house_value
-FROM `storagedev-485602.mydataset.california_housing`
+FROM `project_id.dataset_name.table_name`
 WHERE median_house_value IS NOT NULL;
             </pre>
         </div>
         <div class = "subtitle">Evaluation Model</div>
         <div class = "block">
+          <ul>
+            <li>Implment training in a BigQuery query</li>
+          </ul>
             <pre class = "prettyprint linenums">
 SELECT *
 FROM ML.EVALUATE(
-  MODEL `storagedev-485602.mydataset.house_price_model`
+  MODEL `project_id.dataset_name.model_name`
 );
             </pre>
         </div>
-        <div class = "subtitle">Use Model</div>
+        <div class = "subtitle">Use Model in BigQuery</div>
         <div class = "block">
             <pre class = "prettyprint linenums">
 SELECT
@@ -57,14 +67,139 @@ SELECT
   median_income,
   total_rooms
 FROM ML.PREDICT(
-  MODEL `storagedev-485602.mydataset.house_price_model`,
+  MODEL `project_id.dataset_name.model_name`,
   (
     SELECT *
-    FROM `storagedev-485602.mydataset.california_housing`
+    FROM `project_id.dataset_name.table_name`
     LIMIT 10
   )
 );
             </pre>
+        </div>
+        <div class = "subtitle">Use Model in Script</div>
+        <div class = "block">
+          <ul>
+            <li>Open the model in the dataset</li>
+            <li>Choose Registry tab and click register</li>
+            <li>Create an endpoint</li>
+            <li>Deploy models to the endpoint, each endpoint can have multiple models</li>
+            <li>Use the deployed model</li>
+          </ul>
+        </div>
+        <div class = "block">
+          <pre class = "prettyprint linenums">
+# deploy model
+from google.cloud import aiplatform
+
+PROJECT_ID = "project-e434985f-6be4-4a4f-92d"
+LOCATION = "us-central1"
+
+# Vertex AI registered model ID
+MODEL_ID = "housing_model"
+
+aiplatform.init(
+    project=PROJECT_ID,
+    location=LOCATION
+)
+
+# Get the registered model
+model = aiplatform.Model(
+    model_name=f"projects/{PROJECT_ID}/locations/{LOCATION}/models/{MODEL_ID}"
+)
+
+# Create an endpoint
+endpoint = aiplatform.Endpoint.create(
+    display_name="house-price-endpoint"
+)
+
+# Deploy the model
+model.deploy(
+    endpoint=endpoint,
+    machine_type="e2-highcpu-2",
+    min_replica_count=1,
+    max_replica_count=1
+)
+          </pre>
+        </div>
+        <div class = "block">
+          <ul>
+            <li>Each endpoint can have multiple models</li>
+            <li>Each API request to endpoint can have multiple data points</li>
+            <li>The requests are split to different models</li>
+          </ul>
+            <center><img src = "img/Model_2.png" width=60%></center>
+        </div>
+        <div class = "block">
+          <pre class = "prettyprint linenums">
+# conduct prediction
+instance = {
+    "longitude": -122.23,
+    "latitude": 37.88,
+    "housing_median_age": 41,
+    "total_rooms": 880,
+    "total_bedrooms": 129,
+    "population": 322,
+    "households": 126,
+    "median_income": 8.3252,
+    "ocean_proximity": "NEAR BAY"
+}
+
+response = endpoint.predict(
+    instances=[instance]
+)
+
+print(response.predictions)
+          </pre>
+        </div>
+        <div class = "block">
+          <pre class = "prettyprint linenums">
+# List registered models
+from google.cloud import aiplatform
+
+aiplatform.init(
+    project="project-e434985f-6be4-4a4f-92d",
+    location="us-central1"
+)
+
+models = aiplatform.Model.list()
+
+for model in models:
+    print("Display name:", model.display_name)
+    print("Resource name:", model.resource_name)
+    print()
+  </pre>
+        </div>
+        <div class = "block">
+          <pre class = "prettyprint linenums">
+# List created endpoints
+endpoints = aiplatform.Endpoint.list()
+
+for endpoint in endpoints:
+    print(f"\nEndpoint: {endpoint.display_name}")
+    print(f"ID: {endpoint.name}")
+
+    for deployed_model in endpoint.list_models():
+        print("  Deployed model:", deployed_model.display_name)
+        print("  Deployed model ID:", deployed_model.id)
+          </pre>
+        </div>
+        <div class = "block">
+          <pre class = "prettyprint linenums">
+# list deployed on a specific endpoint
+deployed_models = endpoint.list_models()
+print('Deployed ', len(deployed_models), ' models ...')
+
+for model in deployed_models:
+        print(f"  Model display name: {model.display_name}")
+        print(f"  Deployed model ID: {model.id}")
+        print(f"  Registry model resource: {model.model}")
+          </pre>
+        </div>
+        <div class = "subtitle">Reference</div>
+        <div class = "block">
+          <ul>
+            <li><a href = "https://docs.cloud.google.com/bigquery/docs/bqml-introduction">Introduction to ML in BigQuery</a></li>
+          </ul>
         </div>
 	</body>
 </html>

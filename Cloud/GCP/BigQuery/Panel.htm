@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Google Cloud</title>
+		<link rel="stylesheet" href="../../../css/atelier-sulphurpool-light.css" type="text/css">
+		<script src="../../../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+		<style>
+			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+			div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+			span {color: red; font-weight: bold;}
+		</style>
+	</head>
+	<body>
+		<div class = "title">
+			Panel
+		</div>
+
+        <div class = "subtitle">Installation</div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+%pip install -q panel plotly
+            </pre>
+        </div>
+        <div class = "subtitle">Load Data</div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+from google.cloud import bigquery
+import pandas as pd
+
+client = bigquery.Client()
+
+query = f"""
+SELECT
+    longitude,
+    latitude,
+    housing_median_age,
+    total_rooms,
+    total_bedrooms,
+    population,
+    households,
+    median_income,
+    ocean_proximity,
+    median_house_value
+FROM `{client.project}.housing.housing2`
+WHERE median_house_value IS NOT NULL
+"""
+
+df = client.query(query).to_dataframe()
+            </pre>
+        </div>
+        <div class = "subtitle">Component</div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+import panel as pn
+import plotly.express as px
+
+pn.extension("plotly")
+
+ocean_filter = pn.widgets.Select(
+    name="Ocean Proximity",
+    options=["All"] + sorted(df["ocean_proximity"].dropna().unique().tolist()),
+    value="All",
+    width=250
+)
+
+income_filter = pn.widgets.RangeSlider(
+    name="Median Income",
+    start=float(df["median_income"].min()),
+    end=float(df["median_income"].max()),
+    value=(
+        float(df["median_income"].min()),
+        float(df["median_income"].max())
+    ),
+    step=0.1,
+    width=350
+)
+
+age_filter = pn.widgets.RangeSlider(
+    name="Housing Median Age",
+    start=int(df["housing_median_age"].min()),
+    end=int(df["housing_median_age"].max()),
+    value=(
+        int(df["housing_median_age"].min()),
+        int(df["housing_median_age"].max())
+    ),
+    step=1,
+    width=350
+)
+
+def make_dashboard(ocean, income_range, age_range):
+
+    filtered = df.copy()
+
+    # Ocean filter
+    if ocean != "All":
+        filtered = filtered[
+            filtered["ocean_proximity"] == ocean
+        ]
+
+    # Income filter
+    filtered = filtered[
+        filtered["median_income"].between(
+            income_range[0],
+            income_range[1]
+        )
+    ]
+
+    # Age filter
+    filtered = filtered[
+        filtered["housing_median_age"].between(
+            age_range[0],
+            age_range[1]
+        )
+    ]
+
+    if filtered.empty:
+        return pn.pane.Markdown(
+            "## No rows match the selected filters."
+        )
+
+    # ------------------------
+    # KPIs
+    # ------------------------
+
+    avg_price = filtered["median_house_value"].mean()
+    avg_income = filtered["median_income"].mean()
+    avg_age = filtered["housing_median_age"].mean()
+
+    kpis = pn.Row(
+
+        pn.indicators.Number(
+            name="Homes",
+            value=len(filtered),
+            format="{value:,.0f}",
+            font_size="24pt"
+        ),
+
+        pn.indicators.Number(
+            name="Average House Value",
+            value=avg_price,
+            format="${value:,.0f}",
+            font_size="24pt"
+        ),
+
+        pn.indicators.Number(
+            name="Average Income",
+            value=avg_income,
+            format="{value:.2f}",
+            font_size="24pt"
+        ),
+
+        pn.indicators.Number(
+            name="Average House Age",
+            value=avg_age,
+            format="{value:.1f}",
+            font_size="24pt"
+        )
+    )
+
+    # ------------------------
+    # Chart 1
+    # Income vs house value
+    # ------------------------
+
+    fig1 = px.scatter(
+        filtered,
+        x="median_income",
+        y="median_house_value",
+        opacity=0.4,
+        title="Income vs House Value"
+    )
+
+    fig1.update_layout(
+        height=400,
+        margin=dict(l=20, r=20, t=50, b=20)
+    )
+
+    # ------------------------
+    # Chart 2
+    # House price distribution
+    # ------------------------
+
+    fig2 = px.histogram(
+        filtered,
+        x="median_house_value",
+        nbins=30,
+        title="House Value Distribution"
+    )
+
+    fig2.update_layout(
+        height=400,
+        margin=dict(l=20, r=20, t=50, b=20)
+    )
+
+    # ------------------------
+    # Chart 3
+    # Geographic distribution
+    # ------------------------
+
+    fig3 = px.scatter(
+        filtered,
+        x="longitude",
+        y="latitude",
+        color="median_house_value",
+        opacity=0.5,
+        title="California Housing Prices",
+        color_continuous_scale="Viridis"
+    )
+
+    fig3.update_layout(
+        height=400,
+        margin=dict(l=20, r=20, t=50, b=20)
+    )
+
+    # Convert Plotly figures into Panel panes
+    chart1 = pn.pane.Plotly(
+        fig1,
+        sizing_mode="stretch_width"
+    )
+
+    chart2 = pn.pane.Plotly(
+        fig2,
+        sizing_mode="stretch_width"
+    )
+
+    chart3 = pn.pane.Plotly(
+        fig3,
+        sizing_mode="stretch_width"
+    )
+
+    charts = pn.Row(
+        chart1,
+        chart2,
+        chart3,
+        sizing_mode="stretch_width"
+    )
+
+    return pn.Column(
+        kpis,
+        charts,
+        sizing_mode="stretch_width"
+    )
+
+dashboard_content = pn.bind(
+    make_dashboard,
+    ocean=ocean_filter,
+    income_range=income_filter,
+    age_range=age_filter
+)
+            </pre>
+        </div>
+        <div class = "subtitle">Layout</div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+dashboard = pn.Column(
+
+    pn.pane.Markdown(
+        "# California Housing Dashboard"
+    ),
+
+    pn.Card(
+        pn.Row(
+            ocean_filter,
+            income_filter,
+            age_filter
+        ),
+        title="Filters",
+        collapsed=False,
+        sizing_mode="stretch_width"
+    ),
+
+    dashboard_content,
+
+    sizing_mode="stretch_width"
+)
+
+dashboard
+            </pre>
+        </div>
+	</body>
+</html>
