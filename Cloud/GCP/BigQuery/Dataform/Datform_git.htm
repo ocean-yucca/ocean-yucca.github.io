@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Google Cloud</title>
+		<link rel="stylesheet" href="../../../../css/atelier-sulphurpool-light.css" type="text/css">
+		<script src="../../../../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+		<style>
+			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+			div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+			span {color: red; font-weight: bold;}
+		</style>
+	</head>
+	<body>
+		<div class = "title">
+			Dataform Git
+		</div>
+
+        <div class = "subtitle">No GitHub for the Repository</div>
+        <div class = "block">
+          <ul>
+            <li>One repository has one shared internal <span>main</span> branch which is not directly visible</li>
+            <li>Multiple workspaces use main branch to synchronize code using Commit, Push, and Pull operations</li>
+          </ul>
+                <center><img src = "img/dataform_10.png" width=60%></center>
+        </div>
+        <div class = "subtitle">Repository with GitHub</div>
+        <div class = "block">
+          <ul>
+            <li>Connect GitHub with HTTPs</li>
+          </ul>
+        	<pre class = "prettyprint linenums">
+# create personal access token
+1. Access prifile -&gt; settings -&gt; Developer Settings
+2. Access Personal access tokens -&gt; Tokens (classic)
+3. Create a new personal access token with scope repo
+4. Click Generate token
+5. Copy the token
+
+# store the classic token in Secret Manager
+1. Access Google Cloud Secret Manager
+2. Create Secret
+3. Paste private key in value
+4. Click Create Secret
+
+# Give Dataform access to the secret
+1. Edit Git Connection in Setting in the repository on Dataform
+2. Add HTTPS url of the GitHub repo
+3. Default branch is main
+4. Select secret key as Secret
+          </pre>
+        </div>
+        <div class = "block">
+          <ul>
+            <li>Connect GitHub with SSH</li>
+          </ul>
+          <pre class = "prettyprint linenums">
+# generate SSH keys
+ssh-keygen -t ed25519 -f ./dataform_github -C "dataform-github"
+
+# add public key to GitHub repo
+1. Access Setting in the repo
+2. Access Deploy keys
+3. Add deploy key and paste public key
+4. Allow write acces
+5. Add key
+
+# save private key to in Secret Manager
+1. Access Google Cloud Secret Manager
+2. Create Secret
+3. Paste private key in value
+4. Click Create Secret
+
+# Give Dataform access to the private key
+1. Edit Git Connection in Setting in the repository on Dataform
+2. Add SSH url of the GitHub repo
+3. Default branch is main
+4. Select secret key as Secret
+5. Add <a href = "https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/githubs-ssh-key-fingerprints">GitHub's SSH public host key</a>
+
+          </pre>
+        </div>
+        <div class = "block">
+          <ul>
+            <li>Share code with main branch on GitHub, ignore the main branch on Dataform</li>
+            <li>Each workspace pull code from main branch on GitHub and push code to the its corresponding branch on GitHub</li>
+            <li>Create pull request to merge each branch to main branch on GitHub</li>
+          </ul>
+          <center><img src = "img/dataform_11.png" width=70%></center>
+        </div>
+	</body>
+</html>
