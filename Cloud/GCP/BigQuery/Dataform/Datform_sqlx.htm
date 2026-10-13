@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Google Cloud</title>
+		<link rel="stylesheet" href="../../../../css/atelier-sulphurpool-light.css" type="text/css">
+		<script src="../../../../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+		<style>
+			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+			div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+			span {color: red; font-weight: bold;}
+		</style>
+	</head>
+	<body>
+		<div class = "title">
+			Dataform SQLX
+		</div>
+
+        <div class = "subtitle">Layout</div>
+        <div class = "block">
+        	<ul>
+                <li>SQLX files that define workflow actions must be located inside the definitions/ directory or its subdirectories</li>
+                <li>config
+                    <ul>
+                        <li>type
+                            <ul>
+                                <li>table, creates or replaces a physical table</li>
+                                <li>view, creates or replaces a virtual table</li>
+                                <li>incremental, creates a table initially, then updates it with new or changed data</li>
+                                <li>declaration, registers an existing BigQuery table as a Dataform source</li>
+                                <li>assertion, checks data quality rules and reports failures</li>
+                                <li>operations, executes custom BigQuery SQL commands</li>
+                            </ul>
+                        </li>
+                        <li>database, project id</li>
+                        <li>schema, BigQuery dataset id</li>
+                        <li>name, table/view name</li>
+                        <li>description, description of the action or table</li>
+                        <li>columns, descriptions or metadata for individual output columns</li>
+                        <li>tags, lables used to group and select Dataform actions</li>
+                        <li>dependencies, explicit dependencies on other Dataform actions</li>
+                        <li>disabled, prevents the action from execution</li>
+                        <li>hermetic, whether all input dependencies are explicitly declared</li>
+                        <li>bigquery, BigQuery-specific configuration</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+        <div class = "block">
+                <center><img src = "img/dataform_3.png" width=50%></center>
+        </div>
+        <div class = "block">
+                <center><img src = "img/dataform_4.png" width=50%></center>
+        </div>
+        <div class = "block">
+        	<pre class = "prettyprint linenums">
+# workflow_setting.yaml
+
+# project_id, specifies the GCP project for output tables and views
+defaultProject: data-508912
+
+# dataset_name, default dataset for output tables and views
+defaultDataset: test 
+
+# dataset_location, BigQuery location used to execute queries and store their results, must match the BigQuery location of both the input and output datasets
+defaultLocation: US
+
+# specify the dataset for assertion output
+defaultAssertionDataset: dataform_assertions
+
+# specifies the version of the Dataform Core framework used to compile your SQLX, SQL, and JavaScript code
+# Compiling SQLX: Converting SQLX files into executable BigQuery SQL
+# Managing dependencies: Understanding relationships between tables using ref()
+# Managing configurations: Interpreting config { type: "table" }, schema, and other properties
+# Supporting assertions: Defining data quality tests
+# Generating execution order: Determining which tables must be created before others
+dataformCoreVersion: "3.0.43"
+        	</pre>
+        </div>
+        <div class = "block">
+        	<pre class = "prettyprint linenums">
+/* definitions.sources.california_housing.sqlx */
+config {
+
+  /* refer an existing table with Dataform without creating it */
+  type: "declaration",
+
+  /* project id for input data */
+  database: "data-508912",
+
+  /* dataset name for input data */
+  schema: "test",
+
+  /* input table name */
+  name: "housing" # table_name
+}
+        	</pre>
+        </div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+/* definitions.intermediate.near_ocean.sqlx */
+
+/* config section */
+
+config {
+  // single line comment
+  /* multiple line comment */
+  type: "table",
+  database: "data-508912",
+  schema: "test",
+  name: "near_ocean", // by default, use the script name as the output table/view name
+  description: "Housing records with ocean_proximity equal to NEAR OCEAN"
+}
+
+-- SQL section
+
+SELECT
+  *
+-- single line comment
+/* multiple line comment */
+/* refers to a Dataform action, which can represent either an existing BigQuery table or a table that Dataform will create */
+FROM ${ref("housing")}
+WHERE ocean_proximity = "NEAR OCEAN"
+            </pre>
+        </div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+/* definitions.outputs.top_100_house_value.sqlx */
+config {
+  type: "table",
+  description: "Top 100 near-ocean housing records by median house value"
+}
+
+SELECT
+  *
+FROM ${ref("near_ocean")}
+ORDER BY median_house_value DESC
+LIMIT 100
+            </pre>
+        </div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+/* definitions.outputs.top_100_income.sqlx */
+config {
+  type: "table",
+  description: "Top 100 near-ocean housing records by median income"
+}
+
+SELECT
+  *
+FROM ${ref("near_ocean")}
+ORDER BY median_income DESC
+LIMIT 100
+            </pre>
+        </div>
+        <div class = "subtitle">Assertion</div>
+        <div class = "block">
+            <center><img src = "img/dataform_2.png" width=50%></center>
+        </div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+# workflow_setting.yaml
+defaultProject: data-508912
+defaultDataset: test 
+defaultLocation: US
+
+# specify the dataset for assertion output
+defaultAssertionDataset: dataform_assertions
+
+dataformCoreVersion: "3.0.43"
+            </pre>
+        </div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+/* definitions.assertions.no_null_income.sqlx */
+config {
+  type: "assertion"
+}
+
+SELECT *
+FROM ${ref("near_ocean")}
+WHERE median_income IS NULL
+            </pre>
+        </div>
+        <div class = "subtitle">Incremental</div>
+        <div class = "block">
+            <ul>
+                <li>What to do
+                    <ul>
+                        <li>Creates a physical BigQuery table and updates it on subsequent executions instead of rebuilding the entire table</li>
+                        <li>First execution, create a table</li>
+                        <li>Subsequent execution, update the table</li>
+                    </ul>
+                </li>
+                <li>When to use
+                    <ul>
+                <li>The dataset is large enough that full rebuilds are expensive or slow</li>
+                <li>The data changes regularly, such as hourly or daily</li>
+                <li>Can reliably identify new or changed records using an ID, timestamp, partition, or change-data-capture system</li>
+                </ul>
+                </li>
+            </ul>
+        </div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+/* definitions.intermediate.near_ocean.sqlx */
+config {
+  type: "incremental",
+  database: "data-508912",
+  schema: "test",
+  name: "near_ocean",
+  description: "Incrementally load housing records near the ocean"
+}
+
+SELECT *
+FROM ${ref("housing")} AS housing_source
+WHERE ocean_proximity = 'NEAR OCEAN'
+
+/*
+incremental(), returns true when updating an existing incremental table
+${self()}, references the current output table
+*/
+${when(incremental(), `
+  AND NOT EXISTS (
+    SELECT 1
+    FROM ${self()} AS existing
+    WHERE TO_JSON_STRING(existing) = TO_JSON_STRING(housing_source)
+  )
+`)}
+            </pre>
+        </div><div class = "subtitle">Operations</div>
+        <div class = "block">
+            <ul>
+                <li><span>table</span> primarily a SQL SELECT transformation</li>
+                <li><span>operations</span> allows custom BigQuery SQL statements such as CREATE, UPDATE, DELETE, MERGE, and ALTER</li>
+            </ul>
+        </div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+/* definitions.intermediate.operation.sqlx */
+config {
+  type: "operations",
+  name: "create_near_ocean"
+}
+
+CREATE OR REPLACE TABLE `data-508912.test.near_ocean_backup` AS
+SELECT *
+FROM ${ref("housing")}
+WHERE ocean_proximity = 'NEAR OCEAN';
+            </pre>
+        </div>
+        </div><div class = "subtitle">Columns</div>
+        <div class = "block">
+            <ul>
+                <li>Add description for columns in schema</li>
+            </ul>
+        </div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+/* definitions.intermediate.near_ocean.sqlx */
+config {
+  type: "table",
+  database: "data-508912",
+  schema: "test",
+  name: "near_ocean",
+  description: "Housing records with ocean_proximity equal to NEAR OCEAN",
+  columns: {
+    median_income: "Median income of households",
+    median_house_value: "Median house value",
+    ocean_proximity: "Location relative to the ocean"
+  }
+}
+ 
+SELECT
+  *
+FROM ${ref("housing")}
+WHERE ocean_proximity = "NEAR OCEAN"
+            </pre>
+        </div>
+        </div><div class = "subtitle">Tags</div>
+        <div class = "block">
+            <ul>
+                <li>Labels assigned to SQLX actions to organize them</li>
+                <li>Select and execute groups of actions by labels</li>
+            </ul>
+        </div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+/* definitions.outputs.top_100_house_value.sqlx */
+config {
+  type: "table",
+  description: "Top 100 near-ocean housing records by median house value",
+  tags: ["house_value", "output", "daily"]
+}
+
+SELECT
+  *
+FROM ${ref("near_ocean")}
+ORDER BY median_house_value DESC
+LIMIT 100
+            </pre>
+        </div>
+        </div><div class = "subtitle">Dependencies</div>
+        <div class = "block">
+            <ul>
+                <li>When use ${ref()} to reference other Dataform actions, automatically decide dependencies</li>
+                <li>Use explicit dependencies when an action must run first but is not referenced through ref()</li>
+                <li>The names in dependencies are the output <span>table names</span> defined in dependent script's config.name, not the SQLX filenames</li>
+            </ul>
+        </div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+/* definitions.outputs.top_100_house_value.sqlx */
+config {
+  type: "table",
+  schema: "test",
+  name: "top_100_house_value",
+
+  dependencies: ["near_ocean"]
+}
+
+SELECT *
+FROM `data-508912.test.near_ocean`
+ORDER BY median_house_value DESC
+LIMIT 100
+            </pre>
+        </div>
+        </div><div class = "subtitle">Disabled</div>
+        <div class = "block">
+            <ul>
+                <li>Prevents a SQLX action from executing during a workflow run</li>
+            </ul>
+        </div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+config {
+  type: "table",
+  database: "data-508912",
+  schema: "test",
+  name: "near_ocean",
+  description: "Housing records near the ocean",
+
+  disabled: true
+}
+
+SELECT *
+FROM ${ref("housing")}
+WHERE ocean_proximity = 'NEAR OCEAN'
+            </pre>
+        </div>
+        </div><div class = "subtitle">Hermetic</div>
+        <div class = "block">
+            <ul>
+                <li>true — default, all input dependencies are declared through <span>ref()</span> or <span>dependencies</span></li>
+                <li>false — the action may access external tables or resources that are not registered as Dataform dependencies</li>
+            </ul>
+        </div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+config {
+  type: "table",
+  database: "data-508912",
+  schema: "test",
+  name: "near_ocean",
+  hermetic: true
+}
+
+SELECT *
+FROM ${ref("housing")}
+WHERE ocean_proximity = 'NEAR OCEAN'
+            </pre>
+        </div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+config {
+  type: "table",
+  database: "data-508912",
+  schema: "test",
+  name: "near_ocean",
+  hermetic: false
+}
+
+SELECT *
+FROM `data-508912.test.housing`
+WHERE ocean_proximity = 'NEAR OCEAN'
+            </pre>
+        </div>
+        </div><div class = "subtitle">Bigquery</div>
+        <div class = "block">
+            <ul>
+                <li>Defines BigQuery-specific settings for the output table or view, such as partitioning, clustering, labels, and data retention</li>
+            </ul>
+        </div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+config {
+  type: "table",
+  database: "data-508912",
+  schema: "test",
+  name: "near_ocean",
+
+  bigquery: {
+    labels: { // Details -&gt; Labels
+      project: "housing",
+      environment: "development",
+      department: "analytics"
+    }
+  }
+}
+
+SELECT *
+FROM ${ref("housing")}
+WHERE ocean_proximity = 'NEAR OCEAN'
+            </pre>
+        </div>
+        </div><div class = "subtitle">Reference</div>
+        <div class = "block">
+            <ul>
+                <li><a href = "https://docs.cloud.google.com/dataform/docs/overview">Dataform Documentation</a></li>
+            </ul>
+        </div>
+	</body>
+</html>

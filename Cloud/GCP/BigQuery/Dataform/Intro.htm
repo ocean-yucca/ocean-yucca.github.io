@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Google Cloud</title>
+		<link rel="stylesheet" href="../../../css/atelier-sulphurpool-light.css" type="text/css">
+		<script src="../../../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+		<style>
+			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+			div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+			span {color: red; font-weight: bold;}
+		</style>
+	</head>
+	<body>
+		<div class = "title">
+			Dataform
+		</div>
+
+        <div class = "subtitle">Layout</div>
+        <div class = "block">
+            <center><img src = "img/dataform_1.png" width=60%></center>
+            <ul>
+            	<li><span>Repository</span>
+            		<ul>
+            			<li>Representa a project</li>
+            		</ul>
+            	</li>
+            	<li><span>Workspace</span>
+            		<ul>
+            			<li>One team member’s personal development area</li>
+            			<li>One task/feature/experiment someone is working on</li>
+            		</ul>
+            	</li>
+            	<li><span>workflow_setting.yaml</span>
+            		<ul>
+            			<li>Configuration file for the whole project</li>
+            		</ul>
+            	</li>
+            	<li><span>package.json</span>
+            		<ul>
+            			<li>JavaScript package dependencies</li>
+            		</ul>
+            	</li>
+            	<li><span>definitions/</span>
+            		<ul>
+            			<li>Contains the actual SQL/data pipeline logic</li>
+                        <li>GCP Dataform supports SQLX files in different subdirectories, and compilation <span>automatically discovers</span> them and builds a <span>DAG (Directed Acyclic Graph)</span> based on their dependencies</li>
+                        <li>JS files as a workflow definition, such as, creating tables</li>
+            		</ul>
+            	</li>
+            	<li><span>includes/</span>
+            		<ul>
+            			<li>Reusable JavaScript variables and functions</li>
+            		</ul>
+            	</li>
+        	</ul>
+        </div>
+        <div class = "subtitle">Workflow</div>
+        <div class = "block">
+            <center><img src = "img/dataform_5.png" width=80%></center>
+        </div>
+        <div class = "subtitle">Execution & Run</div>
+        <div class = "block">
+            <ul>
+            <li><span>Execution</span>
+                <ul>
+                    <li>Generate BigQuery SQL and dependency graph</li>
+                    <li>Run SQL queryies in BigQuery to create/update tables and views</li>
+                </ul>
+            </li>
+            <li><span>Run</span>
+                <ul>
+                    <li>Executes SQL for preview, creates temporary query results</li>
+                    <li><span>Do not</span> create the target tables and views</li>
+                </ul>
+            </li>
+            <li><span>Rerun</span> the scirpts will replace the output table with the latest query result</li>
+            </ul>
+        </div>
+        <div class = "subtitle">Schedule</div>
+        <div class = "block">
+            <ul>
+            </ul>
+        </div>
+        <div class = "subtitle">ML</div>
+        <div class = "block">
+            <ul>
+            </ul>
+        </div>
+        <div class = "subtitle">GitHub</div>
+        <div class = "block">
+            <ul>
+            </ul>
+        </div>
+	</body>
+</html>

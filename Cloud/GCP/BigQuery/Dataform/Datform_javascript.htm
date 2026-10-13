@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Google Cloud</title>
+		<link rel="stylesheet" href="../../../../css/atelier-sulphurpool-light.css" type="text/css">
+		<script src="../../../../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+		<style>
+			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+			div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+			span {color: red; font-weight: bold;}
+		</style>
+	</head>
+	<body>
+		<div class = "title">
+			Dataform Javascript
+		</div>
+
+        <div class = "subtitle">JavaScript inside a .sqlx file</div>
+        <div class = "block">
+                <center><img src = "img/dataform_7.png" width=45%></center>
+        </div>
+        <div class = "block">
+                <center><img src = "img/dataform_6.png" width=35%></center>
+        </div>
+        <div class = "block">
+        	<pre class = "prettyprint linenums">
+# workflow_setting.yaml
+defaultProject: data-508912
+defaultDataset: test
+defaultLocation: US
+defaultAssertionDataset: dataform_assertions
+dataformCoreVersion: "3.0.43"
+        	</pre>
+        </div>
+        <div class = "block">
+        	<pre class = "prettyprint linenums">
+/* definitions.sources.california_housing.sqlx */
+config {
+  type: "declaration",
+  database: "data-508912",
+  schema: "test",
+  name: "housing"
+}
+            </pre>
+        </div>
+        <div class = "block">
+        	<pre class = "prettyprint linenums">
+/* definitions.expensive_houses.sqlx */
+config {
+  type: "table"
+}
+
+js {
+  const minPrice = 500000;
+}
+
+SELECT *
+FROM ${ref("housing")}
+WHERE median_house_value > ${minPrice}
+        	</pre>
+        </div>
+        <div class = "subtitle">Reusable JavaScript functions in includes/</div>
+        <div class = "block">
+                <center><img src = "img/dataform_8.png" width=45%></center>
+        </div>
+        <div class = "block">
+        	<pre class = "prettyprint linenums">
+/* definitions.filtered_housing.sqlx */
+config {
+  type: "table",
+  schema: "test"
+}
+
+SELECT *
+FROM ${ref("housing")}
+WHERE median_house_value >= ${housing_utils.MIN_PRICE}
+  AND median_house_value < ${housing_utils.MAX_PRICE}
+  AND median_income >= ${housing_utils.MIN_INCOME}
+        	</pre>
+        </div>
+        <div class = "block">
+        	<pre class = "prettyprint linenums">
+/* includes.housing_utils.js */
+// Reusable variables
+const MIN_PRICE = 250000;
+const MAX_PRICE = 1000000;
+const MIN_INCOME = 5;
+
+// Reusable function: classify house prices
+function priceCategory(column) {
+  return `
+    CASE
+      WHEN ${column} >= 500000 THEN 'High'
+      WHEN ${column} >= 250000 THEN 'Medium'
+      ELSE 'Low'
+    END
+  `;
+}
+
+// Reusable function: generate price filter
+function priceFilter(column, min, max) {
+  return `
+    ${column} >= ${min}
+    AND ${column} < ${max}
+  `;
+}
+
+// Export variables and functions
+module.exports = {
+  MIN_PRICE,
+  MAX_PRICE,
+  MIN_INCOME,
+  priceCategory,
+  priceFilter
+}; // makes the function available to other files.
+        	</pre>
+        </div>
+        <div class = "subtitle">JavaScript .js files to generate multiple tables</div>
+        <div class = "block">
+                <center><img src = "img/dataform_9.png" width=45%></center>
+        </div>
+        <div class = "block">
+        	<pre class = "prettyprint linenums">
+/* definitions.housing_by_price.js */
+const categories = [
+  { name: "high", min: 500000, max: 1000000 },
+  { name: "medium", min: 250000, max: 500000 },
+  { name: "low", min: 0, max: 250000 }
+];
+
+categories.forEach(category => {
+  publish(`housing_${category.name}`, {
+    type: "table"
+  }).query(ctx => `
+    SELECT *
+    FROM ${ctx.ref("housing")}
+    WHERE median_house_value >= ${category.min}
+      AND median_house_value < ${category.max}
+  `);
+});
+        	</pre>
+        </div>
+        <div class = "subtitle">Built-in Javascript Functions in Dataform</div>
+        <div class = "block">
+        	<ul>
+        		<li>ref(), reference a table</li>
+        		<li>self(), reference the current output table</li>
+        		<li>when(), conditionally generate SQL</li>
+        		<li>incremental(), check whether the current execution uses incremental logic</li>
+        		<li>publish(), create a table or view action in JS</li>
+        		<li>declare(), declare an existing data source</li>
+        		<li>assert(), define a data-quality assertion</li>
+        		<li>operate(), define a custom SQL operation</li>
+        	</ul>
+        </div>
+        <div class = "subtitle">Reference</div>
+        <div class = "block">
+        <ul>
+        	<li><a href = "https://docs.cloud.google.com/dataform/docs/reference/dataform-core-reference">Dataform core reference</a></li>
+        </ul>
+    	</div>
+	</body>
+</html>
