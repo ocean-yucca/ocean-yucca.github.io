@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Google Cloud</title>
+		<link rel="stylesheet" href="../../../../css/atelier-sulphurpool-light.css" type="text/css">
+		<script src="../../../../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+		<style>
+			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+			div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+			span {color: red; font-weight: bold;}
+		</style>
+	</head>
+	<body>
+		<div class = "title">
+			Dataform ML
+		</div>
+
+        <div class = "subtitle">Flowchart</div>
+        <div class = "block">
+                <center><img src = "img/ML_1.png" width=40%></center>
+        </div>
+        <div class = "subtitle">Pipeline</div>
+        <div class = "block">
+          <pre class = "prettyprint linenums">
+# workflow_settings.yaml
+defaultProject: data-508912
+defaultDataset: test
+defaultLocation: US
+defaultAssertionDataset: dataform_assertions
+dataformCoreVersion: 3.0.52
+          </pre>
+        </div>
+        <div class = "block">
+        	<pre class = "prettyprint linenums">
+/* definitions.housing_source.sqlx */
+config {
+  type: "declaration",
+  database: "data-508912",
+  schema: "test",
+  name: "housing"
+}
+          </pre>
+        </div>
+        <div class = "block">
+          <pre class = "prettyprint linenums">
+/* definitions.housing_split.sqlx */
+
+config {
+  type: "table",
+  schema: "test"
+}
+
+SELECT
+  longitude,
+  latitude,
+  housing_median_age,
+  total_rooms,
+  total_bedrooms,
+  population,
+  households,
+  median_income,
+  ocean_proximity,
+  median_house_value,
+
+  MOD(
+    MOD(
+      FARM_FINGERPRINT(
+        TO_JSON_STRING(STRUCT(longitude, latitude))
+      ),
+      10
+    ) + 10,
+    10
+  ) AS split_group
+
+FROM ${ref("housing")}
+
+WHERE median_house_value IS NOT NULL
+  AND median_income IS NOT NULL
+          </pre>
+        </div>
+        <div class = "block">
+          <pre class = "prettyprint linenums">
+/* definitions.housing_training.sqlx */
+
+config {
+  type: "table",
+  schema: "test"
+}
+
+SELECT
+  housing_median_age,
+  total_rooms,
+  total_bedrooms,
+  population,
+  households,
+  median_income,
+  ocean_proximity,
+  median_house_value
+
+FROM ${ref("housing_split")}
+
+WHERE split_group < 8
+          </pre>
+        </div>
+        <div class = "block">
+          <pre class = "prettyprint linenums">
+/* definitions.train_housing_model.sqlx */
+
+config {
+  type: "operations",
+  schema: "test",
+  dependencies: ["housing_training"],
+  tags: ["train_model"]
+}
+
+CREATE OR REPLACE MODEL
+  `data-508912.test.housing_price_model`
+
+OPTIONS (
+  MODEL_TYPE = 'LINEAR_REG',
+  INPUT_LABEL_COLS = ['median_house_value'],
+  DATA_SPLIT_METHOD = 'NO_SPLIT'
+)
+
+AS
+SELECT *
+FROM ${ref("housing_training")};
+          </pre>
+        </div>
+        <div class = "block">
+          <pre class = "prettyprint linenums">
+/* definitions.housing_predictions.sqlx */
+
+config {
+  type: "table",
+  schema: "test",
+  dependencies: ["train_housing_model"],
+  tags: ["prediction"]
+}
+
+SELECT
+  longitude,
+  latitude,
+  median_income,
+  ocean_proximity,
+  median_house_value AS actual_price,
+  predicted_median_house_value AS predicted_price,
+
+  predicted_median_house_value
+    - median_house_value AS prediction_error
+
+FROM ML.PREDICT(
+  MODEL `data-508912.test.housing_price_model`,
+
+  (
+    SELECT
+      longitude,
+      latitude,
+      housing_median_age,
+      total_rooms,
+      total_bedrooms,
+      population,
+      households,
+      median_income,
+      ocean_proximity,
+      median_house_value
+
+    FROM ${ref("housing_split")}
+
+    WHERE split_group >= 8
+      AND median_income >= 8
+
+    ORDER BY longitude, latitude
+    LIMIT 20
+  )
+)
+          </pre>
+        </div>
+	</body>
+</html>
