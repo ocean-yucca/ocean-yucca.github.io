@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Docker</title>
+		<link rel="stylesheet" href="../css/atelier-sulphurpool-light.css" type="text/css">
+		<script src="../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+		<style>
+			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+			div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+			span {color: red; font-weight: bold;}
+		</style>
+	</head>
+	<body>
+		<div class = "title">
+			GitHub Container
+		</div>
+        <div class = "subtitle">1. Create a token on GitHub</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+Profile -&gt; Settings -&gt; Developer Settings -&gt; Personal access tokens -&gt; Tokens (classic)
+Create a token with write:packages
+		</pre>
+		</div>
+        <div class = "subtitle">2. Login ghcr.io</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+# ghcr.io is GitHub registry
+# use GitHub user name and personal access token to access
+# echo token | docker login ghcr.io -u [github_username] --password-stdin
+echo token | docker login ghcr.io -u gcpoperationdev-cmd --password-stdin
+        </pre>
+        </div>
+        <div class = "subtitle">3. Create image and Push to ghcr.io</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+# build amd image and arm image, and push to GitHub container
+docker buildx build \
+  --platform linux/amd64,linux/arm64 \
+  -t ghcr.io/gcpoperationdev-cmd/count:v2 \
+  --push \
+  .
+		</pre>
+	</div>
+        <div class = "subtitle">4. Fetch image from ghcr.io</div>
+		<div class = "block">
+		<pre class = "prettyprint linenums">
+docker pull ghcr.io/gcpoperationdev-cmd/count:v2
+        </pre>
+        </div>
+	</body>
+</html>
