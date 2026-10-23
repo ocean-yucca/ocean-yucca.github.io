@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Google Cloud</title>
+		<link rel="stylesheet" href="../../../../css/atelier-sulphurpool-light.css" type="text/css">
+		<script src="../../../../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+		<style>
+			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+			div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+			span {color: red; font-weight: bold;}
+		</style>
+	</head>
+	<body>
+		<div class = "title">
+			Antigravity
+		</div>
+        <div class = "subtitle">Benefits</div>
+        <div class = "block">
+          <ul>
+            <li><span>Standardization across developers</span>, Antigravity can use the established patterns to create new modules more consistently for all developer</li>
+            <li><span>Reusable generation logic</span>, useful when many tables share similar transformations</li>
+            <li><span>Repeatable build and deployment</span>, be able to incorporate build/deploy into GitHub Actions or another CI/CD pipeline</li>
+            <li><span>Separation between configuration and implementation</span></li>
+            <li><span>Agent skills</span>, provide project-specific instructions for building Cortex data products instead of relying only on your general natural-language prompt</li>
+          </ul>
+        </div>
+        <div class = "subtitle">Workflow</div>
+        <div class = "block">
+          <pre class = "prettyprint linenums">
+# download Cortex from https://github.com/GoogleCloudPlatform/cortex-framework
+git clone https://github.com/GoogleCloudPlatform/cortex-framework.git
+          </pre>
+        </div>
+        <div class = "block">
+          <pre class = "prettyprint linenums">
+# start antigravity with proceeding without asking
+agy --dangerously-skip-permissions
+          </pre>
+        </div>
+	</body>
+</html>

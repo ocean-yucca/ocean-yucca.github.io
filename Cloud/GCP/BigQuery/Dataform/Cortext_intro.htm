@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Google Cloud</title>
+		<link rel="stylesheet" href="../../../../css/atelier-sulphurpool-light.css" type="text/css">
+		<script src="../../../../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+		<style>
+			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+			div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+			span {color: red; font-weight: bold;}
+		</style>
+	</head>
+	<body>
+		<div class = "title">
+			Cortex
+		</div>
+
+        <div class = "subtitle">When to Use</div>
+        <div class = "block">
+          <ul>
+            <li>Your organization uses SAP systems</li>
+            <li>You need standardized data models for enterprise reporting</li>
+            <li>You want reusable data foundation and data product layers</li>
+            <li>You want to automate the generation of substantial portions of your Dataform code</li>
+          </ul>
+        </div>
+        <div class = "subtitle">Download Cortex Framework</div>
+        <div class = "block">
+          <pre class = "prettyprint linenums">
+git clone https://github.com/GoogleCloudPlatform/cortex-framework.git
+          </pre>
+        </div>
+        <div class = "subtitle">Layout</div>
+        <div class = "block">
+                <center><img src = "img/Cortex_6.png" width=50%></center>
+        </div>
+        <div class = "block">
+          <pre class = "prettyprint linenums">
+# src/common, contains the reusable Python infrastructure used by Cortex
+# do not modify
+
+# src/common/builder, built-in Python builders that generate Dataform artifacts
+# src/common/clients, clients for interacting with Google Cloud APIs
+# src/common/deployers, deploy generated code
+# src/common/schemas, validate configuration structures
+# scr/common/services, services for configuration, module discovery and other framework operations
+# src/common/utils, provide general-purpose utilities
+          </pre>
+        </div>
+        <div class = "block">
+          <pre class = "prettyprint linenums">
+# src/tools, Cortex command-line operations
+# do not modify
+          </pre>
+        </div>
+        <div class = "block">
+          <pre class = "prettyprint linenums">
+# src/dataform_includes, contains JavaScript intended for use when Dataform compiles SQLX or JavaScript definitions
+# do not modify
+          </pre>
+        </div>
+        <div class = "block">
+          <pre class = "prettyprint linenums">
+# src/workflow_settings.yaml
+# update it if its values don't match your Google Cloud environment
+          </pre>
+        </div>
+        <div class = "block">
+          <pre class = "prettyprint linenums">
+# src/data_modules, data transformation modules
+# add user-defined modules
+
+# src/data_modules/cortex, Google-provided data modules
+# src/data_modules/cortex_samples/, sample modules demonstrating Cortex functionality
+# src/data_modules/user_defined_module, user defined module
+          </pre>
+        </div>
+        <div class = "block">
+          <pre class = "prettyprint linenums">
+# config/config.yaml
+
+# what to build and where to deploy it
+# apply to entire Cortex project
+
+# SECTION: buildEnvironment
+buildProjectId # project id
+
+# SECTION: data
+bigQueryLocation # dataset location on BigQuery
+
+namespaces # where Cortex finds the module code
+  name # module name
+  path # module path
+
+datasets # BigQuery datasets
+  id # dataset id
+  projectId # project id of the dataset
+  datasetId: # dataset name
+
+modules # modules to deploy
+  foundations # prepare and standardize source data
+  catalogs # register or integrate ataset metadata
+  products # create data tables
+    moduleId # module id
+    modulePath # module path in src/data_modules
+    dataTargetId # destination BigQuery dataset reference
+
+# SECTION: deployment
+  targets
+    type: dataform
+    targetSettings
+      repositoryProjectId # project id of the Dataform repository
+      repositoryRegion # Dataform repository region
+      repositoryName # Dataform repository name
+      workspaceName # Dataform workspace name
+          </pre>
+        </div>
+        <div class = "subtitle">Workflow</div>
+        <div class = "block">
+                <center><img src = "img/Cortex_7.png" width=80%></center>
+        </div>
+        <div class = "block">
+          <pre class = "prettyprint linenums">
+# GCP login
+gcloud auth login
+gcloud auth application-default login
+gcloud config set project data-508912
+
+# enable apis
+gcloud services enable bigquery.googleapis.com dataform.googleapis.com --project=data-508912
+          </pre>
+        </div>
+        <div class = "block">
+          <pre class = "prettyprint linenums">
+# build in root of project
+uv run cortex-build --config config/config.yaml
+          </pre>
+        </div>
+        <div class = "block">
+          <pre class = "prettyprint linenums">
+# deploy to Dataform
+uv run cortex-deploy --config config/config.yaml
+          </pre>
+        </div>
+        <div class = "block">
+          <pre class = "prettyprint linenums">
+# execution on Dataform
+          </pre>
+        </div>
+        <div class = "subtitle">Reference</div>
+        <div class = "block">
+          <ul>
+            <li><a href = "https://github.com/GoogleCloudPlatform/cortex-data-foundation">Cortex on GitHub</a></li>
+            <li><a href = "https://docs.cloud.google.com/cortex/docs/overview">Cortex Documentation</a></li>
+          </ul>
+        </div>
+	</body>
+</html>
