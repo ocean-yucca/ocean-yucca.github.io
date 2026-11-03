@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Google Cloud</title>
+		<link rel="stylesheet" href="../../../../css/atelier-sulphurpool-light.css" type="text/css">
+		<script src="../../../../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+		<style>
+			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
+			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
+			div.block {color: navy; font-weight: bold; width: 80%; border-style: solid; padding: 5px; position: relative; margin: 10px auto; border-radius: 5px;}
+			span {color: red; font-weight: bold;}
+		</style>
+	</head>
+	<body>
+		<div class = "title">
+			Development
+		</div>
+
+        <div class = "subtitle">View</div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+# view section
+
+# 1. regular LookML view that points to an existing table
+view: view_name {
+	sql_table_name: `dataset_name.table_name`
+}
+
+# 2. derived table without a persistence setting
+view: view_name {
+	derived_table: {
+		sql:
+			select *
+			from `dataset_name.table_name` ;;
+	}
+}
+
+# 3. persistent derived table (PDT)
+view: view_name {
+	derived_table: {
+		sql:
+			select *
+			from `dataset_name.table_name` ;;
+	}
+
+	datagroup_trigger: datagroup_name # defined in model
+}
+            </pre>
+        </div>
+        <div class = "block">
+            <pre class = "prettyprint linenums">
+# dimension section
+# dimension defines a field that users can select, group by, filter, or display
+
+dimension: dimension_name {
+	label: "field name displayed to users"
+	type: type_name
+	sql: ${TABLE}.field_name
+}
+            </pre>
+    </div>
+    <div class = "block">
+            <pre class = "prettyprint linenums">
+# measure section
+# measure defines a calculated or aggregated value in Looker
+
+measure: measure_name {
+	type: count
+}
+
+measure: measure_name {
+	type: sum
+	sql: ${field_name} # tells Looker which field or SQL expression to use in the measure calculation
+}
+            </pre>
+    </div>
+    <div class = "subtitle">Model</div>
+        <div class = "block">
+ # connection defined by admin connects to datasets on BigQuery
+ connection: "connection_name" 
+
+ # include all the view
+ include: "view_path"
+
+ # datagroup define a caching policy for an Explore
+ datagroup: datagroup_name {
+ 	# policy
+ 	max_cache_age: "1 hour"
+ }
+
+ persist_with: datagroup_name
+
+ # define explore
+ explore: explore_name {
+ 	# allow to join several views (tables)
+ }
+        </div>
+	</body>
+</html>
