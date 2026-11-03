@@ -2,8 +2,8 @@
 <html>
 	<head>
 		<title>Google Cloud</title>
-		<link rel="stylesheet" href="../../../../css/atelier-sulphurpool-light.css" type="text/css">
-		<script src="../../../../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
+		<link rel="stylesheet" href="../../../css/atelier-sulphurpool-light.css" type="text/css">
+		<script src="../../../js/google-code-prettify/run_prettify.js?autoload=true&amp;lang=css"></script>
 		<style>
 			div.title {color: navy; font-weight: bold; width: 80%; font-size: 32px; text-align: center; position: relative; margin: auto;}
 			div.subtitle {color: navy; font-weight: bold; width: 80%; font-size: 24px; text-align: position: relative; margin: auto;}
@@ -16,6 +16,10 @@
 			Development
 		</div>
 
+        <div class = "subtitle">Git Workflow</div>
+        <div class = "block">
+                <center><img src = "img/Looker_2.png" width=40%></center>
+        </div>
         <div class = "subtitle">View</div>
         <div class = "block">
             <pre class = "prettyprint linenums">
@@ -76,6 +80,7 @@ measure: measure_name {
     </div>
     <div class = "subtitle">Model</div>
         <div class = "block">
+        	<pre class = "prettyprint linenums">
  # connection defined by admin connects to datasets on BigQuery
  connection: "connection_name" 
 
@@ -94,6 +99,7 @@ measure: measure_name {
  explore: explore_name {
  	# allow to join several views (tables)
  }
+ 			</pre>
         </div>
 	</body>
 </html>
