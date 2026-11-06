@@ -148,6 +148,19 @@ uv run cortex-deploy --config config/config.yaml
 # execution on Dataform
           </pre>
         </div>
+        <div class = "subtitle">Deployment</div>
+        <div class = "block">
+                <center><img src = "img/Cortex_8.png" width=60%></center>
+        </div>
+        <div class = "block">
+          <ul>
+            <li>Each module has one source dataset and one target dataset</li>
+            <li>In a config.yaml, can define multiple namespace, each namespace contains multiple modules</li>
+            <li>Module path, [namespace_name]/[system_type]/[module_type]/[module_name]</li>
+            <li>Typically, define one enabled Dataform deployment target in a Cortex config.yaml</li>
+            <li>Code in multiple modules is combined and deployed into one workspace within one Dataform repository</li>
+          </ul>
+        </div>
         <div class = "subtitle">Reference</div>
         <div class = "block">
           <ul>
