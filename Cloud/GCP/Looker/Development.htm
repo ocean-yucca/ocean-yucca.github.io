@@ -31,6 +31,7 @@ view: view_name {
 }
 
 # 2. derived table without a persistence setting
+#    behaves similaryly to a database view or subquery
 view: view_name {
 	derived_table: {
 		sql:
@@ -40,6 +41,7 @@ view: view_name {
 }
 
 # 3. persistent derived table (PDT)
+#    result as a physical table in BigQuery scratch dataset
 view: view_name {
 	derived_table: {
 		sql:

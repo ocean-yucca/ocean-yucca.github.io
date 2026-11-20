@@ -16,9 +16,48 @@
 			Introduction
 		</div>
 
-        <div class = "subtitle">Workflow</div>
+        <div class = "subtitle">Development Mode & Production Mode</div>
         <div class = "block">
-                <center><img src = "img/Looker_1.png" width=60%></center>
+        	<center><img src = "img/Looker_1.png" width=40%></center>
+        	<ul>
+        		<li>Development Mode
+        			<ol>
+        				<li>Edit view, model, and dashboard LookML files</li>
+        				<li>Validate LookML</li>
+        				<li>Test
+        					<ul>
+        						<li>Use Explore to create Look and user-define Dashboard</li>
+        						<li>View LookML Dashboards defined in *.dashboard.lkml in Folders</li>
+        					</ul>
+        				</li>
+        				<li>Commit to local dev branch</li>
+        				<li>Push to remote dev branch</li>
+        				<li>Merge remote dev branch to remote main branch | Deploy to Production</li>
+        			</ol>
+        		</li>
+        		<li>Production Mode
+        			<ul>
+        				<li>Use the <span>remote main</span> branch as Production</li>
+        				<li>Use Explore to create Look and Dashboard</li>
+        				<li>Schedule or share content</li>
+        			</ul>
+        		</li>
+        	</ul>
+        </div>
+        <div class = "block">
+                <center><img src = "img/Looker_3.png" width=50%></center>
+                <ul>
+                <li>Development Mode
+        	<ul>
+        		<li>Look and user-defined Dashboard use explore on LookML dev branch</li>
+        	</ul>
+        	</li>
+        	<li>Production Mode
+        	<ul>
+        		<li>When switch to production mode, Look and user-defined Dashboard created in development model use explore on remote main branch</li>
+        	</ul>
+        	</li>
+        	</ul>
         </div>
 	</body>
 </html>
